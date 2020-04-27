@@ -1,10 +1,10 @@
-package za.co.photosharing.app_ws.entity;
+package za.co.photo_sharing.app_ws.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import za.co.photosharing.app_ws.utility.StringPrefixedSequenceIdGenerator;
+import za.co.photo_sharing.app_ws.utility.StringPrefixedSequenceIdGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -26,7 +26,7 @@ public class UserEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "native")
     @GenericGenerator(
             name = "native",
-            strategy = "za.co.photosharing.app_ws.utility.StringPrefixedSequenceIdGenerator",
+            strategy = "za.co.photo_sharing.app_ws.utility.StringPrefixedSequenceIdGenerator",
             parameters = {
                     @Parameter(name = StringPrefixedSequenceIdGenerator.INCREMENT_PARAM, value = "50"),
                     @Parameter(name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER, value = "B_"),

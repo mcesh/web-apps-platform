@@ -1,4 +1,4 @@
-package za.co.photosharing.app_ws;
+package za.co.photo_sharing.app_ws;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

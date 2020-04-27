@@ -1,13 +1,13 @@
-package za.co.photosharing.app_ws.services.impl;
+package za.co.photo_sharing.app_ws.services.impl;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import za.co.photosharing.app_ws.entity.UserEntity;
-import za.co.photosharing.app_ws.repo.UserRepo;
-import za.co.photosharing.app_ws.services.UserService;
-import za.co.photosharing.app_ws.shared.dto.UserDto;
-import za.co.photosharing.app_ws.utility.Utils;
+import za.co.photo_sharing.app_ws.entity.UserEntity;
+import za.co.photo_sharing.app_ws.repo.UserRepo;
+import za.co.photo_sharing.app_ws.services.UserService;
+import za.co.photo_sharing.app_ws.shared.dto.UserDto;
+import za.co.photo_sharing.app_ws.utility.Utils;
 
 @Service
 public class UserServiceImpl implements UserService {

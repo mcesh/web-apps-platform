@@ -1,4 +1,4 @@
-package za.co.photosharing.app_ws.model.request;
+package za.co.photo_sharing.app_ws.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDetailsRequestModel {
+public class UserRest {
 
+    private String userId;
     private String firstName;
     private String lastName;
     private String email;
-    private String password;
     private String username;
 }

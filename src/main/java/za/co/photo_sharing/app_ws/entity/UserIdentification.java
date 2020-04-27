@@ -1,4 +1,4 @@
-package za.co.photosharing.app_ws.entity;
+package za.co.photo_sharing.app_ws.entity;
 
 import java.io.Serializable;
 import java.util.Objects;

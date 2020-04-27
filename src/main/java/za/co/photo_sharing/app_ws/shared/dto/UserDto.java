@@ -1,4 +1,4 @@
-package za.co.photosharing.app_ws.shared.dto;
+package za.co.photo_sharing.app_ws.shared.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

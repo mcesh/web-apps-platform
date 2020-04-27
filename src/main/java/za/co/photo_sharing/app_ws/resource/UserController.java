@@ -1,12 +1,12 @@
-package za.co.photosharing.app_ws.resource;
+package za.co.photo_sharing.app_ws.resource;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import za.co.photosharing.app_ws.model.request.UserDetailsRequestModel;
-import za.co.photosharing.app_ws.model.response.UserRest;
-import za.co.photosharing.app_ws.services.UserService;
-import za.co.photosharing.app_ws.shared.dto.UserDto;
+import za.co.photo_sharing.app_ws.model.response.UserRest;
+import za.co.photo_sharing.app_ws.model.request.UserDetailsRequestModel;
+import za.co.photo_sharing.app_ws.services.UserService;
+import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 @RestController
 @RequestMapping("users") // http://localhost:8080/users

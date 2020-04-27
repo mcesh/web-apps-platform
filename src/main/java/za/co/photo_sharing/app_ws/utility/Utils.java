@@ -1,4 +1,4 @@
-package za.co.photosharing.app_ws.utility;
+package za.co.photo_sharing.app_ws.utility;
 
 import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
 import org.springframework.stereotype.Service;
