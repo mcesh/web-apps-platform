@@ -4,7 +4,9 @@ package za.co.photo_sharing.app_ws.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import org.springframework.beans.factory.annotation.Autowired;
 import za.co.photo_sharing.app_ws.utility.StringPrefixedSequenceIdGenerator;
+import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -18,20 +20,20 @@ public class UserEntity implements Serializable {
     private static final long serialVersionUID = 5313493413859894403L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "native")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     private long id;
 
     @Id
     @Column(nullable = false)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "native")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(
             name = "native",
             strategy = "za.co.photo_sharing.app_ws.utility.StringPrefixedSequenceIdGenerator",
             parameters = {
                     @Parameter(name = StringPrefixedSequenceIdGenerator.INCREMENT_PARAM, value = "50"),
-                    @Parameter(name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER, value = "B_"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER, value = "P_"),
                     @Parameter(name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER, value = "%05d") })
-    protected UserIdentification userId;
+    private String userId;
 
     @Column(nullable=false)
     private String username;
@@ -65,11 +67,11 @@ public class UserEntity implements Serializable {
         this.id = id;
     }
 
-    public UserIdentification getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(UserIdentification userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
