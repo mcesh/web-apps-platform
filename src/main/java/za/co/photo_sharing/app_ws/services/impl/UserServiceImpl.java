@@ -24,6 +24,10 @@ public class UserServiceImpl implements UserService {
         if (userRepo.findByEmail(user.getEmail()) != null){
             throw new  RuntimeException("Email already exists");
         }
+        UserEntity username = userRepo.findByUsername(user.getUsername());
+        if (username != null){
+            throw new RuntimeException("Username Already Exists");
+        }
         UserEntity userEntity = new UserEntity();
         BeanUtils.copyProperties(user,userEntity);
         userEntity.setEncryptedPassword("test");
@@ -31,6 +35,11 @@ public class UserServiceImpl implements UserService {
         UserDto returnValue = new UserDto();
         BeanUtils.copyProperties(storedUserDetails,returnValue);
         return returnValue;
+    }
+
+    @Override
+    public UserEntity findByUsername(String username) {
+        return userRepo.findByUsername(username);
     }
 
    /* @Override

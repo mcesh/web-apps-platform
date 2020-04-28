@@ -1,27 +1,26 @@
 package za.co.photo_sharing.app_ws.entity;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 public class UserIdentification implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String userId;
+    private Long userId;
 
-    public UserIdentification(){
+    public UserIdentification() {
     }
 
-    public UserIdentification(String user_id){
+    public UserIdentification(Long user_id) {
         this.userId = user_id;
     }
 
 
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
@@ -35,18 +34,15 @@ public class UserIdentification implements Serializable {
             return false;
         UserIdentification other = (UserIdentification) obj;
         if (userId == null) {
-            if (other.userId != null)
-                return false;
-        } else if (!userId.equals(other.userId))
-            return false;
-        return true;
+            return other.userId == null;
+        } else return userId.equals(other.userId);
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime + result + ((userId == null)? 0: userId.hashCode());
+        result = prime + result + ((userId == null) ? 0 : userId.hashCode());
         return result;
     }
 

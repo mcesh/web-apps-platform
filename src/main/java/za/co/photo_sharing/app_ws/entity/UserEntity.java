@@ -4,7 +4,6 @@ package za.co.photo_sharing.app_ws.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import za.co.photo_sharing.app_ws.utility.StringPrefixedSequenceIdGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -23,15 +22,13 @@ public class UserEntity implements Serializable {
 
     @Id
     @Column(nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "user_id_generator")
     @GenericGenerator(
-            name = "native",
-            strategy = "za.co.photo_sharing.app_ws.utility.StringPrefixedSequenceIdGenerator",
+            name = "user_id_generator",
+            strategy = "za.co.photo_sharing.app_ws.utility.UserIdentificationRandomGenerator",
             parameters = {
-                    @Parameter(name = StringPrefixedSequenceIdGenerator.INCREMENT_PARAM, value = "50"),
-                    @Parameter(name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER, value = "P_"),
-                    @Parameter(name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER, value = "%05d")})
-    private String userId;
+                    @Parameter(name = "user_id_generator", value = "user_id_generator")})
+    private Long userId;
 
     @Column(nullable = false)
     private String username;
@@ -65,11 +62,11 @@ public class UserEntity implements Serializable {
         this.id = id;
     }
 
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
