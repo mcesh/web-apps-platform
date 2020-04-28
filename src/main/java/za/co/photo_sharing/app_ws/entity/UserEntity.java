@@ -4,9 +4,7 @@ package za.co.photo_sharing.app_ws.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.springframework.beans.factory.annotation.Autowired;
 import za.co.photo_sharing.app_ws.utility.StringPrefixedSequenceIdGenerator;
-import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -32,31 +30,31 @@ public class UserEntity implements Serializable {
             parameters = {
                     @Parameter(name = StringPrefixedSequenceIdGenerator.INCREMENT_PARAM, value = "50"),
                     @Parameter(name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER, value = "P_"),
-                    @Parameter(name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER, value = "%05d") })
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER, value = "%05d")})
     private String userId;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String username;
 
-    @Column(nullable=false, length=50)
+    @Column(nullable = false, length = 50)
     private String firstName;
 
-    @Column(nullable=false, length=50)
+    @Column(nullable = false, length = 50)
     private String lastName;
 
-    @Column(nullable=false, length=120)
+    @Column(nullable = false, length = 120)
     private String email;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String encryptedPassword;
 
     private String emailVerificationToken;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private Boolean emailVerificationStatus = false;
 
     @JsonIgnore
-    @OneToMany(mappedBy="userDetails", cascade=CascadeType.ALL)
+    @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL)
     private List<AddressEntity> addresses;
 
     public long getId() {
