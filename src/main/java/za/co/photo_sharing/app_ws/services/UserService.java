@@ -6,5 +6,5 @@ import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 public interface UserService {
     public UserDto createUser(UserDto user);
-    public UserEntity findByUsername(String username);
+    public UserDto findByUsername(String username);
 }

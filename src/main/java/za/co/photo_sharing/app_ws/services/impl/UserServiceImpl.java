@@ -38,8 +38,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity findByUsername(String username) {
-        return userRepo.findByUsername(username);
+    public UserDto findByUsername(String username) {
+        UserDto userDto = new UserDto();
+        UserEntity userEntity = userRepo.findByUsername(username);
+        if (userEntity == null)
+            throw new RuntimeException("User with username: " + username + " not found");
+        BeanUtils.copyProperties(userEntity, userDto);
+        return userDto;
     }
 
    /* @Override
