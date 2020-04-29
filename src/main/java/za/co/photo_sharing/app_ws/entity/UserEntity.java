@@ -2,8 +2,6 @@ package za.co.photo_sharing.app_ws.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -11,23 +9,15 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-@IdClass(UserIdentification.class)
 public class UserEntity implements Serializable {
 
     private static final long serialVersionUID = 5313493413859894403L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @Id
-    @Column(nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "user_id_generator")
-    @GenericGenerator(
-            name = "user_id_generator",
-            strategy = "za.co.photo_sharing.app_ws.utility.UserIdentificationRandomGenerator",
-            parameters = {
-                    @Parameter(name = "user_id_generator", value = "user_id_generator")})
+    @Column(nullable = false, length = 50)
     private Long userId;
 
     @Column(nullable = false)

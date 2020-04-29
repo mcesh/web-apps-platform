@@ -28,9 +28,11 @@ public class UserServiceImpl implements UserService {
         if (username != null){
             throw new RuntimeException("Username Already Exists");
         }
+
         UserEntity userEntity = new UserEntity();
         BeanUtils.copyProperties(user,userEntity);
         userEntity.setEncryptedPassword("test");
+        userEntity.setUserId(utils.getRandomLongNumbers());
         UserEntity storedUserDetails = userRepo.save(userEntity);
         UserDto returnValue = new UserDto();
         BeanUtils.copyProperties(storedUserDetails,returnValue);

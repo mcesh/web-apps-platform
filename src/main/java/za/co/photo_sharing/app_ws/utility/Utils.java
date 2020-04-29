@@ -15,8 +15,8 @@ public class Utils {
     private final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private final String NUMBERS = "0123456789";
 
-    public String generateUserId(int length) {
-        return generateRandomNumbers(length);
+    public Long generateUserId(int length) {
+        return getRandomLongNumbers();
     }
 
     public String generateAddressId(int length) {
@@ -33,13 +33,8 @@ public class Utils {
         return new String(returnValue);
     }
 
-    private String generateRandomNumbers(int length) {
-        StringBuilder returnValue = new StringBuilder(length);
-
-        for (int i = 0; i < length; i++) {
-            returnValue.append(NUMBERS.charAt(RANDOM.nextInt(NUMBERS.length())));
-        }
-
-        return new String(returnValue);
+    public long getRandomLongNumbers(){
+        long millis = System.currentTimeMillis();
+        return millis/200;
     }
 }
