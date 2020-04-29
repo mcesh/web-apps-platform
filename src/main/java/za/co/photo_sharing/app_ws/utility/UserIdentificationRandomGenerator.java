@@ -1,32 +1,24 @@
 package za.co.photo_sharing.app_ws.utility;
 
 import org.hibernate.HibernateException;
-import org.hibernate.MappingException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
-import org.hibernate.id.enhanced.SequenceStyleGenerator;
-import org.hibernate.internal.util.config.ConfigurationHelper;
-import org.hibernate.service.ServiceRegistry;
-import org.hibernate.type.LongType;
-import org.hibernate.type.Type;
 
 import java.io.Serializable;
-import java.util.Properties;
-import java.util.Random;
 
 public class UserIdentificationRandomGenerator implements IdentifierGenerator {
 
    @Override
     public Serializable generate(SharedSessionContractImplementor session,
                                  Object object) throws HibernateException {
-        return getRandomNumberInts(25,100000);
+        return getRandomLongNumbers();
 
     }
 
 
-    public long getRandomNumberInts(int min, int max){
-        Random random = new Random();
-        return random.ints(min, (max + 1)).findFirst().getAsInt();
+    public long getRandomLongNumbers(){
+        long millis = System.currentTimeMillis();
+        return millis/200;
     }
 
   /*  @Override
