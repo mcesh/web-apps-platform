@@ -1,6 +1,7 @@
 package za.co.photo_sharing.app_ws.utility;
 
 import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -8,20 +9,17 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Random;
 
-@Service
+@Component
 public class Utils {
 
     private final Random RANDOM = new SecureRandom();
     private final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private final String NUMBERS = "0123456789";
 
-    public Long generateUserId(int length) {
+    public Long generateUserId() {
         return getRandomLongNumbers();
     }
 
-    public String generateAddressId(int length) {
-        return generateRandomString(length);
-    }
 
     private String generateRandomString(int length) {
         StringBuilder returnValue = new StringBuilder(length);
@@ -34,7 +32,7 @@ public class Utils {
     }
 
     public long getRandomLongNumbers(){
-        long millis = System.currentTimeMillis();
-        return millis/200;
+        long nanoTime = System.nanoTime();
+        return nanoTime/100000;
     }
 }
