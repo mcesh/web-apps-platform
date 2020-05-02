@@ -49,7 +49,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUser(String email) {
-        return null;
+        UserDto userDto = new UserDto();
+        UserEntity byEmail = userRepo.findByEmail(email);
+        if (byEmail == null) throw new UsernameNotFoundException(email);
+        BeanUtils.copyProperties(byEmail, userDto);
+        return userDto;
     }
 
     @Override
@@ -77,6 +81,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUserByUserId(Long userId) {
         userRepo.deleteUserByUserId(userId);
+    }
+
+    @Override
+    public UserDto findByUserId(Long userId) {
+        UserDto userDto = new UserDto();
+        UserEntity userByUserId = userRepo.findByUserId(userId);
+        if (userByUserId == null){
+            throw new RuntimeException("UserID: " + userByUserId + "not found");
+        }
+        BeanUtils.copyProperties(userByUserId,userDto);
+        return userDto;
     }
 
     @Override

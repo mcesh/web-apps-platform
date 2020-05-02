@@ -2,8 +2,8 @@ package za.co.photo_sharing.app_ws.resource;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import za.co.photo_sharing.app_ws.entity.UserEntity;
 import za.co.photo_sharing.app_ws.model.response.UserRest;
 import za.co.photo_sharing.app_ws.model.request.UserDetailsRequestModel;
 import za.co.photo_sharing.app_ws.services.UserService;
@@ -16,11 +16,18 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping
-    public String getUser(){
-        return "get user called!";
+    @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public UserRest getUser(@PathVariable String id){
+        UserRest userRest = new UserRest();
+
+        Long userId = Long.parseLong(id);
+        UserDto userByUserId = userService.findByUserId(userId);
+        BeanUtils.copyProperties(userByUserId,userRest);
+        return userRest;
     }
-    @PostMapping("/create")
+    @PostMapping(value = "/create",
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails){
 
         UserRest userRest = new UserRest();

@@ -57,6 +57,11 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/de.regnis.q.sequence/sequence-library -->
 		<dependency>
 			<groupId>de.regnis.q.sequence</groupId>
