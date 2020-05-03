@@ -15,4 +15,5 @@ public interface UserService extends UserDetailsService {
     public void deleteUserByUserId(Long userId);
     public UserDto findByUserId(Long userId);
     public UserDto updateUser(Long userId, UserDto userDto);
+    public List<UserDto> findUserByFirstName(String firstName);
 }

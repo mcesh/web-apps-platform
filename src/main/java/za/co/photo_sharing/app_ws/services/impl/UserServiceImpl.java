@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
@@ -16,6 +17,7 @@ import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -108,6 +110,28 @@ public class UserServiceImpl implements UserService {
         BeanUtils.copyProperties(updatedUserDetails,user);
         return user;
     }
+
+    @Override
+    public List<UserDto> findUserByFirstName(String firstName) {
+        List<UserDto> userDtos = new ArrayList<>();
+
+        List<UserEntity> userByFirstName = userRepo.findUserByFirstName(firstName);
+        if (CollectionUtils.isEmpty(userByFirstName)){
+            throw new UserServiceException(ErrorMessages.NO_USERS_FOUND.getErrorMessage());
+        }
+        userByFirstName.forEach(userEntity -> {
+            UserDto userDto = new UserDto();
+            userDto.setUserId(userEntity.getUserId());
+            userDto.setFirstName(userEntity.getFirstName());
+            userDto.setLastName(userEntity.getLastName());
+            userDto.setEmail(userEntity.getEmail());
+            userDto.setEmailVerificationStatus(userEntity.getEmailVerificationStatus());
+            userDto.setUsername(userEntity.getUsername());
+            userDtos.add(userDto);
+        });
+        return userDtos;
+    }
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepo.findByEmail(email);

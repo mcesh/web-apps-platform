@@ -25,5 +25,8 @@ public interface UserRepo extends JpaRepository<UserEntity, Long> {
     @Query("DELETE UserEntity WHERE id=:x")
     public void deleteUserByUserId(@Param("x") Long id);
 
+    @Query(value="select name FROM UserEntity name where name.firstName = ?1")
+    List<UserEntity> findUserByFirstName(@Param("firstName") String firstName);
+
 
 }

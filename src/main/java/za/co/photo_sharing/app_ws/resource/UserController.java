@@ -11,6 +11,9 @@ import za.co.photo_sharing.app_ws.model.request.UserDetailsRequestModel;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("users") // http://localhost:8080/users
 public class UserController {
@@ -64,6 +67,19 @@ public class UserController {
         BeanUtils.copyProperties(user,userRest);
 
         return userRest;
+    }
+
+    @GetMapping(path = "firstName/{firstName}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<UserRest> getUsersByFirstName(@PathVariable String firstName){
+        List<UserRest> userRests = new ArrayList<>();
+
+        List<UserDto> userByFirstName = userService.findUserByFirstName(firstName);
+        userByFirstName.forEach(first_name->{
+            UserRest userRest = new UserRest();
+            BeanUtils.copyProperties(first_name,userRest);
+            userRests.add(userRest);
+        });
+        return userRests;
     }
     @DeleteMapping
     public String deleteUser(){
