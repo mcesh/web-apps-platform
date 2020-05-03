@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
+import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
+import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
@@ -30,11 +32,11 @@ public class UserServiceImpl implements UserService {
     public UserDto createUser(UserDto user) {
 
         if (userRepo.findByEmail(user.getEmail()) != null) {
-            throw new RuntimeException("Email already exists");
+            throw new UserServiceException(ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
         }
         UserEntity username = userRepo.findByUsername(user.getUsername());
         if (username != null) {
-            throw new RuntimeException("Username Already Exists");
+            throw new UserServiceException(ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
         }
 
         UserEntity userEntity = new UserEntity();
@@ -61,7 +63,7 @@ public class UserServiceImpl implements UserService {
         UserDto userDto = new UserDto();
         UserEntity userEntity = userRepo.findByUsername(username);
         if (userEntity == null)
-            throw new RuntimeException("User with username: " + username + " not found");
+            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         BeanUtils.copyProperties(userEntity, userDto);
         return userDto;
     }
@@ -72,7 +74,7 @@ public class UserServiceImpl implements UserService {
         UserDto userDto = new UserDto();
         UserEntity byFirstName = userRepo.findByFirstNameAndUserId(firstName, userId);
         if (Objects.isNull(byFirstName)) {
-            throw new RuntimeException("First name or user Id: " + firstName + " not found");
+            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
         BeanUtils.copyProperties(byFirstName, userDto);
         return userDto;
@@ -88,7 +90,7 @@ public class UserServiceImpl implements UserService {
         UserDto userDto = new UserDto();
         UserEntity userByUserId = userRepo.findByUserId(userId);
         if (userByUserId == null){
-            throw new RuntimeException("UserID: " + userByUserId + "not found");
+            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
         BeanUtils.copyProperties(userByUserId,userDto);
         return userDto;

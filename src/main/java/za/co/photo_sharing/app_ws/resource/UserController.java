@@ -17,11 +17,19 @@ public class UserController {
     private UserService userService;
 
     @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public UserRest getUser(@PathVariable String id){
+    public UserRest getUserByUserId(@PathVariable String id){
         UserRest userRest = new UserRest();
 
         Long userId = Long.parseLong(id);
         UserDto userByUserId = userService.findByUserId(userId);
+        BeanUtils.copyProperties(userByUserId,userRest);
+        return userRest;
+    }
+
+    @GetMapping(path = "username/{username}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public UserRest getUserByUsername(@PathVariable String username){
+        UserRest userRest = new UserRest();
+        UserDto userByUserId = userService.findByUsername(username);
         BeanUtils.copyProperties(userByUserId,userRest);
         return userRest;
     }
