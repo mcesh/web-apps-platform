@@ -4,6 +4,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
+import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.model.response.UserRest;
 import za.co.photo_sharing.app_ws.model.request.UserDetailsRequestModel;
 import za.co.photo_sharing.app_ws.services.UserService;
@@ -48,9 +50,20 @@ public class UserController {
 
         return userRest;
     }
-    @PutMapping
-    public String updateUser(){
-        return "update user was called!";
+    @PutMapping(path = "{id}",
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public UserRest updateUserDetails(@RequestBody UserDetailsRequestModel userDetails,@PathVariable String id){
+        Long userId = Long.parseLong(id);
+        UserRest userRest = new UserRest();
+
+        UserDto userDto = new UserDto();
+
+        BeanUtils.copyProperties(userDetails,userDto);
+        UserDto user = userService.updateUser(userId,userDto);
+        BeanUtils.copyProperties(user,userRest);
+
+        return userRest;
     }
     @DeleteMapping
     public String deleteUser(){
