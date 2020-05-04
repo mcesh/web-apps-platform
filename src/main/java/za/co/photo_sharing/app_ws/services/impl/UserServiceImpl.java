@@ -14,6 +14,7 @@ import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
+import za.co.photo_sharing.app_ws.utility.UserIdFactoryImpl;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import java.util.ArrayList;
@@ -25,6 +26,8 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     Utils utils;
+    @Autowired
+    private UserIdFactoryImpl userIdFactory;
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
     @Autowired
@@ -44,7 +47,7 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = new UserEntity();
         BeanUtils.copyProperties(user, userEntity);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        userEntity.setUserId(utils.generateUserId());
+        userEntity.setUserId(userIdFactory.buildUserId());
         UserEntity storedUserDetails = userRepo.save(userEntity);
         UserDto returnValue = new UserDto();
         BeanUtils.copyProperties(storedUserDetails, returnValue);
@@ -131,6 +134,20 @@ public class UserServiceImpl implements UserService {
         });
         return userDtos;
     }
+
+ /*   @Override
+    public List<UserDto> findAllUserIds() {
+        List<UserDto> returnValue = new ArrayList<>();
+
+        List<UserEntity> userEntities = userRepo.findAll();
+
+        userEntities.forEach(userEntity -> {
+            UserDto userDto = new UserDto();
+            BeanUtils.copyProperties(userEntity, userDto);
+            returnValue.add(userDto);
+        });
+        return returnValue;
+    }*/
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

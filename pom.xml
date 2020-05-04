@@ -62,6 +62,12 @@
 			<artifactId>jackson-dataformat-xml</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>5.2.3.Final</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/de.regnis.q.sequence/sequence-library -->
 		<dependency>
 			<groupId>de.regnis.q.sequence</groupId>
