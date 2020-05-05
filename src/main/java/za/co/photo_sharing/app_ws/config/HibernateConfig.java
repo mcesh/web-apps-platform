@@ -10,9 +10,7 @@ import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 import java.util.Properties;
-/**
- * Created by Java Developer Zone on 25-08-2017.
- */
+
 @Configuration
 @EnableTransactionManagement
 public class HibernateConfig {

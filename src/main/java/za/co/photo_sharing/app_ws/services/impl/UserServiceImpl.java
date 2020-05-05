@@ -2,6 +2,9 @@ package za.co.photo_sharing.app_ws.services.impl;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -86,8 +89,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUserByUserId(Long userId) {
-        userRepo.deleteUserByUserId(userId);
+    public void deleteUser(Long userId) {
+        UserEntity userByUserId = userRepo.findByUserId(userId);
+        if (userByUserId == null)
+            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        userRepo.delete(userByUserId);
     }
 
     @Override
@@ -133,6 +139,28 @@ public class UserServiceImpl implements UserService {
             userDtos.add(userDto);
         });
         return userDtos;
+    }
+
+    @Override
+    public List<UserDto> getUsers(int page, int limit) {
+        List<UserDto> returnValue = new ArrayList<>();
+
+        if(page>0) page = page-1;
+
+        Pageable pageableRequest = PageRequest.of(page, limit);
+
+        Page<UserEntity> usersPage = userRepo.findAll(pageableRequest);
+        List<UserEntity> users = usersPage.getContent();
+        if (CollectionUtils.isEmpty(users)){
+            throw new UserServiceException(ErrorMessages.NO_USERS_FOUND.getErrorMessage());
+        }
+        users.forEach(userEntity -> {
+            UserDto userDto = new UserDto();
+            BeanUtils.copyProperties(userEntity,userDto);
+            returnValue.add(userDto);
+        });
+
+        return returnValue;
     }
 
  /*   @Override

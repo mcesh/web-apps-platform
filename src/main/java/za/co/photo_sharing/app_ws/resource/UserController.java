@@ -5,8 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
-import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
-import za.co.photo_sharing.app_ws.model.response.UserRest;
+import za.co.photo_sharing.app_ws.model.response.*;
 import za.co.photo_sharing.app_ws.model.request.UserDetailsRequestModel;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
@@ -81,8 +80,15 @@ public class UserController {
         });
         return userRests;
     }
-    @DeleteMapping
-    public String deleteUser(){
-        return "user was successfully deleted!";
+    @DeleteMapping(path = "userId/{id}",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public OperationStatusModel deleteUser(@PathVariable String id){
+        long userId = Long.parseLong(id);
+        OperationStatusModel statusModel = new OperationStatusModel();
+        statusModel.setOperationName(RequestOperationName.DELETE.name());
+        userService.deleteUser(userId);
+        statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
+
+        return statusModel;
     }
 }

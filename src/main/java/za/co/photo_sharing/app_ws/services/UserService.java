@@ -8,12 +8,13 @@ import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import java.util.List;
 
 public interface UserService extends UserDetailsService {
-    public UserDto createUser(UserDto user);
+    UserDto createUser(UserDto user);
     UserDto getUser(String email);
-    public UserDto findByUsername(String username);
-    public UserDto findByFirstNameAndUserId(String firstName, Long userId);
-    public void deleteUserByUserId(Long userId);
-    public UserDto findByUserId(Long userId);
-    public UserDto updateUser(Long userId, UserDto userDto);
-    public List<UserDto> findUserByFirstName(String firstName);
+    UserDto findByUsername(String username);
+    UserDto findByFirstNameAndUserId(String firstName, Long userId);
+    void deleteUser(Long userId);
+    UserDto findByUserId(Long userId);
+    UserDto updateUser(Long userId, UserDto userDto);
+    List<UserDto> findUserByFirstName(String firstName);
+    List<UserDto> getUsers(int page, int limit);
 }
