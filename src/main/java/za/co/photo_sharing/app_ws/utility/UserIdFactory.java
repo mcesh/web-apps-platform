@@ -8,13 +8,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
 
+import java.security.InvalidParameterException;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 @Component
 @Transactional
-public class UserIdFactoryImpl {
+public class UserIdFactory {
+
+    private static final String NUMBER = "0123456789";
+    private static final String DATA_FOR_RANDOM_NUMBERS = NUMBER;
+    private static SecureRandom random = new SecureRandom();
 
 
     @Autowired
@@ -22,14 +29,12 @@ public class UserIdFactoryImpl {
 
     public Long buildUserId() {
 
-        long generatedValue = System.nanoTime() / 100000;
+        long generatedValue = Long.parseLong(generateRandomNumbers(7));
 
         long userId;
         if (existingUserIds().contains(generatedValue)) {
-            long incrementUserId = generatedValue;
-            ++incrementUserId;
-            userId = incrementUserId;
-        } else {
+            userId = generatedValue + 1;
+        }else {
             userId = generatedValue;
         }
 
@@ -50,4 +55,21 @@ public class UserIdFactoryImpl {
         query.setMaxResults(100);
         return query.getResultList();
     }
+
+    public String generateRandomNumbers(int length) {
+
+        String characterType = DATA_FOR_RANDOM_NUMBERS;
+
+        if (length < 1) throw new IllegalArgumentException();
+
+        StringBuilder builder = new StringBuilder();
+        IntStream.range(0,length).forEach(value -> {
+            int randomCharaters = random.nextInt(characterType.length());
+            char character = characterType.charAt(randomCharaters);
+            builder.append(character);
+        });
+        builder.append(1);
+        return builder.toString();
+    }
+
 }

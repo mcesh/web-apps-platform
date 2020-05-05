@@ -14,7 +14,7 @@ import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
-import za.co.photo_sharing.app_ws.utility.UserIdFactoryImpl;
+import za.co.photo_sharing.app_ws.utility.UserIdFactory;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     Utils utils;
     @Autowired
-    private UserIdFactoryImpl userIdFactory;
+    private UserIdFactory userIdFactory;
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
     @Autowired
