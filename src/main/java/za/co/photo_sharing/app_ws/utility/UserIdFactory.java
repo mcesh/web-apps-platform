@@ -1,17 +1,17 @@
 package za.co.photo_sharing.app_ws.utility;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
 
-import java.security.InvalidParameterException;
 import java.security.SecureRandom;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
@@ -32,7 +32,7 @@ public class UserIdFactory {
         long generatedValue = Long.parseLong(generateRandomNumbers(7));
 
         long userId;
-        if (existingUserIds().contains(generatedValue)) {
+        if (BooleanUtils.isTrue(existingUserId(generatedValue))) {
             userId = generatedValue + 1;
         }else {
             userId = generatedValue;
@@ -42,17 +42,19 @@ public class UserIdFactory {
         return userId;
     }
 
-    public List<Long> existingUserIds() {
-        List<UserEntity> allUsers = getAllUsers();
-        return allUsers.stream().map(UserEntity::getUserId).collect(Collectors.toList());
+    public boolean existingUserId(Long userId) {
+        List<UserEntity> allUsers = fetchUserId(userId);
+        if (!CollectionUtils.isEmpty(allUsers)){
+            return true;
+        }
+        return false;
     }
 
-    public List<UserEntity> getAllUsers() {
-        String users = "from UserEntity";
+    public List<UserEntity> fetchUserId(Long userId) {
+        String users = "from UserEntity where userId =:userId";
         Session currentSession = sessionFactory.getCurrentSession();
         Query query = currentSession.createQuery(users);
-        query.setFirstResult(0);
-        query.setMaxResults(100);
+        query.setParameter("userId", userId);
         return query.getResultList();
     }
 
