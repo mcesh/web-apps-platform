@@ -91,4 +91,17 @@ public class UserController {
 
         return statusModel;
     }
+    @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<UserRest> getUsers(@RequestParam(value = "page", defaultValue = "1") int page,
+                                   @RequestParam(value = "page", defaultValue = "25") int limit){
+        List<UserRest> returnRests = new ArrayList<>();
+        List<UserDto> users = userService.getUsers(page, limit);
+        users.forEach(userDto -> {
+            UserRest userRest = new UserRest();
+            BeanUtils.copyProperties(userDto,userRest);
+            returnRests.add(userRest);
+        });
+
+        return returnRests;
+    }
 }

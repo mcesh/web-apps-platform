@@ -163,19 +163,6 @@ public class UserServiceImpl implements UserService {
         return returnValue;
     }
 
- /*   @Override
-    public List<UserDto> findAllUserIds() {
-        List<UserDto> returnValue = new ArrayList<>();
-
-        List<UserEntity> userEntities = userRepo.findAll();
-
-        userEntities.forEach(userEntity -> {
-            UserDto userDto = new UserDto();
-            BeanUtils.copyProperties(userEntity, userDto);
-            returnValue.add(userDto);
-        });
-        return returnValue;
-    }*/
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
