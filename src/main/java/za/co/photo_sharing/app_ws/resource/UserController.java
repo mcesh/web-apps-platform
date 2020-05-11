@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("users") // http://localhost:8080/users
+@RequestMapping("users") // http://localhost:8080/users/photo-sharing-app-ws
 public class UserController {
 
     @Autowired
