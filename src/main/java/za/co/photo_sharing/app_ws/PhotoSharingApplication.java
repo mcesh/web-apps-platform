@@ -4,6 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,7 +14,7 @@ import za.co.photo_sharing.app_ws.config.AppProperties;
 @SpringBootApplication
 @ComponentScan
 @EnableAutoConfiguration(exclude = HibernateJpaAutoConfiguration.class)
-public class PhotoSharingApplication {
+public class PhotoSharingApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
 		SpringApplication.run(PhotoSharingApplication.class, args);
@@ -30,6 +32,11 @@ public class PhotoSharingApplication {
 	@Bean(name="AppProperties")
 	public AppProperties getAppProperties(){
 		return new AppProperties();
+	}
+
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+		return application.sources(PhotoSharingApplication.class);
 	}
 
 }

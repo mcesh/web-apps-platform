@@ -12,6 +12,7 @@
 	<artifactId>photosharing.app_ws</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>photosharing.app_ws</name>
+	<packaging>war</packaging>
 	<description>Photo Sharing Web Application</description>
 
 	<properties>
@@ -39,6 +40,12 @@
 			<artifactId>mockito-all</artifactId>
 			<version>1.10.19</version>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
