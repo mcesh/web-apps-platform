@@ -21,28 +21,30 @@ public class AddressEntity implements Serializable {
     @Column(length=30, nullable=false)
     private String addressId;
 
-    @Column(length=15, nullable=false)
+    @Column(length=30, nullable=false)
     private String city;
 
-    @Column(length=15, nullable=false)
+    @Column(length=30, nullable=false)
     private String country;
 
     @Column(length=100, nullable=false)
     private String streetName;
 
-    @Column(length=7, nullable=false)
+    @Column(length=15, nullable=false)
     private String postalCode;
 
     @Column(length=10, nullable=false)
     private String type;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumns({
             @JoinColumn(name="users_id")
     })
-
     private UserEntity userDetails;
+
+    @Column(length=15, nullable=false)
+    private String userId;
 
     public long getId() {
         return id;
@@ -106,6 +108,13 @@ public class AddressEntity implements Serializable {
 
     public void setUserDetails(UserEntity userDetails) {
         this.userDetails = userDetails;
+    }
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
 

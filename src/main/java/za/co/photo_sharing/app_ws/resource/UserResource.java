@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.resource;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -44,12 +45,10 @@ public class UserResource {
 
         UserRest userRest = new UserRest();
 
-        UserDto userDto = new UserDto();
-
-        BeanUtils.copyProperties(userDetails,userDto);
+        ModelMapper modelMapper = new ModelMapper();
+        UserDto userDto = modelMapper.map(userDetails, UserDto.class);
         UserDto user = userService.createUser(userDto);
-        BeanUtils.copyProperties(user,userRest);
-
+        userRest = modelMapper.map(user, UserRest.class);
         return userRest;
     }
     @PutMapping(path = "{id}",

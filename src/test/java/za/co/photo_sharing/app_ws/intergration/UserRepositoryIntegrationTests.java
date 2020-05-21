@@ -72,7 +72,7 @@ public class UserRepositoryIntegrationTests {
 
     private UserEntity buildUserDto() {
         UserEntity userEntity = new UserEntity();
-        userId = utils.generateUserId();
+        userId = new Random().nextLong();
         String emailId = RandomStringUtils.randomAlphabetic(10);
         username = RandomStringUtils.randomAlphabetic(7);
         String emailAddr = emailId + "@" + "gmail.com";
@@ -83,7 +83,7 @@ public class UserRepositoryIntegrationTests {
         userEntity.setLastName("Nxuseka");
         userEntity.setEncryptedPassword(encoder.encode("Password"));
         userEntity.setEmailVerificationStatus(Boolean.FALSE);
-        userEntity.setId(utils.generateUserId());
+        userEntity.setId(new Random().nextLong());
         userEntity.setUsername(username);
         return userEntity;
     }

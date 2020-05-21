@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,4 +18,5 @@ public class UserDetailsRequestModel {
     private String email;
     private String password;
     private String username;
+    private List<AddressRequestModel> addresses;
 }

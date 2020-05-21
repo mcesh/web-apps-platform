@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.UserService;
+import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.UserIdFactory;
 import za.co.photo_sharing.app_ws.utility.Utils;
@@ -46,15 +48,21 @@ public class UserServiceImpl implements UserService {
         if (username != null) {
             throw new UserServiceException(ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
         }
+        Long userId = userIdFactory.buildUserId();
+        for (int i=0; i<user.getAddresses().size(); i++){
+            AddressDTO addressDTO = user.getAddresses().get(i);
+            addressDTO.setUserDetails(user);
+            addressDTO.setAddressId(utils.generateAddressId(30));
+            addressDTO.setUserId(userId);
+            user.getAddresses().set(i, addressDTO);
+        }
 
-        UserEntity userEntity = new UserEntity();
-        BeanUtils.copyProperties(user, userEntity);
+        ModelMapper modelMapper = new ModelMapper();
+        UserEntity userEntity =  modelMapper.map(user, UserEntity.class);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        userEntity.setUserId(userIdFactory.buildUserId());
+        userEntity.setUserId(userId);
         UserEntity storedUserDetails = userRepo.save(userEntity);
-        UserDto returnValue = new UserDto();
-        BeanUtils.copyProperties(storedUserDetails, returnValue);
-        return returnValue;
+        return modelMapper.map(storedUserDetails, UserDto.class);
     }
 
     @Override

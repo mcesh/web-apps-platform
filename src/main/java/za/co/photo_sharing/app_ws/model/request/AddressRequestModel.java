@@ -1,4 +1,4 @@
-package za.co.photo_sharing.app_ws.shared.dto;
+package za.co.photo_sharing.app_ws.model.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,14 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AddressDTO {
-    private long id;
-    private String addressId;
+public class AddressRequestModel {
+
     private String city;
     private String country;
     private String streetName;
     private String postalCode;
     private String type;
-    private Long userId;
-    private UserDto userDetails;
 }
