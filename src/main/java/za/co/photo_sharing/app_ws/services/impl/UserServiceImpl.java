@@ -32,9 +32,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     Utils utils;
     @Autowired
-    private UserIdFactory userIdFactory;
-    @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    private UserIdFactory userIdFactory;
     @Autowired
     private UserRepo userRepo;
 
@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
             throw new UserServiceException(ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
         }
         Long userId = userIdFactory.buildUserId();
-        for (int i=0; i<user.getAddresses().size(); i++){
+        for (int i = 0; i < user.getAddresses().size(); i++) {
             AddressDTO addressDTO = user.getAddresses().get(i);
             addressDTO.setUserDetails(user);
             addressDTO.setAddressId(utils.generateAddressId(30));
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
         }
 
         ModelMapper modelMapper = new ModelMapper();
-        UserEntity userEntity =  modelMapper.map(user, UserEntity.class);
+        UserEntity userEntity = modelMapper.map(user, UserEntity.class);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userEntity.setUserId(userId);
         UserEntity storedUserDetails = userRepo.save(userEntity);
@@ -108,10 +108,10 @@ public class UserServiceImpl implements UserService {
     public UserDto findByUserId(Long userId) {
         UserDto userDto = new UserDto();
         UserEntity userByUserId = userRepo.findByUserId(userId);
-        if (userByUserId == null){
+        if (userByUserId == null) {
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
-        BeanUtils.copyProperties(userByUserId,userDto);
+        BeanUtils.copyProperties(userByUserId, userDto);
         return userDto;
     }
 
@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService {
         userByUserId.setFirstName(userDto.getFirstName());
         userByUserId.setLastName(userDto.getLastName());
         UserEntity updatedUserDetails = userRepo.save(userByUserId);
-        BeanUtils.copyProperties(updatedUserDetails,user);
+        BeanUtils.copyProperties(updatedUserDetails, user);
         return user;
     }
 
@@ -133,17 +133,12 @@ public class UserServiceImpl implements UserService {
         List<UserDto> userDtos = new ArrayList<>();
 
         List<UserEntity> userByFirstName = userRepo.findUserByFirstName(firstName);
-        if (CollectionUtils.isEmpty(userByFirstName)){
+        if (CollectionUtils.isEmpty(userByFirstName)) {
             throw new UserServiceException(ErrorMessages.NO_USERS_FOUND.getErrorMessage());
         }
         userByFirstName.forEach(userEntity -> {
-            UserDto userDto = new UserDto();
-            userDto.setUserId(userEntity.getUserId());
-            userDto.setFirstName(userEntity.getFirstName());
-            userDto.setLastName(userEntity.getLastName());
-            userDto.setEmail(userEntity.getEmail());
-            userDto.setEmailVerificationStatus(userEntity.getEmailVerificationStatus());
-            userDto.setUsername(userEntity.getUsername());
+            ModelMapper modelMapper = new ModelMapper();
+            UserDto userDto = modelMapper.map(userEntity, UserDto.class);
             userDtos.add(userDto);
         });
         return userDtos;
@@ -153,18 +148,18 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getUsers(int page, int limit) {
         List<UserDto> returnValue = new ArrayList<>();
 
-        if(page>0) page = page-1;
+        if (page > 0) page = page - 1;
 
         Pageable pageableRequest = PageRequest.of(page, limit);
 
         Page<UserEntity> usersPage = userRepo.findAll(pageableRequest);
         List<UserEntity> users = usersPage.getContent();
-        if (CollectionUtils.isEmpty(users)){
+        if (CollectionUtils.isEmpty(users)) {
             throw new UserServiceException(ErrorMessages.NO_USERS_FOUND.getErrorMessage());
         }
         users.forEach(userEntity -> {
-            UserDto userDto = new UserDto();
-            BeanUtils.copyProperties(userEntity,userDto);
+            ModelMapper modelMapper = new ModelMapper();
+            UserDto userDto = modelMapper.map(userEntity, UserDto.class);
             returnValue.add(userDto);
         });
 
