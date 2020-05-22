@@ -19,6 +19,7 @@ public class UserDto implements Serializable {
     private Long userId;
     private String firstName;
     private String lastName;
+    private Long cellNumber;
     private String email;
     private String password;
     private String username;

@@ -18,5 +18,6 @@ public class UserRest {
     private String lastName;
     private String email;
     private String username;
+    private Long cellNumber;
     private List<AddressesRest> addresses;
 }

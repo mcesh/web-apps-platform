@@ -18,5 +18,6 @@ public class UserDetailsRequestModel {
     private String email;
     private String password;
     private String username;
+    private Long cellNumber;
     private List<AddressRequestModel> addresses;
 }

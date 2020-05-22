@@ -40,6 +40,9 @@ public class UserEntity implements Serializable {
     @Column(nullable = false)
     private Boolean emailVerificationStatus = false;
 
+    @Column(nullable = false, length = 15)
+    private Long cellNumber;
+
     @JsonIgnore
     @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<AddressEntity> addresses;
@@ -124,6 +127,14 @@ public class UserEntity implements Serializable {
         this.addresses = addresses;
     }
 
+    public Long getCellNumber() {
+        return cellNumber;
+    }
+
+    public void setCellNumber(Long cellNumber) {
+        this.cellNumber = cellNumber;
+    }
+
     @Override
     public String toString() {
         return "UserEntity{" +
@@ -136,7 +147,10 @@ public class UserEntity implements Serializable {
                 ", encryptedPassword='" + encryptedPassword + '\'' +
                 ", emailVerificationToken='" + emailVerificationToken + '\'' +
                 ", emailVerificationStatus=" + emailVerificationStatus +
+                ", cellNumber=" + cellNumber +
                 ", addresses=" + addresses +
                 '}';
     }
+
+
 }
