@@ -47,6 +47,10 @@ public class UserEntity implements Serializable {
     @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<AddressEntity> addresses;
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private CompanyEntity company;
+
     public long getId() {
         return id;
     }
@@ -135,6 +139,13 @@ public class UserEntity implements Serializable {
         this.cellNumber = cellNumber;
     }
 
+    public CompanyEntity getCompany() {
+        return company;
+    }
+    public void setCompany(CompanyEntity company) {
+        this.company = company;
+    }
+
     @Override
     public String toString() {
         return "UserEntity{" +
@@ -149,6 +160,7 @@ public class UserEntity implements Serializable {
                 ", emailVerificationStatus=" + emailVerificationStatus +
                 ", cellNumber=" + cellNumber +
                 ", addresses=" + addresses +
+                ", company=" + company +
                 '}';
     }
 

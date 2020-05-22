@@ -20,4 +20,5 @@ public class UserRest {
     private String username;
     private Long cellNumber;
     private List<AddressesRest> addresses;
+    private CompanyRest company;
 }

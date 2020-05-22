@@ -18,6 +18,7 @@ import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
+import za.co.photo_sharing.app_ws.shared.dto.CompanyDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.UserIdFactory;
 import za.co.photo_sharing.app_ws.utility.Utils;
@@ -56,6 +57,12 @@ public class UserServiceImpl implements UserService {
             addressDTO.setUserId(userId);
             user.getAddresses().set(i, addressDTO);
         }
+        CompanyDTO companyDTO = new CompanyDTO();
+        companyDTO.setCellNumber(user.getCompany().getCellNumber());
+        companyDTO.setCompanyName(user.getCompany().getCompanyName());
+        companyDTO.setCompanyType(user.getCompany().getCompanyType());
+        companyDTO.setUserDetails(user);
+        user.setCompany(companyDTO);
 
         ModelMapper modelMapper = new ModelMapper();
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
@@ -106,13 +113,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto findByUserId(Long userId) {
-        UserDto userDto = new UserDto();
         UserEntity userByUserId = userRepo.findByUserId(userId);
         if (userByUserId == null) {
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
-        BeanUtils.copyProperties(userByUserId, userDto);
-        return userDto;
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(userByUserId, UserDto.class);
     }
 
     @Override

@@ -25,12 +25,11 @@ public class UserResource {
 
     @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUserByUserId(@PathVariable String id) {
-        UserRest userRest = new UserRest();
 
         Long userId = Long.parseLong(id);
         UserDto userByUserId = userService.findByUserId(userId);
-        BeanUtils.copyProperties(userByUserId, userRest);
-        return userRest;
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(userByUserId, UserRest.class);
     }
 
     @GetMapping(path = "username/{username}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
