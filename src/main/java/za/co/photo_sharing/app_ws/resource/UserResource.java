@@ -22,22 +22,21 @@ public class UserResource {
 
     @Autowired
     private UserService userService;
+    private ModelMapper modelMapper = new ModelMapper();
 
     @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUserByUserId(@PathVariable String id) {
 
         Long userId = Long.parseLong(id);
         UserDto userByUserId = userService.findByUserId(userId);
-        ModelMapper modelMapper = new ModelMapper();
+
         return modelMapper.map(userByUserId, UserRest.class);
     }
 
     @GetMapping(path = "username/{username}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUserByUsername(@PathVariable String username) {
-        UserRest userRest = new UserRest();
-        UserDto userByUserId = userService.findByUsername(username);
-        BeanUtils.copyProperties(userByUserId, userRest);
-        return userRest;
+        UserDto byUsername = userService.findByUsername(username);
+        return modelMapper.map(byUsername, UserRest.class);
     }
 
     @PostMapping(value = "/create",
@@ -61,13 +60,9 @@ public class UserResource {
         Long userId = Long.parseLong(id);
         UserRest userRest = new UserRest();
 
-        UserDto userDto = new UserDto();
-
-        BeanUtils.copyProperties(userDetails, userDto);
+        UserDto userDto = modelMapper.map(userDetails, UserDto.class);
         UserDto user = userService.updateUser(userId, userDto);
-        BeanUtils.copyProperties(user, userRest);
-
-        return userRest;
+        return modelMapper.map(user, UserRest.class);
     }
 
     @GetMapping(path = "firstName/{firstName}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -76,7 +71,6 @@ public class UserResource {
 
         List<UserDto> userByFirstName = userService.findUserByFirstName(firstName);
         userByFirstName.forEach(first_name -> {
-            ModelMapper modelMapper = new ModelMapper();
             UserRest userRest = modelMapper.map(first_name, UserRest.class);
             userRests.add(userRest);
         });
@@ -101,7 +95,6 @@ public class UserResource {
         List<UserRest> returnRests = new ArrayList<>();
         List<UserDto> users = userService.getUsers(page, limit);
         users.forEach(userDto -> {
-            ModelMapper modelMapper = new ModelMapper();
             UserRest userRest = modelMapper.map(userDto, UserRest.class);
             returnRests.add(userRest);
         });

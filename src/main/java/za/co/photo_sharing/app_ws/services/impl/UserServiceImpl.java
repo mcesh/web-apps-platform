@@ -24,6 +24,7 @@ import za.co.photo_sharing.app_ws.utility.UserIdFactory;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,6 +39,8 @@ public class UserServiceImpl implements UserService {
     private UserIdFactory userIdFactory;
     @Autowired
     private UserRepo userRepo;
+
+    private ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public UserDto createUser(UserDto user) {
@@ -64,7 +67,6 @@ public class UserServiceImpl implements UserService {
         companyDTO.setUserDetails(user);
         user.setCompany(companyDTO);
 
-        ModelMapper modelMapper = new ModelMapper();
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userEntity.setUserId(userId);
@@ -74,21 +76,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUser(String email) {
-        UserDto userDto = new UserDto();
         UserEntity byEmail = userRepo.findByEmail(email);
         if (byEmail == null) throw new UsernameNotFoundException(email);
-        BeanUtils.copyProperties(byEmail, userDto);
-        return userDto;
+        return modelMapper.map(byEmail, UserDto.class);
     }
 
     @Override
     public UserDto findByUsername(String username) {
-        UserDto userDto = new UserDto();
         UserEntity userEntity = userRepo.findByUsername(username);
         if (userEntity == null)
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
-        BeanUtils.copyProperties(userEntity, userDto);
-        return userDto;
+        return modelMapper.map(userEntity,UserDto.class);
     }
 
     @Override
@@ -123,15 +121,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(Long userId, UserDto userDto) {
-        UserDto user = new UserDto();
+
         UserEntity userByUserId = userRepo.findByUserId(userId);
         if (userByUserId == null) throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
 
         userByUserId.setFirstName(userDto.getFirstName());
         userByUserId.setLastName(userDto.getLastName());
+        if (userDto.getCellNumber() != null){
+            userByUserId.setCellNumber(userDto.getCellNumber());
+        }
         UserEntity updatedUserDetails = userRepo.save(userByUserId);
-        BeanUtils.copyProperties(updatedUserDetails, user);
-        return user;
+
+        return modelMapper.map(updatedUserDetails,UserDto.class);
     }
 
     @Override
@@ -143,7 +144,6 @@ public class UserServiceImpl implements UserService {
             throw new UserServiceException(ErrorMessages.NO_USERS_FOUND.getErrorMessage());
         }
         userByFirstName.forEach(userEntity -> {
-            ModelMapper modelMapper = new ModelMapper();
             UserDto userDto = modelMapper.map(userEntity, UserDto.class);
             userDtos.add(userDto);
         });
@@ -163,8 +163,7 @@ public class UserServiceImpl implements UserService {
         if (CollectionUtils.isEmpty(users)) {
             throw new UserServiceException(ErrorMessages.NO_USERS_FOUND.getErrorMessage());
         }
-        users.forEach(userEntity -> {
-            ModelMapper modelMapper = new ModelMapper();
+        users.stream().sorted(Comparator.comparing(UserEntity::getFirstName)).forEach(userEntity -> {
             UserDto userDto = modelMapper.map(userEntity, UserDto.class);
             returnValue.add(userDto);
         });
