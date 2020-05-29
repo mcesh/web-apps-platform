@@ -1,18 +1,19 @@
 package za.co.photo_sharing.app_ws.resource;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import za.co.photo_sharing.app_ws.model.request.UserDetailsRequestModel;
-import za.co.photo_sharing.app_ws.model.response.OperationStatusModel;
-import za.co.photo_sharing.app_ws.model.response.RequestOperationName;
-import za.co.photo_sharing.app_ws.model.response.RequestOperationStatus;
-import za.co.photo_sharing.app_ws.model.response.UserRest;
+import za.co.photo_sharing.app_ws.model.response.*;
+import za.co.photo_sharing.app_ws.services.AddressService;
 import za.co.photo_sharing.app_ws.services.UserService;
+import za.co.photo_sharing.app_ws.shared.dto.AddressesDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,8 @@ public class UserResource {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private AddressService addressService;
     private ModelMapper modelMapper = new ModelMapper();
 
     @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -100,5 +103,23 @@ public class UserResource {
         });
 
         return returnRests;
+    }
+
+    @GetMapping(path = "/{id}/addresses", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<AddressesRest> getUserAddresses(@PathVariable String id) {
+
+        List<AddressesRest> addressesRests = new ArrayList<>();
+        Long userId = Long.parseLong(id);
+        List<AddressesDTO> addressesDTO = addressService.getAddresses(userId);
+
+        if (addressesDTO != null && !CollectionUtils.isEmpty(addressesDTO)){
+            addressesDTO.forEach(addressDTO ->{
+                AddressesRest addressesRest = modelMapper.map(addressDTO, AddressesRest.class);
+                addressesRests.add(addressesRest);
+            });
+        }
+
+
+        return addressesRests;
     }
 }

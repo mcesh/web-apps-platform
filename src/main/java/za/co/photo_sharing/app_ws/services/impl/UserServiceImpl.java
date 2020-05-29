@@ -17,7 +17,7 @@ import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.UserService;
-import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
+import za.co.photo_sharing.app_ws.shared.dto.AddressesDTO;
 import za.co.photo_sharing.app_ws.shared.dto.CompanyDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.UserIdFactory;
@@ -54,11 +54,11 @@ public class UserServiceImpl implements UserService {
         }
         Long userId = userIdFactory.buildUserId();
         for (int i = 0; i < user.getAddresses().size(); i++) {
-            AddressDTO addressDTO = user.getAddresses().get(i);
-            addressDTO.setUserDetails(user);
-            addressDTO.setAddressId(utils.generateAddressId(30));
-            addressDTO.setUserId(userId);
-            user.getAddresses().set(i, addressDTO);
+            AddressesDTO addressesDTO = user.getAddresses().get(i);
+            addressesDTO.setUserDetails(user);
+            addressesDTO.setAddressId(utils.generateAddressId(30));
+            addressesDTO.setUserId(userId);
+            user.getAddresses().set(i, addressesDTO);
         }
         CompanyDTO companyDTO = new CompanyDTO();
         companyDTO.setCellNumber(user.getCompany().getCellNumber());
@@ -143,7 +143,9 @@ public class UserServiceImpl implements UserService {
         if (CollectionUtils.isEmpty(userByFirstName)) {
             throw new UserServiceException(ErrorMessages.NO_USERS_FOUND.getErrorMessage());
         }
-        userByFirstName.forEach(userEntity -> {
+        userByFirstName.stream()
+                .sorted(Comparator.comparing(UserEntity::getFirstName))
+                .forEach(userEntity -> {
             UserDto userDto = modelMapper.map(userEntity, UserDto.class);
             userDtos.add(userDto);
         });
@@ -163,7 +165,10 @@ public class UserServiceImpl implements UserService {
         if (CollectionUtils.isEmpty(users)) {
             throw new UserServiceException(ErrorMessages.NO_USERS_FOUND.getErrorMessage());
         }
-        users.stream().sorted(Comparator.comparing(UserEntity::getFirstName)).forEach(userEntity -> {
+
+        users.stream()
+                .sorted(Comparator.comparing(UserEntity::getFirstName))
+                .forEach(userEntity -> {
             UserDto userDto = modelMapper.map(userEntity, UserDto.class);
             returnValue.add(userDto);
         });
