@@ -17,16 +17,17 @@ import java.util.List;
 public class AddressServiceImpl implements AddressService {
 
     @Autowired
-   private UserRepo userRepo;
+    private UserRepo userRepo;
     @Autowired
-   private AddressRepository addressRepository;
-   private ModelMapper modelMapper = new ModelMapper();
+    private AddressRepository addressRepository;
+    private ModelMapper modelMapper = new ModelMapper();
+
     @Override
     public List<AddressDTO> getAddresses(Long userId) {
         List<AddressDTO> addressDTOS = new ArrayList<>();
 
         UserEntity userEntity = userRepo.findByUserId(userId);
-        if (userEntity== null) return addressDTOS;
+        if (userEntity == null) return addressDTOS;
 
         Iterable<AddressEntity> addresses = addressRepository.findAllByUserDetails(userEntity);
 
@@ -41,7 +42,7 @@ public class AddressServiceImpl implements AddressService {
 
         AddressEntity addressEntity = addressRepository.findByAddressId(addressId);
 
-        if(addressEntity!=null){
+        if (addressEntity != null) {
             returnValue = modelMapper.map(addressEntity, AddressDTO.class);
         }
         return returnValue;
