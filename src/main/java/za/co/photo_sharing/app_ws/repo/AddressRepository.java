@@ -12,4 +12,5 @@ import java.util.List;
 @Transactional
 public interface AddressRepository extends JpaRepository<AddressEntity, Long> {
     List<AddressEntity> findAllByUserDetails(UserEntity userEntity);
+    AddressEntity findByAddressId(String addressId);
 }

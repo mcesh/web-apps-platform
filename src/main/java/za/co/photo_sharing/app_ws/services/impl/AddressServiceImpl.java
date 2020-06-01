@@ -8,7 +8,7 @@ import za.co.photo_sharing.app_ws.entity.UserEntity;
 import za.co.photo_sharing.app_ws.repo.AddressRepository;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.AddressService;
-import za.co.photo_sharing.app_ws.shared.dto.AddressesDTO;
+import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,16 +22,28 @@ public class AddressServiceImpl implements AddressService {
    private AddressRepository addressRepository;
    private ModelMapper modelMapper = new ModelMapper();
     @Override
-    public List<AddressesDTO> getAddresses(Long userId) {
-        List<AddressesDTO> addressDTOS = new ArrayList<>();
+    public List<AddressDTO> getAddresses(Long userId) {
+        List<AddressDTO> addressDTOS = new ArrayList<>();
 
         UserEntity userEntity = userRepo.findByUserId(userId);
-        if (userEntity== null) return new ArrayList<>();
+        if (userEntity== null) return addressDTOS;
 
         Iterable<AddressEntity> addresses = addressRepository.findAllByUserDetails(userEntity);
 
-        addresses.forEach(addressEntity -> addressDTOS.add(modelMapper.map(addressEntity, AddressesDTO.class)));
+        addresses.forEach(addressEntity -> addressDTOS.add(modelMapper.map(addressEntity, AddressDTO.class)));
 
         return addressDTOS;
+    }
+
+    @Override
+    public AddressDTO getAddress(String addressId) {
+        AddressDTO returnValue = new AddressDTO();
+
+        AddressEntity addressEntity = addressRepository.findByAddressId(addressId);
+
+        if(addressEntity!=null){
+            returnValue = modelMapper.map(addressEntity, AddressDTO.class);
+        }
+        return returnValue;
     }
 }

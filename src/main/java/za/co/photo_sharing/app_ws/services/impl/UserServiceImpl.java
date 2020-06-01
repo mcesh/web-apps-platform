@@ -17,7 +17,7 @@ import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.UserService;
-import za.co.photo_sharing.app_ws.shared.dto.AddressesDTO;
+import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.CompanyDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.UserIdFactory;
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
         }
         Long userId = userIdFactory.buildUserId();
         for (int i = 0; i < user.getAddresses().size(); i++) {
-            AddressesDTO addressesDTO = user.getAddresses().get(i);
+            AddressDTO addressesDTO = user.getAddresses().get(i);
             addressesDTO.setUserDetails(user);
             addressesDTO.setAddressId(utils.generateAddressId(30));
             addressesDTO.setUserId(userId);

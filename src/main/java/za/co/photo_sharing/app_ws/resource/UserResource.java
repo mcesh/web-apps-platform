@@ -1,7 +1,6 @@
 package za.co.photo_sharing.app_ws.resource;
 
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
@@ -10,10 +9,9 @@ import za.co.photo_sharing.app_ws.model.request.UserDetailsRequestModel;
 import za.co.photo_sharing.app_ws.model.response.*;
 import za.co.photo_sharing.app_ws.services.AddressService;
 import za.co.photo_sharing.app_ws.services.UserService;
-import za.co.photo_sharing.app_ws.shared.dto.AddressesDTO;
+import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,7 +108,7 @@ public class UserResource {
 
         List<AddressesRest> addressesRests = new ArrayList<>();
         Long userId = Long.parseLong(id);
-        List<AddressesDTO> addressesDTO = addressService.getAddresses(userId);
+        List<AddressDTO> addressesDTO = addressService.getAddresses(userId);
 
         if (addressesDTO != null && !CollectionUtils.isEmpty(addressesDTO)){
             addressesDTO.forEach(addressDTO ->{
@@ -118,8 +116,17 @@ public class UserResource {
                 addressesRests.add(addressesRest);
             });
         }
-
-
         return addressesRests;
+    }
+
+    @GetMapping(path = "/{userId}/addresses/{addressId}", produces = { MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE, "application/hal+json" })
+    public AddressesRest getUserAddress(@PathVariable String userId, @PathVariable String addressId) {
+
+        AddressDTO addressesDto = addressService.getAddress(addressId);
+
+        ModelMapper modelMapper = new ModelMapper();
+
+        return modelMapper.map(addressesDto, AddressesRest.class);
     }
 }
