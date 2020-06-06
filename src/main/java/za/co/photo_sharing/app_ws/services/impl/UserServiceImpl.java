@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,9 +21,12 @@ import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.CompanyDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
+import za.co.photo_sharing.app_ws.utility.EmailVerification;
 import za.co.photo_sharing.app_ws.utility.UserIdFactory;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
+import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -39,11 +43,15 @@ public class UserServiceImpl implements UserService {
     private UserIdFactory userIdFactory;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private EmailVerification emailVerification;
+    @Autowired
+    private JavaMailSender mailSender;
 
     private ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public UserDto createUser(UserDto user) {
+    public UserDto createUser(UserDto user) throws IOException, MessagingException {
 
         if (userRepo.findByEmail(user.getEmail()) != null) {
             throw new UserServiceException(ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
@@ -69,9 +77,12 @@ public class UserServiceImpl implements UserService {
 
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(userId.toString()));
         userEntity.setUserId(userId);
         UserEntity storedUserDetails = userRepo.save(userEntity);
-        return modelMapper.map(storedUserDetails, UserDto.class);
+        UserDto userDto = modelMapper.map(storedUserDetails, UserDto.class);
+        emailVerification.sendVerificationMail(userDto);
+        return userDto;
     }
 
     @Override

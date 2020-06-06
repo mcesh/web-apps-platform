@@ -9,7 +9,9 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.thymeleaf.TemplateEngine;
 import za.co.photo_sharing.app_ws.config.AppProperties;
+import za.co.photo_sharing.app_ws.utility.EmailVerification;
 
 @SpringBootApplication
 @ComponentScan
@@ -39,4 +41,8 @@ public class PhotoSharingApplication extends SpringBootServletInitializer {
 		return application.sources(PhotoSharingApplication.class);
 	}
 
+	@Bean
+	public TemplateEngine templateEngine(){
+		return new TemplateEngine();
+	}
 }

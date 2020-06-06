@@ -5,10 +5,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
+import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.List;
 
 public interface UserService extends UserDetailsService {
-    UserDto createUser(UserDto user);
+    UserDto createUser(UserDto user) throws IOException, MessagingException;
     UserDto getUser(String email);
     UserDto findByUsername(String username);
     UserDto findByFirstNameAndUserId(String firstName, Long userId);
