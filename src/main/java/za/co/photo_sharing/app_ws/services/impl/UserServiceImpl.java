@@ -187,6 +187,22 @@ public class UserServiceImpl implements UserService {
         return returnValue;
     }
 
+    @Override
+    public boolean verifyEmailToken(String token) {
+        boolean isVerified = false;
+        UserEntity userEntity = userRepo.findUserByEmailVerificationToken(token);
+        if (userEntity != null){
+            boolean hasTokenExpired = Utils.hasTokenExpired(token);
+            if (!hasTokenExpired){
+                userEntity.setEmailVerificationToken(null);
+                userEntity.setEmailVerificationStatus(Boolean.TRUE);
+                userRepo.save(userEntity);
+                isVerified = true;
+            }
+        }
+        return isVerified;
+    }
+
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -195,6 +211,12 @@ public class UserServiceImpl implements UserService {
             throw new UsernameNotFoundException(email);
         }
 
-        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), new ArrayList<>());
+        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(),
+                userEntity.getEmailVerificationStatus(),
+                true,
+                true,
+                true,new ArrayList<>());
+
+        //return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), new ArrayList<>());
     }
 }

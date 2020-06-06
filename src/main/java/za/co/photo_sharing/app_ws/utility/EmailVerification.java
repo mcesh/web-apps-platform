@@ -38,7 +38,7 @@ public class EmailVerification {
     final String FROM = "siya.nxuseka@gmail.com";
 
     // The subject line for the email.
-    final String SUBJECT = "One last step to complete your registration with PhotoApp";
+    final String EMAIL_VERIFICATION_SUBJECT = "Complete Registration!";
 
     final String PASSWORD_RESET_SUBJECT = "Password reset request";
 
@@ -77,33 +77,14 @@ public class EmailVerification {
         MimeMessageHelper helper = new MimeMessageHelper(message,
                 MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                 StandardCharsets.UTF_8.name());
-        Context context = new Context();
-        context.setVariable("user", userDto);
-        String html = engine.process("emailVerificationTemplate", context);
         helper.setTo(userDto.getEmail());
-        helper.setText(html,true);
+        helper.setText("To confirm your account, please click here : "
+                +"http://localhost:8080/photo-sharing-app-ws/users/email-verification?token="+userDto.getEmailVerificationToken());
         helper.setFrom(FROM);
-        helper.setSubject(SUBJECT);
+        helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
+        helper.setSentDate(new Date());
         emailSender.send(message);
-        System.out.println("Successfully sent: {} " + message);
-    }
-
-    public MimeMessagePreparator verifyEmail(UserDto userDto){
-
-        Context context = new Context();
-        context.setVariable("user", userDto);
-        context.setVariable("password", userDto.getPassword());
-        String textMessage = templateEngine.process("emailVerificationTemplate", context);
-        return mimeMessage -> {
-
-            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setPriority(1);
-            messageHelper.setTo(userDto.getEmail());
-            messageHelper.setFrom(new InternetAddress(FROM));
-            messageHelper.setSubject(SUBJECT);
-            messageHelper.setText(textMessage,true);
-            messageHelper.setSentDate(new Date());
-            System.out.println("Email sent: {}" + messageHelper.getEncoding());
-        };
+        System.out.println("Successfully sent: {} "
+                + message.getSubject() +" " + message.getSender() + " " + message.getSentDate());
     }
 }

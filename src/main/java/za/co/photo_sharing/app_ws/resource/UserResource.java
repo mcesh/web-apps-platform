@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 import za.co.photo_sharing.app_ws.model.request.UserDetailsRequestModel;
 import za.co.photo_sharing.app_ws.model.response.*;
 import za.co.photo_sharing.app_ws.services.AddressService;
@@ -130,5 +131,26 @@ public class UserResource {
         ModelMapper modelMapper = new ModelMapper();
 
         return modelMapper.map(addressesDto, AddressesRest.class);
+    }
+
+    @GetMapping(path = "/email-verification",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public ModelAndView verifyEmailToken(ModelAndView modelAndView, @RequestParam(value = "token") String token){
+
+        OperationStatusModel statusModel = new OperationStatusModel();
+        statusModel.setOperationName(RequestOperationName.VERIFY_EMAIL.name());
+
+        boolean isVerified = userService.verifyEmailToken(token);
+
+        if (isVerified){
+            statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
+            modelAndView.setViewName("accountVerified");
+        }else {
+            statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
+            modelAndView.addObject("message","The link is invalid or broken!");
+            modelAndView.setViewName("error");
+        }
+        return modelAndView;
     }
 }

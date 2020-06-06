@@ -19,4 +19,5 @@ public interface UserService extends UserDetailsService {
     UserDto updateUser(Long userId, UserDto userDto);
     List<UserDto> findUserByFirstName(String firstName);
     List<UserDto> getUsers(int page, int limit);
+    boolean verifyEmailToken(String token);
 }
