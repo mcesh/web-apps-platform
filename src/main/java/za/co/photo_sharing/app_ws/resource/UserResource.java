@@ -95,7 +95,7 @@ public class UserResource {
 
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<UserRest> getUsers(@RequestParam(value = "page", defaultValue = "1") int page,
-                                   @RequestParam(value = "page", defaultValue = "25") int limit) {
+                                   @RequestParam(value = "page", defaultValue = "55") int limit) {
         List<UserRest> returnRests = new ArrayList<>();
         List<UserDto> users = userService.getUsers(page, limit);
         users.forEach(userDto -> {
