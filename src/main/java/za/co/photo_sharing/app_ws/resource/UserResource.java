@@ -3,6 +3,9 @@ package za.co.photo_sharing.app_ws.resource;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -16,6 +19,8 @@ import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -187,6 +192,21 @@ public class UserResource {
         if (operationResults){
             statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
         }
+        return statusModel;
+    }
+    @GetMapping(path = "/logout",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public OperationStatusModel sign_outSite(HttpServletRequest request, HttpServletResponse response) {
+        OperationStatusModel statusModel = new OperationStatusModel();
+        statusModel.setOperationName(RequestOperationName.SIGN_OUT.name());
+        statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+            statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
+        }
+
         return statusModel;
     }
 }

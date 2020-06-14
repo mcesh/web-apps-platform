@@ -17,7 +17,7 @@ import za.co.photo_sharing.app_ws.entity.PasswordResetToken;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
-import za.co.photo_sharing.app_ws.repo.PasswordResetRepository;
+import za.co.photo_sharing.app_ws.repo.PasswordResetRequestRepository;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
     private JavaMailSender mailSender;
 
     @Autowired
-    private PasswordResetRepository resetRepository;
+    private PasswordResetRequestRepository resetRequestRepository;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -218,7 +218,7 @@ public class UserServiceImpl implements UserService {
             PasswordResetToken passwordResetToken = new PasswordResetToken();
             passwordResetToken.setToken(token);
             passwordResetToken.setUserDetails(userEntity);
-            resetRepository.save(passwordResetToken);
+            resetRequestRepository.save(passwordResetToken);
             returnValue = emailVerification.sendPasswordResetReq.apply(userEntity, token);
         }
 
@@ -233,7 +233,7 @@ public class UserServiceImpl implements UserService {
         if (Utils.hasTokenExpired(token)){
             return hasUpdated;
         }
-        PasswordResetToken passwordResetToken = resetRepository.findByToken(token);
+        PasswordResetToken passwordResetToken = resetRequestRepository.findByToken(token);
 
         if (passwordResetToken == null){
             return hasUpdated;
@@ -247,7 +247,7 @@ public class UserServiceImpl implements UserService {
                 .equalsIgnoreCase(encodedPassword)){
             hasUpdated = true;
         }
-        resetRepository.delete(passwordResetToken);
+        resetRequestRepository.delete(passwordResetToken);
 
         return hasUpdated;
     }
@@ -265,7 +265,5 @@ public class UserServiceImpl implements UserService {
                 true,
                 true,
                 true, new ArrayList<>());
-
-        //return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), new ArrayList<>());
     }
 }

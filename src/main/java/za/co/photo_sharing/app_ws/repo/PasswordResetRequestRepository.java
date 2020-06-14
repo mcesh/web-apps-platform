@@ -7,7 +7,7 @@ import za.co.photo_sharing.app_ws.entity.PasswordResetToken;
 
 @Repository
 @Transactional
-public interface PasswordResetRepository extends JpaRepository<PasswordResetToken, Long> {
+public interface PasswordResetRequestRepository extends JpaRepository<PasswordResetToken, Long> {
     PasswordResetToken findByToken(String token);
 
 }
