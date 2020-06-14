@@ -13,9 +13,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import za.co.photo_sharing.app_ws.entity.PasswordResetToken;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
+import za.co.photo_sharing.app_ws.repo.PasswordResetRepository;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
@@ -27,10 +29,7 @@ import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -47,6 +46,9 @@ public class UserServiceImpl implements UserService {
     private EmailVerification emailVerification;
     @Autowired
     private JavaMailSender mailSender;
+
+    @Autowired
+    private PasswordResetRepository resetRepository;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -81,7 +83,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setUserId(userId);
         UserEntity storedUserDetails = userRepo.save(userEntity);
         UserDto userDto = modelMapper.map(storedUserDetails, UserDto.class);
-        emailVerification.sendVerificationMail(userDto);
+        emailVerification.verifyEmail.apply(userDto);
         return userDto;
     }
 
@@ -97,7 +99,7 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepo.findByUsername(username);
         if (userEntity == null)
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
-        return modelMapper.map(userEntity,UserDto.class);
+        return modelMapper.map(userEntity, UserDto.class);
     }
 
     @Override
@@ -138,12 +140,12 @@ public class UserServiceImpl implements UserService {
 
         userByUserId.setFirstName(userDto.getFirstName());
         userByUserId.setLastName(userDto.getLastName());
-        if (userDto.getCellNumber() != null){
+        if (userDto.getCellNumber() != null) {
             userByUserId.setCellNumber(userDto.getCellNumber());
         }
         UserEntity updatedUserDetails = userRepo.save(userByUserId);
 
-        return modelMapper.map(updatedUserDetails,UserDto.class);
+        return modelMapper.map(updatedUserDetails, UserDto.class);
     }
 
     @Override
@@ -157,9 +159,9 @@ public class UserServiceImpl implements UserService {
         userByFirstName.stream()
                 .sorted(Comparator.comparing(UserEntity::getFirstName))
                 .forEach(userEntity -> {
-            UserDto userDto = modelMapper.map(userEntity, UserDto.class);
-            userDtos.add(userDto);
-        });
+                    UserDto userDto = modelMapper.map(userEntity, UserDto.class);
+                    userDtos.add(userDto);
+                });
         return userDtos;
     }
 
@@ -180,9 +182,9 @@ public class UserServiceImpl implements UserService {
         users.stream()
                 .sorted(Comparator.comparing(UserEntity::getFirstName))
                 .forEach(userEntity -> {
-            UserDto userDto = modelMapper.map(userEntity, UserDto.class);
-            returnValue.add(userDto);
-        });
+                    UserDto userDto = modelMapper.map(userEntity, UserDto.class);
+                    returnValue.add(userDto);
+                });
 
         return returnValue;
     }
@@ -191,9 +193,9 @@ public class UserServiceImpl implements UserService {
     public boolean verifyEmailToken(String token) {
         boolean isVerified = false;
         UserEntity userEntity = userRepo.findUserByEmailVerificationToken(token);
-        if (userEntity != null){
+        if (userEntity != null) {
             boolean hasTokenExpired = Utils.hasTokenExpired(token);
-            if (!hasTokenExpired){
+            if (!hasTokenExpired) {
                 userEntity.setEmailVerificationToken(null);
                 userEntity.setEmailVerificationStatus(Boolean.TRUE);
                 userRepo.save(userEntity);
@@ -201,6 +203,27 @@ public class UserServiceImpl implements UserService {
             }
         }
         return isVerified;
+    }
+
+    @Override
+    public boolean requestPasswordReset(String email) {
+        boolean returnValue = false;
+
+        UserEntity userEntity = userRepo.findByEmail(email);
+        Optional<UserEntity> entity = Optional.ofNullable(Optional.ofNullable(userEntity)
+                .orElseThrow(() -> new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage())));
+
+        if (entity.isPresent()){
+            String token = utils.generatePasswordResetToken(userEntity.getUserId().toString());
+            PasswordResetToken passwordResetToken = new PasswordResetToken();
+            passwordResetToken.setToken(token);
+            passwordResetToken.setUserDetails(userEntity);
+            resetRepository.save(passwordResetToken);
+            returnValue = emailVerification.sendPasswordResetReq.apply(userEntity, token);
+        }
+
+
+        return returnValue;
     }
 
 
@@ -215,7 +238,7 @@ public class UserServiceImpl implements UserService {
                 userEntity.getEmailVerificationStatus(),
                 true,
                 true,
-                true,new ArrayList<>());
+                true, new ArrayList<>());
 
         //return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), new ArrayList<>());
     }

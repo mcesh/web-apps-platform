@@ -1,5 +1,8 @@
 package za.co.photo_sharing.app_ws;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,14 +16,18 @@ import org.thymeleaf.TemplateEngine;
 import za.co.photo_sharing.app_ws.config.AppProperties;
 import za.co.photo_sharing.app_ws.utility.EmailVerification;
 
+
 @SpringBootApplication
 @ComponentScan
 @EnableAutoConfiguration(exclude = HibernateJpaAutoConfiguration.class)
+@Slf4j
 public class PhotoSharingApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
 		SpringApplication.run(PhotoSharingApplication.class, args);
 	}
+
+	private static Logger LOGGER = LoggerFactory.getLogger(PhotoSharingApplication.class);
 
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder(){
@@ -44,5 +51,9 @@ public class PhotoSharingApplication extends SpringBootServletInitializer {
 	@Bean
 	public TemplateEngine templateEngine(){
 		return new TemplateEngine();
+	}
+
+	public static Logger getLog() {
+		return LOGGER;
 	}
 }

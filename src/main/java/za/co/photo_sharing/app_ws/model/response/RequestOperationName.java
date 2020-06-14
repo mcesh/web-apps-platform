@@ -2,5 +2,6 @@ package za.co.photo_sharing.app_ws.model.response;
 
 public enum RequestOperationName {
     DELETE,
-    VERIFY_EMAIL
+    VERIFY_EMAIL,
+    PASSWORD_RESET
 }
