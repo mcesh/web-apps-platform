@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import za.co.photo_sharing.app_ws.model.request.PasswordResetModel;
 import za.co.photo_sharing.app_ws.model.request.PasswordResetRequestModel;
 import za.co.photo_sharing.app_ws.model.request.UserDetailsRequestModel;
 import za.co.photo_sharing.app_ws.model.response.*;
@@ -161,13 +162,30 @@ public class UserResource {
     public OperationStatusModel requestReset(@RequestBody PasswordResetRequestModel resetRequestModel){
 
         OperationStatusModel statusModel = new OperationStatusModel();
-        statusModel.setOperationName(RequestOperationName.PASSWORD_RESET.name());
+        statusModel.setOperationName(RequestOperationName.PASSWORD_RESET_REQUEST.name());
 
         boolean operationResults = userService.requestPasswordReset(resetRequestModel.getEmail());
         if (operationResults){
             statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
         }else {
             statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
+        }
+        return statusModel;
+    }
+
+    @PostMapping(path = "/password-reset",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public OperationStatusModel resetPassword(@RequestBody PasswordResetModel passwordResetModel){
+
+        OperationStatusModel statusModel = new OperationStatusModel();
+        statusModel.setOperationName(RequestOperationName.PASSWORD_RESET.name());
+        statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
+
+        boolean operationResults = userService.resetPassword(passwordResetModel.getToken(),
+                passwordResetModel.getNewPassword());
+        if (operationResults){
+            statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
         }
         return statusModel;
     }
