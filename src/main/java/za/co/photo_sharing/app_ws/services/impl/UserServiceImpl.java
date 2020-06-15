@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setUserId(userId);
         UserEntity storedUserDetails = userRepo.save(userEntity);
         UserDto userDto = modelMapper.map(storedUserDetails, UserDto.class);
-        emailVerification.verifyEmail.apply(userDto);
+        emailVerification.sendVerificationMail(userDto);
         return userDto;
     }
 

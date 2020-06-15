@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.utility;
 
+import jdk.nashorn.internal.objects.annotations.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import za.co.photo_sharing.app_ws.PhotoSharingApplication;
@@ -32,6 +34,7 @@ import java.util.function.Function;
 @Component
 @ComponentScan()
 @Slf4j
+@Service
 public class EmailVerification {
 
     private static Logger LOGGER = LoggerFactory.getLogger(EmailVerification.class);
