@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.service.impl;
 
+import org.assertj.core.util.Arrays;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.CollectionUtils;
 import za.co.photo_sharing.app_ws.entity.AddressEntity;
 import za.co.photo_sharing.app_ws.entity.CompanyEntity;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
@@ -31,7 +33,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Matchers.*;
@@ -182,7 +186,47 @@ public class UserServiceImplTest {
         assertNotNull(firstNameAndUserId);
 
     }
+    @Test
+    public void shouldThrowAnExceptionWhenNoUserFound(){
+        when(userRepository.findByFirstNameAndUserId(anyString(),anyLong()))
+                .thenReturn(null);
+        assertThrows(UserServiceException.class,
+                () -> userService.findByFirstNameAndUserId(firstName,userId));
+    }
+    @Test
+    public void shouldGetUserByUserId(){
+        when(userRepository.findByUserId(anyLong())).thenReturn(getUserEntity());
+        UserDto userDto = userService.findByUserId(userId);
+        assertNotNull(userDto);
+        assertEquals(userId, userDto.getUserId().longValue());
+    }
 
+    @Test
+    public void shouldThrowAnExceptionWhenUserNotFound(){
+        when(userRepository.findByUserId(anyLong())).thenReturn(null);
+        assertThrows(UserServiceException.class,
+                () -> userService.findByUserId(userId)
+                );
+    }
+
+    @Test
+    public void shouldFindUsersByFirstName(){
+        doReturn(userEntities()).when(userRepository).findUserByFirstName(anyString());
+        List<UserDto> userByFirstName = userService.findUserByFirstName(firstName);
+        assertNotNull(userByFirstName);
+        assertEquals(userByFirstName.size(), 6);
+        assertTrue(userByFirstName.stream().map(UserDto::getFirstName).anyMatch(first_Name -> Objects.equals(firstName, first_Name)));
+    }
+
+    private List<UserEntity> userEntities(){
+        List<UserEntity> entities = new ArrayList<>();
+        UserEntity userEntity;
+        for (int user =0; user<=5;user++){
+            userEntity = getUserEntity();
+            entities.add(userEntity);
+        }
+        return entities;
+    }
 
     private UserEntity getUserEntity() {
         UserEntity userEntity = new UserEntity();
@@ -191,7 +235,7 @@ public class UserServiceImplTest {
         userEntity.setEmail("test9@gamil.com");
         userEntity.setCellNumber(27856257412L);
         userEntity.setLastName("Nxuseka");
-        userEntity.setFirstName("Siyamcela");
+        userEntity.setFirstName(firstName);
         userEntity.setUsername(userName);
         userEntity.setEmailVerificationToken(emailVerificationToken);
         userEntity.setUserId(userId);
