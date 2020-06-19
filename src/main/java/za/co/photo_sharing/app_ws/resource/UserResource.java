@@ -1,6 +1,8 @@
 package za.co.photo_sharing.app_ws.resource;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -17,6 +19,7 @@ import za.co.photo_sharing.app_ws.services.AddressService;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
+import za.co.photo_sharing.app_ws.utility.EmailVerification;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
@@ -24,10 +27,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("users") // http://localhost:8080/users/photo-sharing-app-ws
 public class UserResource {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(EmailVerification.class);
 
     @Autowired
     private UserService userService;
@@ -53,13 +59,15 @@ public class UserResource {
     @PostMapping(value = "/create",
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails) throws IOException, MessagingException {
+    public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails, HttpServletRequest request) throws IOException, MessagingException {
 
+        String userAgent = request.getHeader("User-Agent");
+        Optional.ofNullable(userAgent).ifPresent(agent-> getLog().info("User-Agent {}", agent));
         UserRest userRest = new UserRest();
 
         ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = modelMapper.map(userDetails, UserDto.class);
-        UserDto user = userService.createUser(userDto);
+        UserDto user = userService.createUser(userDto, userAgent);
         userRest = modelMapper.map(user, UserRest.class);
         return userRest;
     }
@@ -143,8 +151,12 @@ public class UserResource {
     @GetMapping(path = "/email-verification",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
-    public ModelAndView verifyEmailToken(ModelAndView modelAndView, @RequestParam(value = "token") String token){
+    public ModelAndView verifyEmailToken(HttpServletRequest request,ModelAndView modelAndView, @RequestParam(value = "token") String token){
 
+        String userAgent = request.getHeader("User-Agent");
+        Optional.ofNullable(userAgent).ifPresent(agent->{
+            getLog().info("User-Agent {}", agent);
+        });
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.VERIFY_EMAIL.name());
 
@@ -208,5 +220,9 @@ public class UserResource {
         }
 
         return statusModel;
+    }
+
+    public static Logger getLog() {
+        return LOGGER;
     }
 }

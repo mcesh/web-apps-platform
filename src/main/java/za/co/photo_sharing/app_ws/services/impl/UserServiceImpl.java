@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
     private ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public UserDto createUser(UserDto user) throws IOException, MessagingException {
+    public UserDto createUser(UserDto user, String userAgent) throws IOException, MessagingException {
 
         if (userRepo.findByEmail(user.getEmail()) != null) {
             throw new UserServiceException(ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setUserId(userId);
         UserEntity storedUserDetails = userRepo.save(userEntity);
         UserDto userDto = modelMapper.map(storedUserDetails, UserDto.class);
-        emailVerification.sendVerificationMail(userDto);
+        emailVerification.sendVerificationMail(userDto,userAgent);
         return userDto;
     }
 

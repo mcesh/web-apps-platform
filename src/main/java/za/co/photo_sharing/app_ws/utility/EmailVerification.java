@@ -21,6 +21,7 @@ import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -38,6 +39,7 @@ import java.util.function.Function;
 public class EmailVerification {
 
     private static Logger LOGGER = LoggerFactory.getLogger(EmailVerification.class);
+    private static final String savePath = "C:/Token";
 
 
     // This address must be verified with Amazon SES.
@@ -68,17 +70,24 @@ public class EmailVerification {
     private SpringTemplateEngine engine;
     @Autowired
     private JavaMailSender emailSender;
+    @Autowired
+    private Utils utils;
 
-    public void sendVerificationMail(UserDto userDto) throws MessagingException, IOException {
+    public void sendVerificationMail(UserDto userDto, String userAgent) throws MessagingException, IOException {
 
         MimeMessage message = emailSender.createMimeMessage();
+        String emailVerificationToken = userDto.getEmailVerificationToken();
 
+        if (userAgent.contains("Apache-HttpClient")){
+            utils.generateFilePath.accept(savePath);
+            utils.generateFile.accept(savePath + "/token.txt", userDto.getEmailVerificationToken());
+        }
         MimeMessageHelper helper = new MimeMessageHelper(message,
                 MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                 StandardCharsets.UTF_8.name());
         helper.setTo(userDto.getEmail());
         helper.setText("To confirm your account, please click here : "
-                + "http://localhost:8080/photo-sharing-app-ws/users/email-verification?token=" + userDto.getEmailVerificationToken());
+                + "http://localhost:8080/photo-sharing-app-ws/users/email-verification?token=" + emailVerificationToken);
         helper.setFrom(FROM);
         helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
         helper.setSentDate(new Date());

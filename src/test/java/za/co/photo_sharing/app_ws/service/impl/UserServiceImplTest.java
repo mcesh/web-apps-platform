@@ -83,8 +83,8 @@ public class UserServiceImplTest {
         when(bCryptPasswordEncoder.encode(anyString())).thenReturn(encryptedPassword);
         UserEntity userEntity = getUserEntity();
         when(userRepository.save(anyObject())).thenReturn(userEntity);
-        Mockito.doNothing().when(emailVerification).sendVerificationMail(any(UserDto.class));
-        UserDto storedUserDetails = userService.createUser(buildUserDto());
+        Mockito.doNothing().when(emailVerification).sendVerificationMail(any(UserDto.class), anyString());
+        UserDto storedUserDetails = userService.createUser(buildUserDto(),"Apache-HttpClient");
         assertNotNull(storedUserDetails);
         assertEquals(userEntity.getFirstName(), storedUserDetails.getFirstName());
         assertEquals(userEntity.getAddresses().size(), storedUserDetails.getAddresses().size());
@@ -105,10 +105,10 @@ public class UserServiceImplTest {
         when(bCryptPasswordEncoder.encode(anyString())).thenReturn(encryptedPassword);
         UserEntity userEntity = getUserEntity();
         when(userRepository.save(anyObject())).thenReturn(userEntity);
-        Mockito.doNothing().when(emailVerification).sendVerificationMail(any(UserDto.class));
+        Mockito.doNothing().when(emailVerification).sendVerificationMail(any(UserDto.class),anyString());
         assertThrows(UserServiceException.class,
                 () -> {
-                    userService.createUser(buildUserDto());
+                    userService.createUser(buildUserDto(),"Apache-HttpClient");
                 }
         );
 
@@ -124,9 +124,9 @@ public class UserServiceImplTest {
         when(bCryptPasswordEncoder.encode(anyString())).thenReturn(encryptedPassword);
         UserEntity userEntity = getUserEntity();
         when(userRepository.save(anyObject())).thenReturn(userEntity);
-        Mockito.doNothing().when(emailVerification).sendVerificationMail(any(UserDto.class));
+        Mockito.doNothing().when(emailVerification).sendVerificationMail(any(UserDto.class),anyString());
         assertThrows(UserServiceException.class,
-                () -> userService.createUser(buildUserDto())
+                () -> userService.createUser(buildUserDto(),"Apache-HttpClient")
         );
 
     }

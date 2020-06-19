@@ -9,11 +9,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import za.co.photo_sharing.app_ws.config.SecurityConstants;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Random;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 @Component
 public class Utils {
@@ -70,5 +76,69 @@ public class Utils {
                 .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
                 .compact();
+    }
+
+    public Consumer<String> generateFilePath = filePath -> {
+        File directory = new File(filePath);
+        if (!directory.exists()) {
+            directory.mkdir();
+            // If you require it to make the entire directory path including parents,
+            // use directory.mkdirs(); here instead.
+        }
+    };
+
+    public BiConsumer<String,String> generateFile = (filePath, fileData)  ->{
+
+        //Where to save
+        File file = new File(filePath);
+
+        //Writer for fileData
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(file, false);
+        } catch (IOException e) {
+           throw new RuntimeException("Couldn't generate file " + e.getMessage());
+        }
+
+        try {
+
+            Objects.requireNonNull(writer).append(fileData);
+            writer.flush();
+
+        } catch (IOException e) {
+            throw new RuntimeException("Could not write file into given file path: " + e.getMessage());
+        } finally {
+
+            try {
+                Objects.requireNonNull(writer).close();
+            } catch (IOException e) {
+                throw new RuntimeException("Couldn't generate file " + e.getMessage());
+            }
+
+        }
+
+    };
+
+    public void generateFile(String filePath, String fileData) throws IOException {
+
+        //Where to save
+        File file = new File(filePath);
+
+        //Writer for fileData
+        FileWriter writer = new FileWriter(file, false);
+
+        try {
+
+            writer.append(fileData);
+            writer.flush();
+
+        } catch (IOException e) {
+            throw new RuntimeException("Could not write file into given file path: " + e.getMessage());
+        } finally {
+
+            writer.close();
+
+        }
+
     }
 }
