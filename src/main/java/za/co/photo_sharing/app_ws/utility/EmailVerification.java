@@ -1,6 +1,5 @@
 package za.co.photo_sharing.app_ws.utility;
 
-import jdk.nashorn.internal.objects.annotations.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,23 +12,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.spring5.SpringTemplateEngine;
-import za.co.photo_sharing.app_ws.PhotoSharingApplication;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import javax.mail.MessagingException;
-import javax.mail.NoSuchProviderException;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Component
@@ -38,10 +31,8 @@ import java.util.function.Function;
 @Service
 public class EmailVerification {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(EmailVerification.class);
     private static final String savePath = "C:/Token";
-
-
+    private static Logger LOGGER = LoggerFactory.getLogger(EmailVerification.class);
     // This address must be verified with Amazon SES.
     final String FROM = "siya.nxuseka@gmail.com";
     // The subject line for the email.
@@ -70,33 +61,7 @@ public class EmailVerification {
     private SpringTemplateEngine engine;
     @Autowired
     private JavaMailSender emailSender;
-    @Autowired
-    private Utils utils;
-
-    public void sendVerificationMail(UserDto userDto, String userAgent) throws MessagingException, IOException {
-
-        MimeMessage message = emailSender.createMimeMessage();
-        String emailVerificationToken = userDto.getEmailVerificationToken();
-
-        if (userAgent.contains("Apache-HttpClient")){
-            utils.generateFilePath.accept(savePath);
-            utils.generateFile.accept(savePath + "/token.txt", userDto.getEmailVerificationToken());
-        }
-        MimeMessageHelper helper = new MimeMessageHelper(message,
-                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                StandardCharsets.UTF_8.name());
-        helper.setTo(userDto.getEmail());
-        helper.setText("To confirm your account, please click here : "
-                + "http://localhost:8080/photo-sharing-app-ws/users/email-verification?token=" + emailVerificationToken);
-        helper.setFrom(FROM);
-        helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
-        helper.setSentDate(new Date());
-        emailSender.send(message);
-        System.out.println("Successfully sent: {} "
-                + message.getSubject() + " " + message.getSentDate() + " " + Arrays.toString(message.getReplyTo()));
-    }
-
-    public Function<UserDto, Boolean> verifyEmail = userDto ->{
+    public Function<UserDto, Boolean> verifyEmail = userDto -> {
         boolean returnValue = false;
         MimeMessage message = emailSender.createMimeMessage();
 
@@ -121,16 +86,15 @@ public class EmailVerification {
                     message.getSubject(), message.getSentDate(),
                     message.getAllRecipients());
 
-        }catch (MessagingException e){
+        } catch (MessagingException e) {
             throw new RuntimeException("Error sending email: {} " + e.getMessage());
         }
-            if (emailSender !=null){
-                returnValue = true;
-            }
+        if (emailSender != null) {
+            returnValue = true;
+        }
         return returnValue;
     };
-
-    public BiFunction<UserEntity,String,Boolean> sendPasswordResetReq = ((userEntity, token) -> {
+    public BiFunction<UserEntity, String, Boolean> sendPasswordResetReq = ((userEntity, token) -> {
 
         boolean returnValue = false;
         final String PASSWORD_RESET_HTMLBODY = new StringBuilder().append("Hi, ")
@@ -165,7 +129,7 @@ public class EmailVerification {
             helper.setSentDate(new Date());
             emailSender.send(message);
 
-            if (emailSender != null){
+            if (emailSender != null) {
                 returnValue = true;
             }
 
@@ -174,47 +138,72 @@ public class EmailVerification {
                     message.getAllRecipients());
 
 
-        }catch (MessagingException e){
+        } catch (MessagingException e) {
             throw new RuntimeException("Error sending email: {} " + e.getMessage());
         }
         return returnValue;
 
     });
-
+    @Autowired
+    private Utils utils;
 
     public static Logger getLog() {
         return LOGGER;
     }
 
-    private String newLine(){
+    public void sendVerificationMail(UserDto userDto, String userAgent) throws MessagingException, IOException {
+
+        MimeMessage message = emailSender.createMimeMessage();
+        String emailVerificationToken = userDto.getEmailVerificationToken();
+
+        if (userAgent.contains("Apache-HttpClient")) {
+            utils.generateFilePath.accept(savePath);
+            utils.generateFile.accept(savePath + "/token.txt", userDto.getEmailVerificationToken());
+        }
+        MimeMessageHelper helper = new MimeMessageHelper(message,
+                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                StandardCharsets.UTF_8.name());
+        helper.setTo(userDto.getEmail());
+        helper.setText("To confirm your account, please click here : "
+                + "http://localhost:8080/photo-sharing-app-ws/users/email-verification?token=" + emailVerificationToken);
+        helper.setFrom(FROM);
+        helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
+        helper.setSentDate(new Date());
+        emailSender.send(message);
+        getLog().info("Email sent successfully with the following details {}, {}, and {}",
+                message.getSubject(), message.getSentDate(),
+                message.getAllRecipients());
+    }
+
+    private String newLine() {
 
         String os = determineOperatingSystem();
 
         String newLineIndicator = "OS not recognized";
-        if (os.equalsIgnoreCase("windows")){
+        if (os.equalsIgnoreCase("windows")) {
             newLineIndicator = "\r\n";
         }
-        if (os.equalsIgnoreCase("linux")){
+        if (os.equalsIgnoreCase("linux")) {
             newLineIndicator = "\n";
         }
         return newLineIndicator;
     }
 
-    private String determineOperatingSystem(){
+    private String determineOperatingSystem() {
         String operatingSystem;
         String os;
 
         operatingSystem = System.getProperty("os.name").toLowerCase();
 
-        if(operatingSystem.contains("win")){
+        if (operatingSystem.contains("win")) {
             os = "windows";
-        }else if (operatingSystem.contains("mac")){
+        } else if (operatingSystem.contains("mac")) {
             os = "mac";
-        }else if (operatingSystem.contains("nix") || operatingSystem.contains("nux") || operatingSystem.contains("aix")){
+        } else if (operatingSystem.contains("nix") || operatingSystem.contains("nux") || operatingSystem.contains("aix")) {
             os = "linux";
-        }else if (operatingSystem.contains("sunos")){
+        } else if (operatingSystem.contains("sunos")) {
             os = "solaris";
-        }else {
+        } else {
             throw new IllegalArgumentException("ERROR Finding Operating System");
         }
         return os;

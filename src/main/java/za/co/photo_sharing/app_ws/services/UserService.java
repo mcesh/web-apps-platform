@@ -1,6 +1,8 @@
 package za.co.photo_sharing.app_ws.services;
 
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
@@ -22,4 +24,5 @@ public interface UserService extends UserDetailsService {
     boolean verifyEmailToken(String token);
     boolean requestPasswordReset(String email);
     boolean resetPassword(String token, String newPassword);
+    List<UserDto> findAllUsersWithConfirmedEmailAddress(int page, int limit);
 }

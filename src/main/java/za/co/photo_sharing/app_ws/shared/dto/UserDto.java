@@ -3,6 +3,7 @@ package za.co.photo_sharing.app_ws.shared.dto;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -26,7 +27,7 @@ public class UserDto implements Serializable {
     private Boolean emailVerificationStatus = false;
     private List<AddressDTO> addresses;
     private CompanyDTO company;
-
+    private LocalDateTime registrationDate;
 
 
 }
