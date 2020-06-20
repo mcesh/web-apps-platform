@@ -41,6 +41,10 @@ public class UserResource {
     private AddressService addressService;
     private ModelMapper modelMapper = new ModelMapper();
 
+    public static Logger getLog() {
+        return LOGGER;
+    }
+
     @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUserByUserId(@PathVariable String id) {
 
@@ -62,7 +66,7 @@ public class UserResource {
     public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails, HttpServletRequest request) throws IOException, MessagingException {
 
         String userAgent = request.getHeader("User-Agent");
-        Optional.ofNullable(userAgent).ifPresent(agent-> getLog().info("User-Agent {}", agent));
+        Optional.ofNullable(userAgent).ifPresent(agent -> getLog().info("User-Agent {}", agent));
         UserRest userRest = new UserRest();
 
         ModelMapper modelMapper = new ModelMapper();
@@ -128,8 +132,8 @@ public class UserResource {
         Long userId = Long.parseLong(id);
         List<AddressDTO> addressesDTO = addressService.getAddresses(userId);
 
-        if (addressesDTO != null && !CollectionUtils.isEmpty(addressesDTO)){
-            addressesDTO.forEach(addressDTO ->{
+        if (addressesDTO != null && !CollectionUtils.isEmpty(addressesDTO)) {
+            addressesDTO.forEach(addressDTO -> {
                 AddressesRest addressesRest = modelMapper.map(addressDTO, AddressesRest.class);
                 addressesRests.add(addressesRest);
             });
@@ -137,8 +141,8 @@ public class UserResource {
         return addressesRests;
     }
 
-    @GetMapping(path = "/{userId}/addresses/{addressId}", produces = { MediaType.APPLICATION_JSON_VALUE,
-            MediaType.APPLICATION_XML_VALUE, "application/hal+json" })
+    @GetMapping(path = "/{userId}/addresses/{addressId}", produces = {MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
     public AddressesRest getUserAddress(@PathVariable String userId, @PathVariable String addressId) {
 
         AddressDTO addressesDto = addressService.getAddress(addressId);
@@ -151,10 +155,10 @@ public class UserResource {
     @GetMapping(path = "/email-verification",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
-    public ModelAndView verifyEmailToken(HttpServletRequest request,ModelAndView modelAndView, @RequestParam(value = "token") String token){
+    public ModelAndView verifyEmailToken(HttpServletRequest request, ModelAndView modelAndView, @RequestParam(value = "token") String token) {
 
         String userAgent = request.getHeader("User-Agent");
-        Optional.ofNullable(userAgent).ifPresent(agent->{
+        Optional.ofNullable(userAgent).ifPresent(agent -> {
             getLog().info("User-Agent {}", agent);
         });
         OperationStatusModel statusModel = new OperationStatusModel();
@@ -162,12 +166,12 @@ public class UserResource {
 
         boolean isVerified = userService.verifyEmailToken(token);
 
-        if (isVerified){
+        if (isVerified) {
             statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
             modelAndView.setViewName("accountVerified");
-        }else {
+        } else {
             statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
-            modelAndView.addObject("message","The link is invalid or broken!");
+            modelAndView.addObject("message", "The link is invalid or broken!");
             modelAndView.setViewName("error");
         }
         return modelAndView;
@@ -176,15 +180,15 @@ public class UserResource {
     @PostMapping(path = "/password-reset-request",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
-    public OperationStatusModel requestReset(@RequestBody PasswordResetRequestModel resetRequestModel){
+    public OperationStatusModel requestReset(@RequestBody PasswordResetRequestModel resetRequestModel) {
 
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.PASSWORD_RESET_REQUEST.name());
 
         boolean operationResults = userService.requestPasswordReset(resetRequestModel.getEmail());
-        if (operationResults){
+        if (operationResults) {
             statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
-        }else {
+        } else {
             statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
         }
         return statusModel;
@@ -193,7 +197,7 @@ public class UserResource {
     @PostMapping(path = "/password-reset",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
-    public OperationStatusModel resetPassword(@RequestBody PasswordResetModel passwordResetModel){
+    public OperationStatusModel resetPassword(@RequestBody PasswordResetModel passwordResetModel) {
 
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.PASSWORD_RESET.name());
@@ -201,11 +205,12 @@ public class UserResource {
 
         boolean operationResults = userService.resetPassword(passwordResetModel.getToken(),
                 passwordResetModel.getNewPassword());
-        if (operationResults){
+        if (operationResults) {
             statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
         }
         return statusModel;
     }
+
     @GetMapping(path = "/logout",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
@@ -222,7 +227,19 @@ public class UserResource {
         return statusModel;
     }
 
-    public static Logger getLog() {
-        return LOGGER;
+    @GetMapping(path = "/confirmed_emails",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public List<UserRest> confirmedEmails(@RequestParam(value = "page", defaultValue = "0") int page,
+                                          @RequestParam(value = "limit", defaultValue = "2") int limit) {
+        List<UserRest> userRests = new ArrayList<>();
+        List<UserDto> confirmedEmailAddress = userService.findAllUsersWithConfirmedEmailAddress(page, limit);
+        confirmedEmailAddress.forEach(userDto -> {
+            UserRest userRest = new UserRest();
+            modelMapper.map(userDto, userRest);
+            userRests.add(userRest);
+        });
+
+        return userRests;
     }
 }

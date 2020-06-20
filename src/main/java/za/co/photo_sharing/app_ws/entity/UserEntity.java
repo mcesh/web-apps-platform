@@ -2,9 +2,11 @@ package za.co.photo_sharing.app_ws.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -43,6 +45,10 @@ public class UserEntity implements Serializable {
     @Column(nullable = false, length = 15)
     private Long cellNumber;
 
+    @CreationTimestamp
+    @Column(nullable = false, length = 30)
+    private LocalDateTime registrationDate;
+
     @JsonIgnore
     @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<AddressEntity> addresses;
@@ -50,6 +56,10 @@ public class UserEntity implements Serializable {
     @JsonIgnore
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private CompanyEntity company;
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private PasswordResetToken resetToken;
 
     public long getId() {
         return id;
@@ -142,8 +152,25 @@ public class UserEntity implements Serializable {
     public CompanyEntity getCompany() {
         return company;
     }
+
     public void setCompany(CompanyEntity company) {
         this.company = company;
+    }
+
+    public LocalDateTime getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(LocalDateTime registrationDate) {
+        this.registrationDate = registrationDate;
+    }
+
+    public PasswordResetToken getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(PasswordResetToken resetToken) {
+        this.resetToken = resetToken;
     }
 
     @Override
@@ -159,10 +186,10 @@ public class UserEntity implements Serializable {
                 ", emailVerificationToken='" + emailVerificationToken + '\'' +
                 ", emailVerificationStatus=" + emailVerificationStatus +
                 ", cellNumber=" + cellNumber +
+                ", registrationDate=" + registrationDate +
                 ", addresses=" + addresses +
                 ", company=" + company +
+                ", resetToken=" + resetToken +
                 '}';
     }
-
-
 }

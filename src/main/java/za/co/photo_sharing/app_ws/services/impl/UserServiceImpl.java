@@ -29,6 +29,7 @@ import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -80,10 +81,11 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(userId.toString()));
+        userEntity.setRegistrationDate(LocalDateTime.now());
         userEntity.setUserId(userId);
         UserEntity storedUserDetails = userRepo.save(userEntity);
         UserDto userDto = modelMapper.map(storedUserDetails, UserDto.class);
-        emailVerification.sendVerificationMail(userDto,userAgent);
+        emailVerification.sendVerificationMail(userDto, userAgent);
         return userDto;
     }
 
@@ -213,7 +215,7 @@ public class UserServiceImpl implements UserService {
         Optional<UserEntity> entity = Optional.ofNullable(Optional.ofNullable(userEntity)
                 .orElseThrow(() -> new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage())));
 
-        if (entity.isPresent()){
+        if (entity.isPresent()) {
             String token = utils.generatePasswordResetToken(userEntity.getUserId().toString());
             PasswordResetToken passwordResetToken = new PasswordResetToken();
             passwordResetToken.setToken(token);
@@ -230,12 +232,12 @@ public class UserServiceImpl implements UserService {
     public boolean resetPassword(String token, String newPassword) {
         boolean hasUpdated = false;
 
-        if (Utils.hasTokenExpired(token)){
+        if (Utils.hasTokenExpired(token)) {
             return hasUpdated;
         }
         PasswordResetToken passwordResetToken = resetRequestRepository.findByToken(token);
 
-        if (passwordResetToken == null){
+        if (passwordResetToken == null) {
             return hasUpdated;
         }
 
@@ -244,12 +246,36 @@ public class UserServiceImpl implements UserService {
         userEntity.setEncryptedPassword(encodedPassword);
         UserEntity userPasswordUpdate = userRepo.save(userEntity);
         if (userPasswordUpdate != null && userPasswordUpdate.getEncryptedPassword()
-                .equalsIgnoreCase(encodedPassword)){
+                .equalsIgnoreCase(encodedPassword)) {
             hasUpdated = true;
         }
         resetRequestRepository.delete(passwordResetToken);
 
         return hasUpdated;
+    }
+
+    @Override
+    public List<UserDto> findAllUsersWithConfirmedEmailAddress(int page, int limit) {
+
+        List<UserDto> userDtos = new ArrayList<>();
+
+        Pageable pageableRequest = PageRequest.of(page, limit);
+
+        Page<UserEntity> usersPage = userRepo.findAllUsersWithConfirmedEmailAddress(pageableRequest);
+
+        List<UserEntity> users = usersPage.getContent();
+
+        if (CollectionUtils.isEmpty(users)) {
+            return userDtos;
+        }
+        users.stream()
+                .sorted(Comparator.comparing(UserEntity::getRegistrationDate).reversed())
+                .forEach(userEntity -> {
+                    UserDto userDto = new UserDto();
+                    modelMapper.map(userEntity, userDto);
+                    userDtos.add(userDto);
+                });
+        return userDtos;
     }
 
 

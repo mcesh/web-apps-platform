@@ -1,5 +1,7 @@
 package za.co.photo_sharing.app_ws.repo;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -27,6 +29,9 @@ public interface UserRepo extends JpaRepository<UserEntity, Long> {
 
     @Query(value="select name FROM UserEntity name where name.firstName = ?1")
     List<UserEntity> findUserByFirstName(@Param("firstName") String firstName);
+
+    @Query(value = "select * from Users u where u.emailVerificationStatus = 1", nativeQuery = true)
+    Page<UserEntity> findAllUsersWithConfirmedEmailAddress(Pageable pageableRequest);
 
 
 }

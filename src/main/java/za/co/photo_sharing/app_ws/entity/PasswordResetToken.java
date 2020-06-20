@@ -1,5 +1,7 @@
 package za.co.photo_sharing.app_ws.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -14,8 +16,8 @@ public class PasswordResetToken implements Serializable {
 
     private String token;
 
-    @OneToOne()
-    @JoinColumn(name = "users_id")
+    @JsonIgnore
+    @OneToOne(cascade = CascadeType.ALL)
     private UserEntity userDetails;
 
     public long getId() {
