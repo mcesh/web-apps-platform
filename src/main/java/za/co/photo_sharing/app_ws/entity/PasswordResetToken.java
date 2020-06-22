@@ -17,7 +17,7 @@ public class PasswordResetToken implements Serializable {
     private String token;
 
     @JsonIgnore
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne()
     private UserEntity userDetails;
 
     public long getId() {

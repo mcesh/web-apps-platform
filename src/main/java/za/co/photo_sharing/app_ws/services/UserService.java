@@ -22,7 +22,7 @@ public interface UserService extends UserDetailsService {
     List<UserDto> findUserByFirstName(String firstName);
     List<UserDto> getUsers(int page, int limit);
     boolean verifyEmailToken(String token);
-    boolean requestPasswordReset(String email);
+    boolean requestPasswordReset(String email,String userAgent);
     boolean resetPassword(String token, String newPassword);
     List<UserDto> findAllUsersWithConfirmedEmailAddress(int page, int limit);
 }

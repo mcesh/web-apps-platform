@@ -35,6 +35,8 @@ import java.util.*;
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final String savePath = "C:/Token";
+
     @Autowired
     Utils utils;
     @Autowired
@@ -208,7 +210,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean requestPasswordReset(String email) {
+    public boolean requestPasswordReset(String email,String userAgent) {
         boolean returnValue = false;
 
         UserEntity userEntity = userRepo.findByEmail(email);
@@ -221,6 +223,10 @@ public class UserServiceImpl implements UserService {
             passwordResetToken.setToken(token);
             passwordResetToken.setUserDetails(userEntity);
             resetRequestRepository.save(passwordResetToken);
+            if (userAgent.contains("Apache-HttpClient")) {
+                utils.generateFilePath.accept(savePath);
+                utils.generateFile.accept(savePath + "/passwordReset.txt", token);
+            }
             returnValue = emailVerification.sendPasswordResetReq.apply(userEntity, token);
         }
 

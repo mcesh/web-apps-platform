@@ -180,12 +180,14 @@ public class UserResource {
     @PostMapping(path = "/password-reset-request",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
-    public OperationStatusModel requestReset(@RequestBody PasswordResetRequestModel resetRequestModel) {
+    public OperationStatusModel requestReset(@RequestBody PasswordResetRequestModel resetRequestModel,HttpServletRequest request) {
+
+        String userAgent = request.getHeader("User-Agent");
 
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.PASSWORD_RESET_REQUEST.name());
 
-        boolean operationResults = userService.requestPasswordReset(resetRequestModel.getEmail());
+        boolean operationResults = userService.requestPasswordReset(resetRequestModel.getEmail(), userAgent);
         if (operationResults) {
             statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
         } else {
