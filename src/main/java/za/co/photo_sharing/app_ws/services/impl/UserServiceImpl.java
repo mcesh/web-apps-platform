@@ -239,12 +239,12 @@ public class UserServiceImpl implements UserService {
         boolean hasUpdated = false;
 
         if (Utils.hasTokenExpired(token)) {
-            return hasUpdated;
+            throw new UserServiceException(ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
         }
         PasswordResetToken passwordResetToken = resetRequestRepository.findByToken(token);
 
         if (passwordResetToken == null) {
-            return hasUpdated;
+            throw new UserServiceException(ErrorMessages.TOKEN_NOT_FOUND.getErrorMessage());
         }
 
         String encodedPassword = bCryptPasswordEncoder.encode(newPassword);
