@@ -225,7 +225,7 @@ public class UserServiceImpl implements UserService {
             resetRequestRepository.save(passwordResetToken);
             if (userAgent.contains("Apache-HttpClient")) {
                 utils.generateFilePath.accept(savePath);
-                utils.generateFile.accept(savePath + "/passwordReset.txt", token);
+                utils.generateFile.accept(savePath + "/passwordResetToken.txt", token);
             }
             returnValue = emailVerification.sendPasswordResetReq.apply(userEntity, token);
         }

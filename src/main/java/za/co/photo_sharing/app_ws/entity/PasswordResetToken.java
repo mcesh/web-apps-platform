@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.io.Serializable;
 
-@Entity(name = "password_reset_tokens")
+@Entity
+@Table(name = "password_reset_tokens")
 public class PasswordResetToken implements Serializable {
 
     private static final long serialVersionUID = 8051324316462829780L;
@@ -17,7 +18,10 @@ public class PasswordResetToken implements Serializable {
     private String token;
 
     @JsonIgnore
-    @OneToOne()
+    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinColumns({
+            @JoinColumn(name="users_id")
+    })
     private UserEntity userDetails;
 
     public long getId() {

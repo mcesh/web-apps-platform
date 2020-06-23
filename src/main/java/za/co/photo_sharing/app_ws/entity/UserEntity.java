@@ -58,7 +58,7 @@ public class UserEntity implements Serializable {
     private CompanyEntity company;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "userDetails", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private PasswordResetToken resetToken;
 
     public long getId() {
