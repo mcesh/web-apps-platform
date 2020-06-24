@@ -30,12 +30,12 @@ public interface UserRepo extends JpaRepository<UserEntity, Long> {
     @Query(value="select name FROM UserEntity name where name.firstName = ?1")
     List<UserEntity> findUserByFirstName(@Param("firstName") String firstName);
 
-    @Query(value = "select * from Users u where u.emailVerificationStatus = 1",
-            countQuery = "select count(*) from Users u where u.emailVerificationStatus = 1",
+    @Query(value = "select * from users u where u.emailVerificationStatus = 1",
+            countQuery = "select count(*) from users u where u.emailVerificationStatus = 1",
             nativeQuery = true)
     Page<UserEntity> findAllUsersWithConfirmedEmailAddress(Pageable pageableRequest);
 
-    @Query(value="select * from Users u where first_name LIKE %:keyword% or last_name LIKE %:keyword%",
+    @Query(value="select * from users u where first_name LIKE %:keyword% or last_name LIKE %:keyword%",
             nativeQuery=true)
     List<UserEntity> findUsersByKeyword(@Param("keyword") String keyword);
 

@@ -17,8 +17,10 @@ import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
@@ -31,7 +33,7 @@ import java.util.function.Function;
 @Service
 public class EmailVerification {
 
-    private static final String savePath = "C:/Token";
+    private static String savePath = "C:/Token";
     private static Logger LOGGER = LoggerFactory.getLogger(EmailVerification.class);
     // This address must be verified with Amazon SES.
     final String FROM = "siya.nxuseka@gmail.com";
@@ -157,8 +159,12 @@ public class EmailVerification {
         String emailVerificationToken = userDto.getEmailVerificationToken();
 
         if (userAgent.contains("Apache-HttpClient")) {
+            if (determineOperatingSystem().equalsIgnoreCase("linux")){
+                savePath = "/home/Token";
+            }
             utils.generateFilePath.accept(savePath);
             utils.generateFile.accept(savePath + "/token.txt", userDto.getEmailVerificationToken());
+
         }
         MimeMessageHelper helper = new MimeMessageHelper(message,
                 MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
@@ -189,7 +195,7 @@ public class EmailVerification {
         return newLineIndicator;
     }
 
-    private String determineOperatingSystem() {
+    public String determineOperatingSystem() {
         String operatingSystem;
         String os;
 

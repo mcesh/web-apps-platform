@@ -35,7 +35,7 @@ import java.util.*;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private static final String savePath = "C:/Token";
+    private static String savePath = "C:/Token";
 
     @Autowired
     Utils utils;
@@ -226,6 +226,9 @@ public class UserServiceImpl implements UserService {
             passwordResetToken.setUserDetails(userEntity);
             resetRequestRepository.save(passwordResetToken);
             if (userAgent.contains("Apache-HttpClient")) {
+                if (emailVerification.determineOperatingSystem().equalsIgnoreCase("linux")){
+                    savePath = "/home/Token";
+                }
                 utils.generateFilePath.accept(savePath);
                 utils.generateFile.accept(savePath + "/passwordResetToken.txt", token);
             }
