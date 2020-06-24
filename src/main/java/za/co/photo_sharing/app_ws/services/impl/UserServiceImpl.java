@@ -204,6 +204,8 @@ public class UserServiceImpl implements UserService {
                 userEntity.setEmailVerificationStatus(Boolean.TRUE);
                 userRepo.save(userEntity);
                 isVerified = true;
+            }else {
+                throw new UserServiceException(ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
             }
         }
         return isVerified;

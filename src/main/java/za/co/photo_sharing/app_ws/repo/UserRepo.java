@@ -35,5 +35,12 @@ public interface UserRepo extends JpaRepository<UserEntity, Long> {
             nativeQuery = true)
     Page<UserEntity> findAllUsersWithConfirmedEmailAddress(Pageable pageableRequest);
 
+    @Query(value="select * from Users u where first_name LIKE %:keyword% or last_name LIKE %:keyword%",
+            nativeQuery=true)
+    List<UserEntity> findUsersByKeyword(@Param("keyword") String keyword);
+
+    @Query(value="select u.first_name, u.last_name from Users u where u.first_name LIKE %:keyword% or u.last_name LIKE %:keyword%",nativeQuery=true)
+    List<Object[]> findUserFirstNameAndLastNameByKeyword(@Param("keyword") String keyword);
+
 
 }
