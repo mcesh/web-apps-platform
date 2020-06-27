@@ -78,7 +78,7 @@ public class EmailVerification {
                     StandardCharsets.UTF_8.name());
             helper.setTo(Objects.requireNonNull(userDto).getEmail());
             helper.setText("To confirm your account, please click here : "
-                    + "http://localhost:8080/photo-sharing-app-ws/users/email-verification?token=" + userDto.getEmailVerificationToken());
+                    + "http://157.230.240.44:8080/photo-sharing-app-ws/users/email-verification?token=" + userDto.getEmailVerificationToken());
             helper.setFrom(FROM);
             helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
             helper.setSentDate(new Date());
@@ -106,7 +106,7 @@ public class EmailVerification {
                 .append("You has requested to reset your password with our project. If it were not you, please ignore it.")
                 .append(" otherwise please click on the link below to set a new password: ")
                 .append(newLine())
-                .append("<a href='http://localhost:8080/verification-service/password-reset.html?token=")
+                .append("<a href='http://178.128.244.72:8080/verification-service/password-reset.html?token=")
                 .append(token)
                 .append("'")
                 .append(" Click this link to Reset Password")
@@ -171,7 +171,7 @@ public class EmailVerification {
                 StandardCharsets.UTF_8.name());
         helper.setTo(userDto.getEmail());
         helper.setText("To confirm your account, please click here : "
-                + "http://localhost:8080/photo-sharing-app-ws/users/email-verification?token=" + emailVerificationToken);
+                + "http://178.128.244.72:8080/photo-sharing-app-ws/users/email-verification?token=" + userDto.getEmailVerificationToken());
         helper.setFrom(FROM);
         helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
         helper.setSentDate(new Date());

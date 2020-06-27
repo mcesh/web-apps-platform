@@ -1,14 +1,12 @@
 package za.co.photo_sharing.app_ws.intergration;
 
 
-import javafx.geometry.Pos;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -16,15 +14,12 @@ import za.co.photo_sharing.app_ws.entity.UserEntity;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.*;
-import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
-
 import java.util.ArrayList;
+import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -42,12 +37,12 @@ public class UserRepositoryIntegrationTests {
     private UserEntity userDto;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         userDto = buildUserDto();
     }
 
     @Test
-    public void shouldCreateANewUser(){
+    public void shouldCreateANewUser() {
         UserEntity userEntity = userRepo.save(userDto);
         assertNotNull(userEntity);
         assertEquals(userId, userEntity.getUserId().longValue());
@@ -56,16 +51,16 @@ public class UserRepositoryIntegrationTests {
     }
 
     @Test
-    public void shouldDeleteByUserId(){
+    public void shouldDeleteByUserId() {
         userRepo.deleteUserByUserId(userId);
     }
 
     @Test
-    public void shouldFindUserByFirstNameAndUserId(){
-        long userId =2497238243L;
+    public void shouldFindUserByFirstNameAndUserId() {
+        long userId = 2497238243L;
         UserEntity entity = userRepo.findByFirstNameAndUserId("Siyamcela", userId);
         assertNotNull(entity);
-        assertEquals(userId,entity.getUserId().longValue());
+        assertEquals(userId, entity.getUserId().longValue());
         System.out.println("User Details: {} " + entity);
     }
 
