@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import za.co.photo_sharing.app_ws.entity.PasswordResetToken;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
@@ -31,6 +32,7 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Predicate;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -64,6 +66,9 @@ public class UserServiceImpl implements UserService {
         UserEntity username = userRepo.findByUsername(user.getUsername());
         if (username != null) {
             throw new UserServiceException(ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
+        }
+        if (!isNumeric.test(user.getCompany().getCellNumber())){
+            throw new UserServiceException(ErrorMessages.NUMBER_NOT_NUMERIC.getErrorMessage());
         }
         Long userId = userIdFactory.buildUserId();
         for (int i = 0; i < user.getAddresses().size(); i++) {
@@ -303,4 +308,5 @@ public class UserServiceImpl implements UserService {
                 true,
                 true, new ArrayList<>());
     }
+    private Predicate<String> isNumeric = str-> str.matches("-?\\d+(\\.\\d+)?");
 }

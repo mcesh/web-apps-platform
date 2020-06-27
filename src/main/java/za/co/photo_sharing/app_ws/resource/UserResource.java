@@ -1,5 +1,8 @@
 package za.co.photo_sharing.app_ws.resource;
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +48,11 @@ public class UserResource {
         return LOGGER;
     }
 
+    @ApiOperation(value="The Get User By UserId Endpoint",
+            notes="${userResource.GetUserByUserId.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
     @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUserByUserId(@PathVariable String id) {
 
@@ -54,12 +62,19 @@ public class UserResource {
         return modelMapper.map(userByUserId, UserRest.class);
     }
 
+    @ApiOperation(value="The Get User By Username Endpoint",
+            notes="${userResource.Username.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
     @GetMapping(path = "username/{username}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUserByUsername(@PathVariable String username) {
         UserDto byUsername = userService.findByUsername(username);
         return modelMapper.map(byUsername, UserRest.class);
     }
 
+    @ApiOperation(value="The Create User Endpoint",
+            notes="${userResource.CreateUser.ApiOperation.Notes}")
     @PostMapping(value = "/create",
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -76,6 +91,11 @@ public class UserResource {
         return userRest;
     }
 
+    @ApiOperation(value="The Update User Details Endpoint",
+            notes="${userResource.UpdateUsersDetails.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
     @PutMapping(path = "{id}",
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -88,6 +108,11 @@ public class UserResource {
         return modelMapper.map(user, UserRest.class);
     }
 
+    @ApiOperation(value="The Get Users By First Name Endpoint",
+            notes="${userResource.FirstName.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
     @GetMapping(path = "firstName/{firstName}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<UserRest> getUsersByFirstName(@PathVariable String firstName) {
         List<UserRest> userRests = new ArrayList<>();
@@ -100,6 +125,11 @@ public class UserResource {
         return userRests;
     }
 
+    @ApiOperation(value="The Delete User By UserId Endpoint",
+            notes="${userResource.DeleteUserById.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
     @DeleteMapping(path = "userId/{id}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public OperationStatusModel deleteUser(@PathVariable String id) {
@@ -112,6 +142,11 @@ public class UserResource {
         return statusModel;
     }
 
+    @ApiOperation(value="The Get All Users Endpoint",
+            notes="${userResource.GetUsers.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<UserRest> getUsers(@RequestParam(value = "page", defaultValue = "1") int page,
                                    @RequestParam(value = "page", defaultValue = "900") int limit) {
@@ -125,6 +160,11 @@ public class UserResource {
         return returnRests;
     }
 
+    @ApiOperation(value="The Get User Addresses By UserId Endpoint",
+            notes="${userResource.GetUserAddressesByUserId.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
     @GetMapping(path = "/{id}/addresses", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<AddressesRest> getUserAddresses(@PathVariable String id) {
 
@@ -141,6 +181,11 @@ public class UserResource {
         return addressesRests;
     }
 
+    @ApiOperation(value="The Get User Address By UserId And AddressId Endpoint",
+            notes="${userResource.GetUserAddress.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
     @GetMapping(path = "/{userId}/addresses/{addressId}", produces = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
     public AddressesRest getUserAddress(@PathVariable String userId, @PathVariable String addressId) {
@@ -152,6 +197,8 @@ public class UserResource {
         return modelMapper.map(addressesDto, AddressesRest.class);
     }
 
+    @ApiOperation(value="The Email Verification Endpoint",
+            notes="${userResource.EmailVerification.ApiOperation.Notes}")
     @GetMapping(path = "/email-verification",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
@@ -177,6 +224,11 @@ public class UserResource {
         return modelAndView;
     }
 
+    @ApiOperation(value="The Password Reset Request Endpoint",
+            notes="${userResource.PasswordResetRequest.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
     @PostMapping(path = "/password-reset-request",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
@@ -196,6 +248,11 @@ public class UserResource {
         return statusModel;
     }
 
+    @ApiOperation(value="The Password Reset Endpoint",
+            notes="${userResource.PasswordReset.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
     @PostMapping(path = "/password-reset",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
@@ -229,6 +286,11 @@ public class UserResource {
         return statusModel;
     }
 
+    @ApiOperation(value="The Get Confirmed Emails Endpoint",
+            notes="${userResource.GetUser.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
     @GetMapping(path = "/confirmed_emails",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})

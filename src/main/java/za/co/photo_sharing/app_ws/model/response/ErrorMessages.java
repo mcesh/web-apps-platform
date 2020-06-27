@@ -15,7 +15,8 @@ public enum ErrorMessages {
     NO_USERS_FOUND("No users found with the specified first name"),
     EMAIL_ADDRESS_NOT_VERIFIED("Email address could not be verified"),
     TOKEN_EXPIRED("Token has expired"),
-    TOKEN_NOT_FOUND("Token value not found");
+    TOKEN_NOT_FOUND("Token value not found"),
+    NUMBER_NOT_NUMERIC("Please provide digital numbers");
 
 
     private String errorMessage;
