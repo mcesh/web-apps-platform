@@ -24,10 +24,12 @@ public class UserDto implements Serializable {
     private String username;
     private String encryptedPassword;
     private String emailVerificationToken;
+    private String appToken;
     private Boolean emailVerificationStatus = false;
     private List<AddressDTO> addresses;
     private CompanyDTO company;
     private LocalDateTime registrationDate;
+    private AuthorityRoleTypeDTO roleType;
 
 
 }

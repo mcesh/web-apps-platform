@@ -1,10 +1,7 @@
 package za.co.photo_sharing.app_ws.services;
 
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import za.co.photo_sharing.app_ws.entity.UserEntity;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import javax.mail.MessagingException;

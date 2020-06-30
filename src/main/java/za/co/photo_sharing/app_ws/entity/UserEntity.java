@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -60,6 +61,33 @@ public class UserEntity implements Serializable {
     @JsonIgnore
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private PasswordResetToken resetToken;
+
+    @JsonIgnore
+    @ManyToMany(cascade = {CascadeType.PERSIST})
+    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "users_id",
+            referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
+    private Collection<Role> roles;
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private AuthorityRoleType roleType;
+
+    public AuthorityRoleType getRoleType() {
+        return roleType;
+    }
+
+    public void setRoleType(AuthorityRoleType roleType) {
+        this.roleType = roleType;
+    }
+
+    public Collection<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Collection<Role> roles) {
+        this.roles = roles;
+    }
 
     public long getId() {
         return id;

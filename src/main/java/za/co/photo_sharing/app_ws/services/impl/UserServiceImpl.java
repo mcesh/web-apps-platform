@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import za.co.photo_sharing.app_ws.constants.AuthorityRoleTypeKeys;
 import za.co.photo_sharing.app_ws.entity.PasswordResetToken;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
@@ -22,6 +23,7 @@ import za.co.photo_sharing.app_ws.repo.PasswordResetRequestRepository;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
+import za.co.photo_sharing.app_ws.shared.dto.AuthorityRoleTypeDTO;
 import za.co.photo_sharing.app_ws.shared.dto.CompanyDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.EmailVerification;
@@ -84,16 +86,30 @@ public class UserServiceImpl implements UserService {
         companyDTO.setCompanyType(user.getCompany().getCompanyType());
         companyDTO.setUserDetails(user);
         user.setCompany(companyDTO);
+        if (user.getAppToken().equalsIgnoreCase("NORMAL_USER") ||
+                StringUtils.isEmpty(user.getAppToken())){
+            Long roleKey = AuthorityRoleTypeKeys.USER;
+            assignRoleKey(user,roleKey);
+        }
 
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(userId.toString()));
         userEntity.setRegistrationDate(LocalDateTime.now());
         userEntity.setUserId(userId);
+
         UserEntity storedUserDetails = userRepo.save(userEntity);
         UserDto userDto = modelMapper.map(storedUserDetails, UserDto.class);
         emailVerification.sendVerificationMail(userDto, userAgent);
         return userDto;
+    }
+
+    private AuthorityRoleTypeDTO assignRoleKey(UserDto user, Long roleKey) {
+        AuthorityRoleTypeDTO roleKeyDTO = new AuthorityRoleTypeDTO();
+        roleKeyDTO.setRoleTypeKey(roleKey);
+        roleKeyDTO.setUserDetails(user);
+        user.setRoleType(roleKeyDTO);
+        return roleKeyDTO;
     }
 
     @Override

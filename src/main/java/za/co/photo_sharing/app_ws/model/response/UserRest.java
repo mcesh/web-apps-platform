@@ -21,6 +21,7 @@ public class UserRest {
     private String username;
     private Long cellNumber;
     private LocalDateTime registrationDate;
+    private AuthorityRoleRest roleType;
     private List<AddressesRest> addresses;
     private CompanyRest company;
     private Boolean emailVerificationStatus;

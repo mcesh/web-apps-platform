@@ -50,6 +50,7 @@ public class UserServiceImplTest {
     public static final long ID = 12L;
     public static final String lastName = "Nxuseka";
     public static final String userName = "kjts";
+    public static final String REGISTRATION_TOKEN = "LKU253JKY";
     @Mock
     BCryptPasswordEncoder bCryptPasswordEncoder;
     String encryptedPassword = "74hghd8474jf";
