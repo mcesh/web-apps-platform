@@ -58,6 +58,7 @@ public class UserServiceImpl implements UserService {
     private PasswordResetRequestRepository resetRequestRepository;
 
     private ModelMapper modelMapper = new ModelMapper();
+    private Predicate<String> isNumeric = str -> str.matches("-?\\d+(\\.\\d+)?");
 
     @Override
     public UserDto createUser(UserDto user, String userAgent) throws IOException, MessagingException {
@@ -69,7 +70,7 @@ public class UserServiceImpl implements UserService {
         if (username != null) {
             throw new UserServiceException(ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
         }
-        if (!isNumeric.test(user.getCompany().getCellNumber())){
+        if (!isNumeric.test(user.getCompany().getCellNumber())) {
             throw new UserServiceException(ErrorMessages.NUMBER_NOT_NUMERIC.getErrorMessage());
         }
         Long userId = userIdFactory.buildUserId();
@@ -87,9 +88,9 @@ public class UserServiceImpl implements UserService {
         companyDTO.setUserDetails(user);
         user.setCompany(companyDTO);
         if (user.getAppToken().equalsIgnoreCase("NORMAL_USER") ||
-                StringUtils.isEmpty(user.getAppToken())){
+                StringUtils.isEmpty(user.getAppToken())) {
             Long roleKey = AuthorityRoleTypeKeys.USER;
-            assignRoleKey(user,roleKey);
+            assignRoleKey(user, roleKey);
         }
 
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
@@ -225,7 +226,7 @@ public class UserServiceImpl implements UserService {
                 userEntity.setEmailVerificationStatus(Boolean.TRUE);
                 userRepo.save(userEntity);
                 isVerified = true;
-            }else {
+            } else {
                 throw new UserServiceException(ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
             }
         }
@@ -233,7 +234,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean requestPasswordReset(String email,String userAgent) {
+    public boolean requestPasswordReset(String email, String userAgent) {
         boolean returnValue = false;
 
         UserEntity userEntity = userRepo.findByEmail(email);
@@ -247,7 +248,7 @@ public class UserServiceImpl implements UserService {
             passwordResetToken.setUserDetails(userEntity);
             resetRequestRepository.save(passwordResetToken);
             if (userAgent.contains("Apache-HttpClient")) {
-                if (emailVerification.determineOperatingSystem().equalsIgnoreCase("linux")){
+                if (emailVerification.determineOperatingSystem().equalsIgnoreCase("linux")) {
                     savePath = "/home/Token";
                 }
                 utils.generateFilePath.accept(savePath);
@@ -310,7 +311,6 @@ public class UserServiceImpl implements UserService {
         return userDtos;
     }
 
-
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepo.findByEmail(email);
@@ -324,5 +324,4 @@ public class UserServiceImpl implements UserService {
                 true,
                 true, new ArrayList<>());
     }
-    private Predicate<String> isNumeric = str-> str.matches("-?\\d+(\\.\\d+)?");
 }
