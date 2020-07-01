@@ -13,14 +13,13 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
+import za.co.photo_sharing.app_ws.shared.dto.UserAppRequestDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
@@ -63,6 +62,40 @@ public class EmailVerification {
     private SpringTemplateEngine engine;
     @Autowired
     private JavaMailSender emailSender;
+
+
+
+
+
+    public void sendAppReqVerificationMail(UserAppRequestDTO appRequestDTO, String userAgent, String webUrl) throws MessagingException, IOException {
+
+        MimeMessage message = emailSender.createMimeMessage();
+        String emailVerificationToken = appRequestDTO.getEmailVerificationToken();
+
+        if (userAgent.contains("Apache-HttpClient")) {
+            if (determineOperatingSystem().equalsIgnoreCase("linux")){
+                savePath = "/home/Token";
+            }
+            utils.generateFilePath.accept(savePath);
+            utils.generateFile.accept(savePath + "/appRequest.txt", appRequestDTO.getEmailVerificationToken());
+
+        }
+        MimeMessageHelper helper = new MimeMessageHelper(message,
+                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                StandardCharsets.UTF_8.name());
+        helper.setTo(appRequestDTO.getEmail());
+        helper.setText("To confirm your account, please click here : "
+                + webUrl +"photo-sharing-app-ws/users_app_request/request-app-email-verify?token=" + appRequestDTO.getEmailVerificationToken());
+        helper.setFrom(FROM);
+        helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
+        helper.setSentDate(new Date());
+        emailSender.send(message);
+        getLog().info("Email sent successfully with the following details {}, {}, and {}",
+                message.getSubject(), message.getSentDate(),
+                message.getAllRecipients());
+    }
+
+
     public Function<UserDto, Boolean> verifyEmail = userDto -> {
         boolean returnValue = false;
         MimeMessage message = emailSender.createMimeMessage();
@@ -153,7 +186,7 @@ public class EmailVerification {
         return LOGGER;
     }
 
-    public void sendVerificationMail(UserDto userDto, String userAgent) throws MessagingException, IOException {
+    public void sendVerificationMail(UserDto userDto, String userAgent, String webUrl) throws MessagingException, IOException {
 
         MimeMessage message = emailSender.createMimeMessage();
         String emailVerificationToken = userDto.getEmailVerificationToken();
@@ -171,7 +204,7 @@ public class EmailVerification {
                 StandardCharsets.UTF_8.name());
         helper.setTo(userDto.getEmail());
         helper.setText("To confirm your account, please click here : "
-                + "http://178.128.244.72:8080/photo-sharing-app-ws/users/email-verification?token=" + userDto.getEmailVerificationToken());
+                + webUrl +"photo-sharing-app-ws/users/email-verification?token=" + userDto.getEmailVerificationToken());
         helper.setFrom(FROM);
         helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
         helper.setSentDate(new Date());

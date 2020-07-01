@@ -25,9 +25,11 @@ import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.EmailVerification;
 
 import javax.mail.MessagingException;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -81,12 +83,25 @@ public class UserResource {
     public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails, HttpServletRequest request) throws IOException, MessagingException {
 
         String userAgent = request.getHeader("User-Agent");
-        Optional.ofNullable(userAgent).ifPresent(agent -> getLog().info("User-Agent {}", agent));
+        String webUrl = "";
+        if (userAgent != null){
+            getLog().info("User-Agent {}", userAgent);
+            StringBuffer requestURL = request.getRequestURL();
+            String host = request.getHeader("Host");
+            String serverName = request.getServerName();
+            String requestScheme = request.getScheme();
+
+            getLog().info("App Url, {}",requestURL);
+            getLog().info("Scheme name: {}", requestScheme);
+            getLog().info("Host Name: {}", host);
+            getLog().info("Server name {}", serverName);
+            webUrl = requestScheme +"://" + host + "/";
+        }
         UserRest userRest = new UserRest();
 
         ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = modelMapper.map(userDetails, UserDto.class);
-        UserDto user = userService.createUser(userDto, userAgent);
+        UserDto user = userService.createUser(userDto, userAgent,webUrl);
         userRest = modelMapper.map(user, UserRest.class);
         return userRest;
     }

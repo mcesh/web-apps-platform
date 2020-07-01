@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface UserService extends UserDetailsService {
-    UserDto createUser(UserDto user, String userAgent) throws IOException, MessagingException;
+    UserDto createUser(UserDto user, String userAgent, String webUrl) throws IOException, MessagingException;
     UserDto getUser(String email);
     UserDto findByUsername(String username);
     UserDto findByFirstNameAndUserId(String firstName, Long userId);

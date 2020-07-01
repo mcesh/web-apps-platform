@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
     private Predicate<String> isNumeric = str -> str.matches("-?\\d+(\\.\\d+)?");
 
     @Override
-    public UserDto createUser(UserDto user, String userAgent) throws IOException, MessagingException {
+    public UserDto createUser(UserDto user, String userAgent, String webUrl) throws IOException, MessagingException {
 
         if (userRepo.findByEmail(user.getEmail()) != null) {
             throw new UserServiceException(ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
 
         UserEntity storedUserDetails = userRepo.save(userEntity);
         UserDto userDto = modelMapper.map(storedUserDetails, UserDto.class);
-        emailVerification.sendVerificationMail(userDto, userAgent);
+        emailVerification.sendVerificationMail(userDto, userAgent,webUrl);
         return userDto;
     }
 

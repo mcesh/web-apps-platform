@@ -69,6 +69,14 @@ public class Utils {
                 .compact();
         return token;
     }
+    public String generateEmailVerificationTokenForAppRequest(String email) {
+        String token = Jwts.builder()
+                .setSubject(email)
+                .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
+                .compact();
+        return token;
+    }
 
     public String generatePasswordResetToken(String userId){
         return Jwts.builder()

@@ -8,6 +8,8 @@ public class SecurityConstants {
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String HEADER_STRING = "Authorization";
     public static final String SIGN_UP_URL = "/users/create";
+    public static final String USER_APP_REQUEST_URL = "/users_app_request/request-app-dev";
+    public static final String USER_APP_REQ_EMAIL_VERIFY = "/users_app_request/request-app-email-verify";
     public static final String TOKEN_SECRET = "qFUch1xxu4jtKixVyLWGgxL0mPMGNHmRGl2oQUrI7FxtQYz5Dr5KGmGveVgyJve";
     public static final String VERIFICATION_EMAIL_URL = "/users/email-verification";
     public static final String PASSWORD_RESET_REQUEST_URL = "/users/password-reset-request";
