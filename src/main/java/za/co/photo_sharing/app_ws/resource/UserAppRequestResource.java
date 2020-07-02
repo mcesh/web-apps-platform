@@ -70,7 +70,7 @@ public class UserAppRequestResource {
     @GetMapping(value = "/request-app-email-verify",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
-    public ModelAndView appRequestEmailVerification(HttpServletRequest request, ModelAndView modelAndView, @RequestParam(value = "token") String token){
+    public ModelAndView appRequestEmailVerification(HttpServletRequest request, ModelAndView modelAndView, @RequestParam(value = "token") String token) throws IOException, MessagingException {
 
         String userAgent = request.getHeader("User-Agent");
         if (userAgent!= null){
@@ -83,7 +83,7 @@ public class UserAppRequestResource {
 
         if (isVerified) {
             statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
-            modelAndView.setViewName("accountVerified");
+            modelAndView.setViewName("userRequestVerified");
         } else {
             statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
             modelAndView.addObject("message", "The link is invalid or broken!");

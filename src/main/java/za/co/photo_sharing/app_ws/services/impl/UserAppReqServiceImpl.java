@@ -5,11 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import za.co.photo_sharing.app_ws.entity.AppToken;
 import za.co.photo_sharing.app_ws.entity.UserAppRequest;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
+import za.co.photo_sharing.app_ws.repo.AppTokenRepository;
 import za.co.photo_sharing.app_ws.repo.UserAppReqRepository;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
+import za.co.photo_sharing.app_ws.shared.dto.AppTokenDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserAppRequestDTO;
 import za.co.photo_sharing.app_ws.utility.EmailVerification;
 import za.co.photo_sharing.app_ws.utility.Utils;
@@ -27,6 +30,8 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     private EmailVerification emailVerification;
     @Autowired
     private Utils utils;
+    @Autowired
+    private AppTokenRepository appTokenRepository;
     private ModelMapper modelMapper = new ModelMapper();
 
     @Override
@@ -39,6 +44,11 @@ public class UserAppReqServiceImpl implements UserAppReqService {
         UserAppRequest userAppRequest = modelMapper.map(appRequestDTO, UserAppRequest.class);
         userAppRequest.setEmailVerificationToken(utils.generateEmailVerificationTokenForAppRequest(appRequestDTO.getEmail()));
         userAppRequest.setRequestDate(LocalDateTime.now());
+        if (appRequestDTO.getWebType().equalsIgnoreCase("ORGANIZATION")){
+            userAppRequest.setSecondaryEmail(appRequestDTO.getSecondaryEmail());
+            appRequestDTO.setThirdEmail(appRequestDTO.getThirdEmail());
+            appRequestDTO.setFourthEmail(appRequestDTO.getFourthEmail());
+        }
         UserAppRequest appRequest = appReqRepository.save(userAppRequest);
         UserAppRequestDTO userAppRequestDTO = modelMapper.map(appRequest, UserAppRequestDTO.class);
 
@@ -47,7 +57,7 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     }
 
     @Override
-    public boolean verifyAppReqEmailToken(String token) {
+    public boolean verifyAppReqEmailToken(String token) throws IOException, MessagingException {
         boolean isVerified = false;
         UserAppRequest userByEmailVerificationToken = appReqRepository.findUserByEmailVerificationToken(token);
 
@@ -56,8 +66,23 @@ public class UserAppReqServiceImpl implements UserAppReqService {
             if (!hasTokenExpired) {
                 userByEmailVerificationToken.setEmailVerificationToken(null);
                 userByEmailVerificationToken.setEmailVerificationStatus(Boolean.TRUE);
+
+                String appToken = utils.generateAppToken(userByEmailVerificationToken.getEmail()).toUpperCase();
+
+                AppToken appTokenCode = new AppToken();
+                if (userByEmailVerificationToken.getWebType().equalsIgnoreCase("ORGANIZATION")){
+                    appTokenCode.setSecondaryEmail(userByEmailVerificationToken.getSecondaryEmail());
+                    appTokenCode.setThirdEmail(userByEmailVerificationToken.getThirdEmail());
+                    appTokenCode.setFourthEmail(userByEmailVerificationToken.getFourthEmail());
+                }
+                appTokenCode.setAppToken(appToken);
+                appTokenCode.setPrimaryEmail(userByEmailVerificationToken.getEmail());
+                appTokenCode.setUserAppRequest(userByEmailVerificationToken);
+                AppTokenDTO appTokenDTO = modelMapper.map(appTokenCode,AppTokenDTO.class);
+                appTokenRepository.save(appTokenCode);
                 appReqRepository.save(userByEmailVerificationToken);
                 isVerified = true;
+                emailVerification.sendAppToken(appTokenDTO, userByEmailVerificationToken.getFirstName());
             } else {
                 throw new UserServiceException(ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
             }

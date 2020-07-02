@@ -1,5 +1,7 @@
 package za.co.photo_sharing.app_ws.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -29,6 +31,41 @@ public class UserAppRequest implements Serializable {
     private String emailVerificationToken;
     @Column(nullable = false)
     private Boolean emailVerificationStatus = false;
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "userAppRequest", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    private AppToken appToken;
+
+    @Column(length = 50)
+    private String secondaryEmail;
+    @Column(length = 50)
+    private String thirdEmail;
+    @Column(length = 50)
+    private String fourthEmail;
+
+    public String getSecondaryEmail() {
+        return secondaryEmail;
+    }
+
+    public void setSecondaryEmail(String secondaryEmail) {
+        this.secondaryEmail = secondaryEmail;
+    }
+
+    public String getThirdEmail() {
+        return thirdEmail;
+    }
+
+    public void setThirdEmail(String thirdEmail) {
+        this.thirdEmail = thirdEmail;
+    }
+
+    public String getFourthEmail() {
+        return fourthEmail;
+    }
+
+    public void setFourthEmail(String fourthEmail) {
+        this.fourthEmail = fourthEmail;
+    }
 
     public long getId() {
         return id;

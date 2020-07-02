@@ -32,6 +32,15 @@ public class Utils {
         return generateRandomString(length);
     }
 
+    public String generateAppToken(String email){
+
+        String emailToken = email.split("@")[0];
+
+        String randomString = generateRandomString(7);
+
+        return emailToken + randomString;
+    }
+
     private String generateRandomString(int length) {
         StringBuilder returnValue = new StringBuilder(length);
 

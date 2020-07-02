@@ -10,5 +10,5 @@ import java.io.IOException;
 public interface UserAppReqService extends UserDetailsService {
     UserAppRequestDTO requestAppDevelopment(UserAppRequestDTO appRequestDTO, String userAgent, String webUrl) throws IOException, MessagingException;
 
-    boolean verifyAppReqEmailToken(String token);
+    boolean verifyAppReqEmailToken(String token) throws IOException, MessagingException;
 }

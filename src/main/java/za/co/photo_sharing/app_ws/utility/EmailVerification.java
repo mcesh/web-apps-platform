@@ -11,8 +11,10 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
+import za.co.photo_sharing.app_ws.shared.dto.AppTokenDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserAppRequestDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
@@ -38,6 +40,7 @@ public class EmailVerification {
     final String FROM = "siya.nxuseka@gmail.com";
     // The subject line for the email.
     final String EMAIL_VERIFICATION_SUBJECT = "Complete Registration!";
+    final String APP_REQUEST_CONFIRMATION = "APPLICATION IN PROGRESS!";
     final String PASSWORD_RESET_SUBJECT = "Password reset request";
     // The email body for recipients with non-HTML email clients.
     final String TEXTBODY = "Please verify your email address. "
@@ -88,6 +91,30 @@ public class EmailVerification {
                 + webUrl +"photo-sharing-app-ws/users_app_request/request-app-email-verify?token=" + appRequestDTO.getEmailVerificationToken());
         helper.setFrom(FROM);
         helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
+        helper.setSentDate(new Date());
+        emailSender.send(message);
+        getLog().info("Email sent successfully with the following details {}, {}, and {}",
+                message.getSubject(), message.getSentDate(),
+                message.getAllRecipients());
+    }
+
+    public void sendAppToken(AppTokenDTO appTokenDTO, String firstName) throws MessagingException, IOException {
+
+        MimeMessage message = emailSender.createMimeMessage();
+
+
+        Context context = new Context();
+        context.setVariable("userAppToken",appTokenDTO);
+        context.setVariable("firstName",firstName);
+        String html = engine.process("appTokenTemplate", context);
+
+        MimeMessageHelper helper = new MimeMessageHelper(message,
+                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                StandardCharsets.UTF_8.name());
+        helper.setTo(appTokenDTO.getPrimaryEmail());
+        helper.setText(html,true);
+        helper.setFrom(FROM);
+        helper.setSubject(APP_REQUEST_CONFIRMATION);
         helper.setSentDate(new Date());
         emailSender.send(message);
         getLog().info("Email sent successfully with the following details {}, {}, and {}",
