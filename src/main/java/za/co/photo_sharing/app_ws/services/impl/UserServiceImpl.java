@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +16,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import za.co.photo_sharing.app_ws.constants.AuthorityRoleTypeKeys;
-import za.co.photo_sharing.app_ws.entity.PasswordResetToken;
-import za.co.photo_sharing.app_ws.entity.UserEntity;
+import za.co.photo_sharing.app_ws.constants.UserAuthorityTypeKeys;
+import za.co.photo_sharing.app_ws.constants.UserRoleTypeKeys;
+import za.co.photo_sharing.app_ws.entity.*;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
-import za.co.photo_sharing.app_ws.repo.PasswordResetRequestRepository;
-import za.co.photo_sharing.app_ws.repo.UserRepo;
+import za.co.photo_sharing.app_ws.repo.*;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.AuthorityRoleTypeDTO;
@@ -53,9 +54,14 @@ public class UserServiceImpl implements UserService {
     private EmailVerification emailVerification;
     @Autowired
     private JavaMailSender mailSender;
-
     @Autowired
     private PasswordResetRequestRepository resetRequestRepository;
+    @Autowired
+    private AppTokenRepository appTokenRepository;
+    @Autowired
+    AuthorityRepository authorityRepository;
+    @Autowired
+    RoleRepository roleRepository;
 
     private ModelMapper modelMapper = new ModelMapper();
     private Predicate<String> isNumeric = str -> str.matches("-?\\d+(\\.\\d+)?");
@@ -87,17 +93,50 @@ public class UserServiceImpl implements UserService {
         companyDTO.setCompanyType(user.getCompany().getCompanyType());
         companyDTO.setUserDetails(user);
         user.setCompany(companyDTO);
+        Long roleKey;
+        List<AppToken> emails = new ArrayList<>();
         if (user.getAppToken().equalsIgnoreCase("NORMAL_USER") ||
                 StringUtils.isEmpty(user.getAppToken())) {
-            Long roleKey = AuthorityRoleTypeKeys.USER;
-            assignRoleKey(user, roleKey);
+            roleKey = AuthorityRoleTypeKeys.USER;
+        }else {
+            AppToken appToken = appTokenRepository.findByAppToken(user.getAppToken());
+            if (Objects.isNull(appToken)){
+                throw new UserServiceException(ErrorMessages.APP_TOKEN_NOT_FOUND.getErrorMessage());
+            }
+            emails.add(appToken);
+            boolean isEmailAssociated = emails.stream().anyMatch(appToken1 -> {
+                if (appToken1.getPrimaryEmail().equalsIgnoreCase(user.getEmail())){
+                    return true;
+                }else if (appToken1.getSecondaryEmail()!=null && appToken1.getSecondaryEmail().equalsIgnoreCase(user.getEmail())){
+                    return true;
+                }else if (appToken1.getThirdEmail()!=null && appToken1.getThirdEmail().equalsIgnoreCase(user.getEmail())){
+                    return true;
+                }else return appToken1.getFourthEmail() != null && appToken1.getFourthEmail().equalsIgnoreCase(user.getEmail());
+            });
+            if (BooleanUtils.isFalse(isEmailAssociated)){
+                throw new UserServiceException(ErrorMessages.USER_NOT_AUTHORIZED.getErrorMessage());
+            }
+            roleKey = AuthorityRoleTypeKeys.ADMIN;
         }
+        assignRoleKey(user, roleKey);
+
+        Authority readAuthority = getAuthority(UserAuthorityTypeKeys.READ_AUTHORITY);
+        Authority writeAuthority = getAuthority(UserAuthorityTypeKeys.WRITE_AUTHORITY);
+        Authority deleteAuthority = getAuthority(UserAuthorityTypeKeys.DELETE_AUTHORITY);
+
+        Role role_user = getRole(UserRoleTypeKeys.ROLE_USER, Arrays.asList(readAuthority, writeAuthority));
+        Role role_admin = getRole(UserRoleTypeKeys.ROLE_ADMIN, Arrays.asList(readAuthority, writeAuthority, deleteAuthority));
 
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(userId.toString()));
         userEntity.setRegistrationDate(LocalDateTime.now());
         userEntity.setUserId(userId);
+        if (AuthorityRoleTypeKeys.ADMIN.equals(user.getRoleType().getRoleTypeKey())){
+            userEntity.setRoles(Collections.singletonList(role_user));
+        }else if (AuthorityRoleTypeKeys.SUPER_ADMIN.equals(user.getRoleType().getRoleTypeKey())){
+            userEntity.setRoles(Collections.singleton(role_admin));
+        }
 
         UserEntity storedUserDetails = userRepo.save(userEntity);
         UserDto userDto = modelMapper.map(storedUserDetails, UserDto.class);
@@ -315,7 +354,7 @@ public class UserServiceImpl implements UserService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepo.findByEmail(email);
         if (userEntity == null) {
-            throw new UsernameNotFoundException(email);
+            throw new UsernameNotFoundException("Email address not found: {} " + email);
         }
 
         return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(),
@@ -323,5 +362,12 @@ public class UserServiceImpl implements UserService {
                 true,
                 true,
                 true, new ArrayList<>());
+    }
+
+    private Authority getAuthority(String authority){
+        return authorityRepository.findByAuthorityName(authority);
+    }
+    private Role getRole(String name, Collection<Authority> authorities){
+        return roleRepository.findByRoleName(name);
     }
 }

@@ -19,7 +19,7 @@ public class Role implements Serializable {
     @Column(nullable = false,length = 25)
     private String roleName;
 
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles",cascade = CascadeType.MERGE,fetch = FetchType.LAZY)
     private Collection<UserEntity> users;
 
     @JsonIgnore

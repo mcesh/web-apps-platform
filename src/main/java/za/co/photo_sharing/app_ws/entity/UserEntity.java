@@ -63,7 +63,7 @@ public class UserEntity implements Serializable {
     private PasswordResetToken resetToken;
 
     @JsonIgnore
-    @ManyToMany(cascade = {CascadeType.PERSIST})
+    @ManyToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "users_id",
             referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))

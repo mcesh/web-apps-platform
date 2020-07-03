@@ -16,7 +16,9 @@ public enum ErrorMessages {
     EMAIL_ADDRESS_NOT_VERIFIED("Email address could not be verified"),
     TOKEN_EXPIRED("Token has expired"),
     TOKEN_NOT_FOUND("Token value not found"),
-    NUMBER_NOT_NUMERIC("Please provide digital numbers");
+    NUMBER_NOT_NUMERIC("Please provide digital numbers"),
+    APP_TOKEN_NOT_FOUND("AppToken not found"),
+    USER_NOT_AUTHORIZED("User not authorized to use provided appToken");
 
 
     private String errorMessage;

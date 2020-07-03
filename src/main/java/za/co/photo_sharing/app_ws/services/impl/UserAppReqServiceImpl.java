@@ -46,8 +46,8 @@ public class UserAppReqServiceImpl implements UserAppReqService {
         userAppRequest.setRequestDate(LocalDateTime.now());
         if (appRequestDTO.getWebType().equalsIgnoreCase("ORGANIZATION")){
             userAppRequest.setSecondaryEmail(appRequestDTO.getSecondaryEmail());
-            appRequestDTO.setThirdEmail(appRequestDTO.getThirdEmail());
-            appRequestDTO.setFourthEmail(appRequestDTO.getFourthEmail());
+            userAppRequest.setThirdEmail(appRequestDTO.getThirdEmail());
+            userAppRequest.setFourthEmail(appRequestDTO.getFourthEmail());
         }
         UserAppRequest appRequest = appReqRepository.save(userAppRequest);
         UserAppRequestDTO userAppRequestDTO = modelMapper.map(appRequest, UserAppRequestDTO.class);
