@@ -321,4 +321,30 @@ public class UserResource {
 
         return userRests;
     }
+
+    @ApiOperation(value="The Get User By Email Address Endpoint",
+            notes="${userResource.Username.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @GetMapping(path = "email/{email}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public UserRest getUserByEmailAddress(@PathVariable String email) {
+        UserDto byUsername = userService.findByEmail(email);
+        return modelMapper.map(byUsername, UserRest.class);
+    }
+    @ApiOperation(value="The Delete User By Email Address Endpoint",
+            notes="${userResource.DeleteUserById.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @DeleteMapping(path = "email/{email}",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public OperationStatusModel deleteUserByEmail(@PathVariable String email) {
+        OperationStatusModel statusModel = new OperationStatusModel();
+        statusModel.setOperationName(RequestOperationName.DELETE.name());
+        userService.deleteUserByEmail(email);
+        statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
+
+        return statusModel;
+    }
 }

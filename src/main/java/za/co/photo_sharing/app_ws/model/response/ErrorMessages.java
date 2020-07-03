@@ -10,7 +10,7 @@ public enum ErrorMessages {
     COULD_NOT_UPDATE_RECORD("Could not update record"),
     COULD_NOT_DELETE_RECORD("Could not delete record"),
     USERNAME_ALREADY_EXISTS("Username already exists"),
-    USER_NOT_FOUND("No user found with the specified userID,username or first name"),
+    USER_NOT_FOUND("No user found with the specified Email Address,userID,username or first name"),
     EMAIL_ADDRESS_ALREADY_EXISTS("Email address already exists"),
     NO_USERS_FOUND("No users found with the specified first name"),
     EMAIL_ADDRESS_NOT_VERIFIED("Email address could not be verified"),

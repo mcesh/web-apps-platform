@@ -22,4 +22,6 @@ public interface UserService extends UserDetailsService {
     boolean requestPasswordReset(String email,String userAgent);
     boolean resetPassword(String token, String newPassword);
     List<UserDto> findAllUsersWithConfirmedEmailAddress(int page, int limit);
+    UserDto findByEmail(String email);
+    void deleteUserByEmail(String email);
 }
