@@ -21,7 +21,7 @@ import za.co.photo_sharing.app_ws.services.impl.UserServiceImpl;
 import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.CompanyDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
-import za.co.photo_sharing.app_ws.utility.EmailVerification;
+import za.co.photo_sharing.app_ws.utility.EmailUtility;
 import za.co.photo_sharing.app_ws.utility.UserIdFactory;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
@@ -65,13 +65,13 @@ public class UserServiceImplTest {
     @Mock
     private UserIdFactory userIdFactory;
     @Mock
-    private EmailVerification emailVerification;
+    private EmailUtility emailUtility;
 
     @BeforeEach
     void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        EmailVerification emailVerification = new EmailVerification();
-        Mockito.spy(emailVerification);
+        EmailUtility emailUtility = new EmailUtility();
+        Mockito.spy(emailUtility);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class UserServiceImplTest {
         when(bCryptPasswordEncoder.encode(anyString())).thenReturn(encryptedPassword);
         UserEntity userEntity = getUserEntity();
         when(userRepository.save(anyObject())).thenReturn(userEntity);
-        Mockito.doNothing().when(emailVerification).sendVerificationMail(any(UserDto.class), anyString(), webUrl);
+        Mockito.doNothing().when(emailUtility).sendVerificationMail(any(UserDto.class), anyString(), webUrl);
         UserDto storedUserDetails = userService.createUser(buildUserDto(),"Apache-HttpClient", webUrl);
         assertNotNull(storedUserDetails);
         assertEquals(userEntity.getFirstName(), storedUserDetails.getFirstName());
@@ -106,7 +106,7 @@ public class UserServiceImplTest {
         when(bCryptPasswordEncoder.encode(anyString())).thenReturn(encryptedPassword);
         UserEntity userEntity = getUserEntity();
         when(userRepository.save(anyObject())).thenReturn(userEntity);
-        Mockito.doNothing().when(emailVerification).sendVerificationMail(any(UserDto.class),anyString(), webUrl);
+        Mockito.doNothing().when(emailUtility).sendVerificationMail(any(UserDto.class),anyString(), webUrl);
         assertThrows(UserServiceException.class,
                 () -> {
                     userService.createUser(buildUserDto(),"Apache-HttpClient", webUrl);
@@ -125,7 +125,7 @@ public class UserServiceImplTest {
         when(bCryptPasswordEncoder.encode(anyString())).thenReturn(encryptedPassword);
         UserEntity userEntity = getUserEntity();
         when(userRepository.save(anyObject())).thenReturn(userEntity);
-        Mockito.doNothing().when(emailVerification).sendVerificationMail(any(UserDto.class),anyString(), webUrl);
+        Mockito.doNothing().when(emailUtility).sendVerificationMail(any(UserDto.class),anyString(), webUrl);
         assertThrows(UserServiceException.class,
                 () -> userService.createUser(buildUserDto(),"Apache-HttpClient", webUrl)
         );

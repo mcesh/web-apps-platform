@@ -32,10 +32,10 @@ import java.util.function.Function;
 @ComponentScan()
 @Slf4j
 @Service
-public class EmailVerification {
+public class EmailUtility {
 
     private static String savePath = "C:/Token";
-    private static Logger LOGGER = LoggerFactory.getLogger(EmailVerification.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(EmailUtility.class);
     // This address must be verified with Amazon SES.
     final String FROM = "siya.nxuseka@gmail.com";
     // The subject line for the email.
@@ -98,20 +98,20 @@ public class EmailVerification {
                 message.getAllRecipients());
     }
 
-    public void sendAppToken(AppTokenDTO appTokenDTO, String firstName) throws MessagingException, IOException {
+    public void sendAppToken(String tokenKey, String firstName, String email) throws MessagingException, IOException {
 
         MimeMessage message = emailSender.createMimeMessage();
 
 
         Context context = new Context();
-        context.setVariable("userAppToken",appTokenDTO);
+        context.setVariable("tokenKey",tokenKey);
         context.setVariable("firstName",firstName);
         String html = engine.process("appTokenTemplate", context);
 
         MimeMessageHelper helper = new MimeMessageHelper(message,
                 MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                 StandardCharsets.UTF_8.name());
-        helper.setTo(appTokenDTO.getPrimaryEmail());
+        helper.setTo(email);
         helper.setText(html,true);
         helper.setFrom(FROM);
         helper.setSubject(APP_REQUEST_CONFIRMATION);

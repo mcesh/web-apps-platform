@@ -24,48 +24,27 @@ public class UserAppRequest implements Serializable {
     private String email;
     @Column(nullable = false)
     private String webType;
-    @Column(columnDefinition = "text",nullable = true)
-    private String description;
+   // @Column(columnDefinition = "text",nullable = false)
+    @Lob
+    @Column(name="CONTENT", length=512)
+    private String description ="";
     @Column(nullable = false)
     private LocalDateTime requestDate;
     private String emailVerificationToken;
     @Column(nullable = false)
     private Boolean emailVerificationStatus = false;
-
-    @JsonIgnore
-    @OneToOne(mappedBy = "userAppRequest", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    private AppToken appToken;
-
     @Column(length = 50)
     private String secondaryEmail;
     @Column(length = 50)
     private String thirdEmail;
     @Column(length = 50)
     private String fourthEmail;
+    @Column(length = 75)
+    private String OrganizationUsername;
 
-    public String getSecondaryEmail() {
-        return secondaryEmail;
-    }
-
-    public void setSecondaryEmail(String secondaryEmail) {
-        this.secondaryEmail = secondaryEmail;
-    }
-
-    public String getThirdEmail() {
-        return thirdEmail;
-    }
-
-    public void setThirdEmail(String thirdEmail) {
-        this.thirdEmail = thirdEmail;
-    }
-
-    public String getFourthEmail() {
-        return fourthEmail;
-    }
-
-    public void setFourthEmail(String fourthEmail) {
-        this.fourthEmail = fourthEmail;
-    }
+    @JsonIgnore
+    @OneToOne(mappedBy = "userAppRequest", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private AppToken appToken;
 
     public long getId() {
         return id;
@@ -137,5 +116,45 @@ public class UserAppRequest implements Serializable {
 
     public void setEmailVerificationStatus(Boolean emailVerificationStatus) {
         this.emailVerificationStatus = emailVerificationStatus;
+    }
+
+    public String getSecondaryEmail() {
+        return secondaryEmail;
+    }
+
+    public void setSecondaryEmail(String secondaryEmail) {
+        this.secondaryEmail = secondaryEmail;
+    }
+
+    public String getThirdEmail() {
+        return thirdEmail;
+    }
+
+    public void setThirdEmail(String thirdEmail) {
+        this.thirdEmail = thirdEmail;
+    }
+
+    public String getFourthEmail() {
+        return fourthEmail;
+    }
+
+    public void setFourthEmail(String fourthEmail) {
+        this.fourthEmail = fourthEmail;
+    }
+
+    public String getOrganizationUsername() {
+        return OrganizationUsername;
+    }
+
+    public void setOrganizationUsername(String organizationUsername) {
+        OrganizationUsername = organizationUsername;
+    }
+
+    public AppToken getAppToken() {
+        return appToken;
+    }
+
+    public void setAppToken(AppToken appToken) {
+        this.appToken = appToken;
     }
 }

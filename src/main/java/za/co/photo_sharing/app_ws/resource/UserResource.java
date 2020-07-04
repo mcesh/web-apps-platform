@@ -22,14 +22,12 @@ import za.co.photo_sharing.app_ws.services.AddressService;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
-import za.co.photo_sharing.app_ws.utility.EmailVerification;
+import za.co.photo_sharing.app_ws.utility.EmailUtility;
 
 import javax.mail.MessagingException;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +36,7 @@ import java.util.Optional;
 @RequestMapping("users") // http://localhost:8080/users/photo-sharing-app-ws
 public class UserResource {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(EmailVerification.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(EmailUtility.class);
 
     @Autowired
     private UserService userService;

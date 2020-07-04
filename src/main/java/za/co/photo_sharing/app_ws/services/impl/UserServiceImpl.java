@@ -1,6 +1,5 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,7 @@ import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.AuthorityRoleTypeDTO;
 import za.co.photo_sharing.app_ws.shared.dto.CompanyDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
-import za.co.photo_sharing.app_ws.utility.EmailVerification;
+import za.co.photo_sharing.app_ws.utility.EmailUtility;
 import za.co.photo_sharing.app_ws.utility.UserIdFactory;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
@@ -51,13 +50,13 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepo userRepo;
     @Autowired
-    private EmailVerification emailVerification;
+    private EmailUtility emailUtility;
     @Autowired
     private JavaMailSender mailSender;
     @Autowired
     private PasswordResetRequestRepository resetRequestRepository;
-    @Autowired
-    private AppTokenRepository appTokenRepository;
+    /*@Autowired
+    private AppTokenRepository appTokenRepository;*/
     @Autowired
     AuthorityRepository authorityRepository;
     @Autowired
@@ -94,12 +93,12 @@ public class UserServiceImpl implements UserService {
         companyDTO.setUserDetails(user);
         user.setCompany(companyDTO);
         Long roleKey;
-        List<AppToken> emails = new ArrayList<>();
+        //List<AppToken> emails = new ArrayList<>();
         if (user.getAppToken().equalsIgnoreCase("NORMAL_USER") ||
                 StringUtils.isEmpty(user.getAppToken())) {
             roleKey = AuthorityRoleTypeKeys.USER;
         }else {
-            AppToken appToken = appTokenRepository.findByAppToken(user.getAppToken());
+            /*AppToken appToken = appTokenRepository.findByAppToken(user.getAppToken());
             if (Objects.isNull(appToken)){
                 throw new UserServiceException(ErrorMessages.APP_TOKEN_NOT_FOUND.getErrorMessage());
             }
@@ -112,10 +111,10 @@ public class UserServiceImpl implements UserService {
                 }else if (appToken1.getThirdEmail()!=null && appToken1.getThirdEmail().equalsIgnoreCase(user.getEmail())){
                     return true;
                 }else return appToken1.getFourthEmail() != null && appToken1.getFourthEmail().equalsIgnoreCase(user.getEmail());
-            });
-            if (BooleanUtils.isFalse(isEmailAssociated)){
+            });*/
+            /*if (BooleanUtils.isFalse(isEmailAssociated)){
                 throw new UserServiceException(ErrorMessages.USER_NOT_AUTHORIZED.getErrorMessage());
-            }
+            }*/
             roleKey = AuthorityRoleTypeKeys.ADMIN;
         }
         assignRoleKey(user, roleKey);
@@ -140,7 +139,7 @@ public class UserServiceImpl implements UserService {
 
         UserEntity storedUserDetails = userRepo.save(userEntity);
         UserDto userDto = modelMapper.map(storedUserDetails, UserDto.class);
-        emailVerification.sendVerificationMail(userDto, userAgent,webUrl);
+        emailUtility.sendVerificationMail(userDto, userAgent,webUrl);
         return userDto;
     }
 
@@ -287,13 +286,13 @@ public class UserServiceImpl implements UserService {
             passwordResetToken.setUserDetails(userEntity);
             resetRequestRepository.save(passwordResetToken);
             if (userAgent.contains("Apache-HttpClient")) {
-                if (emailVerification.determineOperatingSystem().equalsIgnoreCase("linux")) {
+                if (emailUtility.determineOperatingSystem().equalsIgnoreCase("linux")) {
                     savePath = "/home/Token";
                 }
                 utils.generateFilePath.accept(savePath);
                 utils.generateFile.accept(savePath + "/passwordResetToken.txt", token);
             }
-            returnValue = emailVerification.sendPasswordResetReq.apply(userEntity, token);
+            returnValue = emailUtility.sendPasswordResetReq.apply(userEntity, token);
         }
 
 

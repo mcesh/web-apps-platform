@@ -15,32 +15,18 @@ public class AppToken implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, length = 50)
-    private String appToken;
+    @Column(nullable = false, length = 85)
+    private String tokenKey;
 
     @Column(length = 50, nullable = false)
     private String primaryEmail;
-    @Column(length = 50)
-    private String secondaryEmail;
-    @Column(length = 50)
-    private String thirdEmail;
-    @Column(length = 50)
-    private String fourthEmail;
 
     @JsonIgnore
-    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumns({
             @JoinColumn(name="users_id")
     })
     private UserAppRequest userAppRequest;
-
-    public UserAppRequest getUserAppRequest() {
-        return userAppRequest;
-    }
-
-    public void setUserAppRequest(UserAppRequest userAppRequest) {
-        this.userAppRequest = userAppRequest;
-    }
 
     public long getId() {
         return id;
@@ -50,12 +36,12 @@ public class AppToken implements Serializable {
         this.id = id;
     }
 
-    public String getAppToken() {
-        return appToken;
+    public String getTokenKey() {
+        return tokenKey;
     }
 
-    public void setAppToken(String appToken) {
-        this.appToken = appToken;
+    public void setTokenKey(String tokenKey) {
+        this.tokenKey = tokenKey;
     }
 
     public String getPrimaryEmail() {
@@ -66,27 +52,11 @@ public class AppToken implements Serializable {
         this.primaryEmail = primaryEmail;
     }
 
-    public String getSecondaryEmail() {
-        return secondaryEmail;
+    public UserAppRequest getUserAppRequest() {
+        return userAppRequest;
     }
 
-    public void setSecondaryEmail(String secondaryEmail) {
-        this.secondaryEmail = secondaryEmail;
-    }
-
-    public String getThirdEmail() {
-        return thirdEmail;
-    }
-
-    public void setThirdEmail(String thirdEmail) {
-        this.thirdEmail = thirdEmail;
-    }
-
-    public String getFourthEmail() {
-        return fourthEmail;
-    }
-
-    public void setFourthEmail(String fourthEmail) {
-        this.fourthEmail = fourthEmail;
+    public void setUserAppRequest(UserAppRequest userAppRequest) {
+        this.userAppRequest = userAppRequest;
     }
 }

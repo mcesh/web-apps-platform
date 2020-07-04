@@ -1,33 +1,33 @@
 package za.co.photo_sharing.app_ws.resource;
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import za.co.photo_sharing.app_ws.model.request.UserAppRequestModel;
-import za.co.photo_sharing.app_ws.model.request.UserDetailsRequestModel;
-import za.co.photo_sharing.app_ws.model.response.*;
+import za.co.photo_sharing.app_ws.model.response.OperationStatusModel;
+import za.co.photo_sharing.app_ws.model.response.RequestOperationName;
+import za.co.photo_sharing.app_ws.model.response.RequestOperationStatus;
+import za.co.photo_sharing.app_ws.model.response.UserAppReqRest;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.shared.dto.UserAppRequestDTO;
-import za.co.photo_sharing.app_ws.shared.dto.UserDto;
-import za.co.photo_sharing.app_ws.utility.EmailVerification;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("users_app_request") // http://localhost:8080/users_app_request/photo-sharing-app-ws
 public class UserAppRequestResource {
 
     private ModelMapper modelMapper = new ModelMapper();
-    private static Logger LOGGER = LoggerFactory.getLogger(EmailVerification.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(UserAppRequestResource.class);
 
     @Autowired
     private UserAppReqService appReqService;
@@ -38,7 +38,7 @@ public class UserAppRequestResource {
     @PostMapping(value = "/request-app-dev",
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public UserAppReqRest requestAppDevelopment(@RequestBody UserAppRequestModel appRequestModel, HttpServletRequest request) throws IOException, MessagingException {
+    public UserAppReqRest requestAppDevelopment(@RequestBody UserAppRequestModel appRequestModel, HttpServletRequest request) throws IOException, MessagingException, IOException, MessagingException {
 
         String userAgent = request.getHeader("User-Agent");
         String webUrl = "";
@@ -63,7 +63,6 @@ public class UserAppRequestResource {
         appReqRest = modelMapper.map(requestDTO, UserAppReqRest.class);
         return appReqRest;
     }
-
 
     @ApiOperation(value="The Request Application Endpoint",
             notes="${userAppRequestResource.AppRequestEmailVerification.ApiOperation.Notes}")
@@ -93,6 +92,20 @@ public class UserAppRequestResource {
 
     }
 
+    @ApiOperation(value="The Delete User By Email Endpoint",
+            notes="${userResource.DeleteUserByEmail.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @DeleteMapping(path = "email/{email}",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public OperationStatusModel deleteUser(@PathVariable String email) {
+        OperationStatusModel statusModel = new OperationStatusModel();
+        statusModel.setOperationName(RequestOperationName.DELETE.name());
+        appReqService.deleteAppRequestByEmail(email);
+        statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
+        return statusModel;
+    }
 
     public static Logger getLog() {
         return LOGGER;

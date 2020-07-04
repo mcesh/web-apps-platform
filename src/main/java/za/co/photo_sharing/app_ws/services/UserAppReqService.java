@@ -11,4 +11,6 @@ public interface UserAppReqService extends UserDetailsService {
     UserAppRequestDTO requestAppDevelopment(UserAppRequestDTO appRequestDTO, String userAgent, String webUrl) throws IOException, MessagingException;
 
     boolean verifyAppReqEmailToken(String token) throws IOException, MessagingException;
+
+    void deleteAppRequestByEmail(String email);
 }
