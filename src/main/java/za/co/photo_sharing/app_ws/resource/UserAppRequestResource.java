@@ -11,12 +11,10 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import za.co.photo_sharing.app_ws.model.request.UserAppRequestModel;
-import za.co.photo_sharing.app_ws.model.response.OperationStatusModel;
-import za.co.photo_sharing.app_ws.model.response.RequestOperationName;
-import za.co.photo_sharing.app_ws.model.response.RequestOperationStatus;
-import za.co.photo_sharing.app_ws.model.response.UserAppReqRest;
+import za.co.photo_sharing.app_ws.model.response.*;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.shared.dto.UserAppRequestDTO;
+import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
@@ -105,6 +103,18 @@ public class UserAppRequestResource {
         appReqService.deleteAppRequestByEmail(email);
         statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
         return statusModel;
+    }
+
+    @ApiOperation(value="The Get App Development Request By Email Address Endpoint",
+            notes="${userAppRequestResource.GetAppDevelopmentRequestByEmail.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}",
+                    paramType="header")
+    })
+    @GetMapping(path = "email/{email}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public UserAppReqRest getUserByEmailAddress(@PathVariable String email) {
+        UserAppRequestDTO appRequestDTO = appReqService.findByEmail(email);
+        return modelMapper.map(appRequestDTO, UserAppReqRest.class);
     }
 
     public static Logger getLog() {

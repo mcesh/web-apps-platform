@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import za.co.photo_sharing.app_ws.entity.AppToken;
 import za.co.photo_sharing.app_ws.entity.UserAppRequest;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
+import za.co.photo_sharing.app_ws.repo.AppTokenRepository;
 import za.co.photo_sharing.app_ws.repo.UserAppReqRepository;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.shared.dto.AppTokenDTO;
@@ -30,6 +32,11 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     private Utils utils;
     @Autowired
     private EmailUtility emailUtility;
+    @Autowired
+    private AppTokenRepository tokenRepository;
+
+    private static String firstName;
+    private static String tokenKey;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -40,7 +47,16 @@ public class UserAppReqServiceImpl implements UserAppReqService {
             throw new UserServiceException(ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
         }
 
-        String tokenKey = utils.generateAppToken(user.getEmail()).toUpperCase();
+        if (user.getWebType().equalsIgnoreCase("ORGANIZATION")){
+            if (appReqRepository.findByOrganizationUsername(user.getOrganizationUsername()) !=null){
+                throw new UserServiceException(ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
+            }
+            tokenKey = utils.generateAppToken(user.getOrganizationUsername()).toUpperCase();
+
+        }else {
+            tokenKey = utils.generateAppToken(user.getEmail()).toUpperCase();
+        }
+
         AppTokenDTO tokenDTO = new AppTokenDTO();
         tokenDTO.setPrimaryEmail(user.getEmail());
         tokenDTO.setTokenKey(tokenKey);
@@ -71,8 +87,12 @@ public class UserAppReqServiceImpl implements UserAppReqService {
                 userByEmailVerificationToken.setEmailVerificationToken(null);
                 userByEmailVerificationToken.setEmailVerificationStatus(Boolean.TRUE);
                 appReqRepository.save(userByEmailVerificationToken);
+                if (userByEmailVerificationToken.getWebType().equalsIgnoreCase("ORGANIZATION")){
+                    firstName = userByEmailVerificationToken.getOrganizationUsername();
+                }else {
+                    firstName = userByEmailVerificationToken.getFirstName();
+                }
                 String tokenKey = userByEmailVerificationToken.getAppToken().getTokenKey();
-                String firstName = userByEmailVerificationToken.getFirstName();
                 String email = userByEmailVerificationToken.getEmail();
                 emailUtility.sendAppToken(tokenKey,firstName,email);
                 isVerified = true;
@@ -89,6 +109,25 @@ public class UserAppReqServiceImpl implements UserAppReqService {
         if (userAppRequest == null)
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         appReqRepository.delete(userAppRequest);
+    }
+
+    @Override
+    public AppTokenDTO findByTokenKey(String tokenKey) {
+        AppToken byTokenKey = tokenRepository.findByTokenKey(tokenKey);
+
+        if (Objects.isNull(byTokenKey)){
+            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        }
+        return modelMapper.map(byTokenKey,AppTokenDTO.class);
+    }
+
+    @Override
+    public UserAppRequestDTO findByEmail(String email) {
+        UserAppRequest userAppRequest = appReqRepository.findByEmail(email);
+        if (Objects.isNull(userAppRequest)){
+            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        }
+        return modelMapper.map(userAppRequest,UserAppRequestDTO.class);
     }
 
     @Override

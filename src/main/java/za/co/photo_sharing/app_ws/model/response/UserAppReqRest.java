@@ -17,4 +17,5 @@ public class UserAppReqRest {
     private String webType;
     private String description;
     private LocalDateTime requestDate;
+    private boolean emailVerificationStatus;
 }

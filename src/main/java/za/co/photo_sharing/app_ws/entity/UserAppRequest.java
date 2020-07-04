@@ -40,7 +40,7 @@ public class UserAppRequest implements Serializable {
     @Column(length = 50)
     private String fourthEmail;
     @Column(length = 75)
-    private String OrganizationUsername;
+    private String organizationUsername;
 
     @JsonIgnore
     @OneToOne(mappedBy = "userAppRequest", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -143,11 +143,11 @@ public class UserAppRequest implements Serializable {
     }
 
     public String getOrganizationUsername() {
-        return OrganizationUsername;
+        return organizationUsername;
     }
 
     public void setOrganizationUsername(String organizationUsername) {
-        OrganizationUsername = organizationUsername;
+        this.organizationUsername = organizationUsername;
     }
 
     public AppToken getAppToken() {
