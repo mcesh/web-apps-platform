@@ -3,6 +3,8 @@ package za.co.photo_sharing.app_ws.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -63,10 +65,11 @@ public class UserEntity implements Serializable {
     private PasswordResetToken resetToken;
 
     @JsonIgnore
-    @ManyToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.MERGE},fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "users_id",
             referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
+    @Fetch(value = FetchMode.SUBSELECT)
     private Collection<Role> roles;
 
     @JsonIgnore

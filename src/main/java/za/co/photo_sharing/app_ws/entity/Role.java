@@ -1,13 +1,17 @@
 package za.co.photo_sharing.app_ws.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
+import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.util.Collection;
 
 @Entity
 @Table(name = "roles")
+@Transactional
 public class Role implements Serializable {
 
     private static final long serialVersionUID = 5315236587412596532L;
@@ -19,7 +23,8 @@ public class Role implements Serializable {
     @Column(nullable = false,length = 25)
     private String roleName;
 
-    @ManyToMany(mappedBy = "roles",cascade = CascadeType.MERGE,fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "roles",cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
+    @Fetch(value = FetchMode.SUBSELECT)
     private Collection<UserEntity> users;
 
     @JsonIgnore

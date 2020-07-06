@@ -2,19 +2,21 @@ package za.co.photo_sharing.app_ws.services.impl;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import za.co.photo_sharing.app_ws.config.UserPrincipal;
 import za.co.photo_sharing.app_ws.constants.AuthorityRoleTypeKeys;
 import za.co.photo_sharing.app_ws.constants.UserAuthorityTypeKeys;
 import za.co.photo_sharing.app_ws.constants.UserRoleTypeKeys;
@@ -30,6 +32,7 @@ import za.co.photo_sharing.app_ws.utility.UserIdFactory;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -39,6 +42,7 @@ import java.util.function.Predicate;
 public class UserServiceImpl implements UserService {
 
     private static String savePath = "C:/Token";
+    private static Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     Utils utils;
@@ -65,6 +69,10 @@ public class UserServiceImpl implements UserService {
 
     private ModelMapper modelMapper = new ModelMapper();
     private Predicate<String> isNumeric = str -> str.matches("-?\\d+(\\.\\d+)?");
+
+    public static Logger getLog() {
+        return LOGGER;
+    }
 
     @Override
     public UserDto createUser(UserDto user, String userAgent, String webUrl) throws IOException, MessagingException {
@@ -124,7 +132,7 @@ public class UserServiceImpl implements UserService {
         Authority writeAuthority = getAuthority(UserAuthorityTypeKeys.WRITE_AUTHORITY);
         Authority deleteAuthority = getAuthority(UserAuthorityTypeKeys.DELETE_AUTHORITY);
 
-        Role role_user = getRole(UserRoleTypeKeys.ROLE_USER, Arrays.asList(readAuthority, writeAuthority));
+        Role role_user = getRole(UserRoleTypeKeys.ROLE_USER, Collections.singletonList(readAuthority));
         Role role_admin = getRole(UserRoleTypeKeys.ROLE_ADMIN, Arrays.asList(readAuthority, writeAuthority, deleteAuthority));
 
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
@@ -132,9 +140,10 @@ public class UserServiceImpl implements UserService {
         userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(userId.toString()));
         userEntity.setRegistrationDate(LocalDateTime.now());
         userEntity.setUserId(userId);
-        if (AuthorityRoleTypeKeys.ADMIN.equals(user.getRoleType().getRoleTypeKey())){
+        //TODO revisit this implementation
+        if (AuthorityRoleTypeKeys.USER.equals(user.getRoleType().getRoleTypeKey())){
             userEntity.setRoles(Collections.singletonList(role_user));
-        }else if (AuthorityRoleTypeKeys.SUPER_ADMIN.equals(user.getRoleType().getRoleTypeKey())){
+        }else if (AuthorityRoleTypeKeys.ADMIN.equals(user.getRoleType().getRoleTypeKey())){
             userEntity.setRoles(Collections.singleton(role_admin));
         }
 
@@ -370,16 +379,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
         UserEntity userEntity = userRepo.findByEmail(email);
         if (userEntity == null) {
             throw new UsernameNotFoundException("Email address not found: {} " + email);
         }
-
-        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(),
-                userEntity.getEmailVerificationStatus(),
-                true,
-                true,
-                true, new ArrayList<>());
+        return new UserPrincipal(userEntity);
     }
 
     private Authority getAuthority(String authority){

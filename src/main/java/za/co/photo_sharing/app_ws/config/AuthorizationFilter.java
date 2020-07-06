@@ -1,7 +1,6 @@
 package za.co.photo_sharing.app_ws.config;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -14,11 +13,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import io.jsonwebtoken.Jwts;
+import za.co.photo_sharing.app_ws.entity.UserEntity;
+import za.co.photo_sharing.app_ws.repo.UserRepo;
 
 public class AuthorizationFilter extends BasicAuthenticationFilter {
+    private UserRepo userRepo;
 
-    public AuthorizationFilter(AuthenticationManager authManager) {
+    public AuthorizationFilter(AuthenticationManager authManager, UserRepo userRepo) {
         super(authManager);
+        this.userRepo = userRepo;
     }
 
     @Override
@@ -52,7 +55,9 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
                     .getSubject();
 
             if (user != null) {
-                return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+                UserEntity userEntity = userRepo.findByEmail(user);
+                UserPrincipal userPrincipal = new UserPrincipal(userEntity);
+                return new UsernamePasswordAuthenticationToken(user, null, userPrincipal.getAuthorities());
             }
 
             return null;

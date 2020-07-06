@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 import za.co.photo_sharing.app_ws.model.request.LoginRequestModel;
 import za.co.photo_sharing.app_ws.model.request.UserLoginRequestModel;
 
+import javax.transaction.Transactional;
+
 @RestController
+@Transactional
 public class AuthenticationResource {
 
     @ApiOperation("User login")
