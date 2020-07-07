@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -140,6 +142,8 @@ public class UserResource {
         return userRests;
     }
 
+   // @PreAuthorize("hasRole(ROLE_ADMIN) or #id == principal.userId")
+     @Secured("ROLE_ADMIN")
     @ApiOperation(value="The Delete User By UserId Endpoint",
             notes="${userResource.DeleteUserById.ApiOperation.Notes}")
     @ApiImplicitParams({
@@ -332,6 +336,7 @@ public class UserResource {
         UserDto byUsername = userService.findByEmail(email);
         return modelMapper.map(byUsername, UserRest.class);
     }
+    @Secured("ROLE_ADMIN")
     @ApiOperation(value="The Delete User By Email Address Endpoint",
             notes="${userResource.DeleteUserById.ApiOperation.Notes}")
     @ApiImplicitParams({

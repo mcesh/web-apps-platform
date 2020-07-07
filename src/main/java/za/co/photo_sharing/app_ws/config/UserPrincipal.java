@@ -16,9 +16,11 @@ public class UserPrincipal implements UserDetails {
     private static final long serialVersionUID = 2365874215500256256L;
 
     UserEntity userEntity;
+    private Long userId;
 
     public UserPrincipal(UserEntity userEntity) {
         this.userEntity = userEntity;
+        this.userId = userEntity.getUserId();
     }
 
     @Override
@@ -68,5 +70,13 @@ public class UserPrincipal implements UserDetails {
     @Override
     public boolean isEnabled() {
         return this.userEntity.getEmailVerificationStatus();
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

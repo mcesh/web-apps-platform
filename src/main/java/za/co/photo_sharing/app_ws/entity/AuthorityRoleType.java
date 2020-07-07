@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "authority_role")
@@ -31,6 +33,26 @@ public class AuthorityRoleType implements Serializable {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    private LocalDateTime assignedOn;
+
+    private LocalDateTime updatedOn;
+
+    public LocalDateTime getAssignedOn() {
+        return assignedOn;
+    }
+
+    public void setAssignedOn(LocalDateTime assignedOn) {
+        this.assignedOn = assignedOn;
+    }
+
+    public LocalDateTime getUpdatedOn() {
+        return updatedOn;
+    }
+
+    public void setUpdatedOn(LocalDateTime updatedOn) {
+        this.updatedOn = updatedOn;
     }
 
     public long getRoleTypeKey() {

@@ -1,6 +1,7 @@
 package za.co.photo_sharing.app_ws.config;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -56,8 +57,9 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
 
             if (user != null) {
                 UserEntity userEntity = userRepo.findByEmail(user);
+                if (Objects.isNull(userEntity)) return null;
                 UserPrincipal userPrincipal = new UserPrincipal(userEntity);
-                return new UsernamePasswordAuthenticationToken(user, null, userPrincipal.getAuthorities());
+                return new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
             }
 
             return null;

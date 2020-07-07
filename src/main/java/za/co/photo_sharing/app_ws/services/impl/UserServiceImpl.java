@@ -156,6 +156,8 @@ public class UserServiceImpl implements UserService {
     private AuthorityRoleTypeDTO assignRoleKey(UserDto user, Long roleKey) {
         AuthorityRoleTypeDTO roleKeyDTO = new AuthorityRoleTypeDTO();
         roleKeyDTO.setRoleTypeKey(roleKey);
+        roleKeyDTO.setAssignedOn(LocalDateTime.now());
+        roleKeyDTO.setUpdatedOn(LocalDateTime.now());
         roleKeyDTO.setUserDetails(user);
         user.setRoleType(roleKeyDTO);
         return roleKeyDTO;
