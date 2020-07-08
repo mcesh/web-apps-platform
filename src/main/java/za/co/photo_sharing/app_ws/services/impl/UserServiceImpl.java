@@ -380,6 +380,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDto addNewUserAddress(Long userId, AddressDTO addressDTO) {
+        UserEntity userById = userRepo.findByUserId(userId);
+        if (Objects.isNull(userById)) throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        userById.setAddresses(buildAddresses(addressDTO, userById));
+        UserEntity storedUserAddress = userRepo.save(userById);
+        return modelMapper.map(storedUserAddress,UserDto.class);
+    }
+
+    private List<AddressEntity> buildAddresses(AddressDTO addressDTO, UserEntity user) {
+        List<AddressEntity> addresses = new ArrayList<>();
+        AddressEntity address = new AddressEntity();
+        address.setAddressId(utils.generateAddressId(30));
+        address.setCity(addressDTO.getCity());
+        address.setCountry(addressDTO.getCountry());
+        address.setPostalCode(addressDTO.getPostalCode());
+        address.setStreetName(addressDTO.getStreetName());
+        address.setType(addressDTO.getType());
+        address.setUserId(user.getUserId());
+        address.setUserDetails(user);
+        addresses.add(address);
+        return addresses;
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
         UserEntity userEntity = userRepo.findByEmail(email);

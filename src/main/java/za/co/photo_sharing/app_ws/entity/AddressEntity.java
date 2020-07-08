@@ -44,7 +44,7 @@ public class AddressEntity implements Serializable {
     private UserEntity userDetails;
 
     @Column(length=15, nullable=false)
-    private String userId;
+    private Long userId;
 
     public long getId() {
         return id;
@@ -109,11 +109,11 @@ public class AddressEntity implements Serializable {
     public void setUserDetails(UserEntity userDetails) {
         this.userDetails = userDetails;
     }
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

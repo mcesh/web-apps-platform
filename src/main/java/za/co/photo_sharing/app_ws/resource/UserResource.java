@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import za.co.photo_sharing.app_ws.model.request.AddressRequestModel;
 import za.co.photo_sharing.app_ws.model.request.PasswordResetModel;
 import za.co.photo_sharing.app_ws.model.request.PasswordResetRequestModel;
 import za.co.photo_sharing.app_ws.model.request.UserDetailsRequestModel;
@@ -184,11 +185,11 @@ public class UserResource {
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
     })
-    @GetMapping(path = "/{id}/addresses", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public List<AddressesRest> getUserAddresses(@PathVariable String id) {
+    @GetMapping(path = "/{userId}/addresses", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<AddressesRest> getUserAddresses(@PathVariable String user_id) {
 
         List<AddressesRest> addressesRests = new ArrayList<>();
-        Long userId = Long.parseLong(id);
+        Long userId = Long.parseLong(user_id);
         List<AddressDTO> addressesDTO = addressService.getAddresses(userId);
 
         if (addressesDTO != null && !CollectionUtils.isEmpty(addressesDTO)) {
@@ -351,5 +352,31 @@ public class UserResource {
         statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
 
         return statusModel;
+    }
+
+    @ApiOperation(value="The Update User Address By AddressId Endpoint",
+            notes="${userResource.UpdateUserAddress.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @PutMapping(path = "/{userId}/addresses/{addressId}", produces = {MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
+    public AddressesRest updateUserAddress(@RequestBody AddressRequestModel address, @PathVariable String addressId) {
+        AddressDTO addressDTO = modelMapper.map(address, AddressDTO.class);
+        AddressDTO addressesDto = addressService.updateUserAddress(addressId,addressDTO);
+        return modelMapper.map(addressesDto, AddressesRest.class);
+    }
+
+    @ApiOperation(value="The Add new User Address Endpoint",
+            notes="${userResource.AddNewUserAddress.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @PostMapping(path = "/{userId}/new-address/", produces = {MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
+    public UserRest addNewUserAddress(@RequestBody AddressRequestModel address, @PathVariable Long userId) {
+        AddressDTO addressDTO = modelMapper.map(address, AddressDTO.class);
+        UserDto addressesDto = userService.addNewUserAddress(userId,addressDTO);
+        return modelMapper.map(addressesDto, UserRest.class);
     }
 }

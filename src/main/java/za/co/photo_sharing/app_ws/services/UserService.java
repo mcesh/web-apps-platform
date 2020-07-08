@@ -2,6 +2,7 @@ package za.co.photo_sharing.app_ws.services;
 
 
 import org.springframework.security.core.userdetails.UserDetailsService;
+import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import javax.mail.MessagingException;
@@ -24,4 +25,5 @@ public interface UserService extends UserDetailsService {
     List<UserDto> findAllUsersWithConfirmedEmailAddress(int page, int limit);
     UserDto findByEmail(String email);
     void deleteUserByEmail(String email);
+    UserDto addNewUserAddress(Long userId, AddressDTO addressDTO);
 }
