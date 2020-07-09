@@ -185,7 +185,7 @@ public class UserResource {
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
     })
-    @GetMapping(path = "/{userId}/addresses", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/{user_id}/addresses", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<AddressesRest> getUserAddresses(@PathVariable String user_id) {
 
         List<AddressesRest> addressesRests = new ArrayList<>();
@@ -378,5 +378,19 @@ public class UserResource {
         AddressDTO addressDTO = modelMapper.map(address, AddressDTO.class);
         UserDto addressesDto = userService.addNewUserAddress(userId,addressDTO);
         return modelMapper.map(addressesDto, UserRest.class);
+    }
+
+    @Secured("ROLE_ADMIN")
+    @ApiOperation(value="The Update User Roles Endpoint",
+            notes="${userResource.UpdateUsersRoles.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @PutMapping(path = "updateRoles/{email}",produces = {MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
+    public UserRest updateUserRoles(@PathVariable String email) {
+        UserRest userRest = new UserRest();
+        UserDto user = userService.updateUserRoles(email);
+        return modelMapper.map(user, UserRest.class);
     }
 }

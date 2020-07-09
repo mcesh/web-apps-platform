@@ -32,7 +32,6 @@ import za.co.photo_sharing.app_ws.utility.UserIdFactory;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -64,6 +63,8 @@ public class UserServiceImpl implements UserService {
     AuthorityRepository authorityRepository;
     @Autowired
     RoleRepository roleRepository;
+    @Autowired
+    private AddressRepository addressRepository;
     @Autowired
     private UserAppReqService appReqService;
 
@@ -386,6 +387,33 @@ public class UserServiceImpl implements UserService {
         userById.setAddresses(buildAddresses(addressDTO, userById));
         UserEntity storedUserAddress = userRepo.save(userById);
         return modelMapper.map(storedUserAddress,UserDto.class);
+    }
+
+    @Override
+    public UserDto updateUserRoles(String email) {
+        UserEntity user = userRepo.findByEmail(email);
+        if (Objects.isNull(user)) throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        if (user.isRoleUpdated()){
+            throw new UserServiceException(ErrorMessages.AUTHORITY_NOT_APPLICABLE.getErrorMessage());
+        }
+        Authority readAuthority = getAuthority(UserAuthorityTypeKeys.READ_AUTHORITY);
+        Authority writeAuthority = getAuthority(UserAuthorityTypeKeys.WRITE_AUTHORITY);
+        Authority deleteAuthority = getAuthority(UserAuthorityTypeKeys.DELETE_AUTHORITY);
+
+        Role role_admin = getRole(UserRoleTypeKeys.ROLE_ADMIN, Arrays.asList(readAuthority, writeAuthority, deleteAuthority));
+        user.setRoleType(buildRoleType(user));
+        user.setRoleUpdated(Boolean.TRUE);
+        user.setRoles(Collections.singleton(role_admin));
+        UserEntity storedUser = userRepo.save(user);
+        return modelMapper.map(storedUser, UserDto.class);
+    }
+
+    private AuthorityRoleType buildRoleType(UserEntity userEntity) {
+        AuthorityRoleType roleType = new AuthorityRoleType();
+        roleType.setRoleTypeKey(AuthorityRoleTypeKeys.ADMIN);
+        roleType.setAssignedOn(userEntity.getRoleType().getAssignedOn());
+        roleType.setUpdatedOn(LocalDateTime.now());
+        return roleType;
     }
 
     private List<AddressEntity> buildAddresses(AddressDTO addressDTO, UserEntity user) {

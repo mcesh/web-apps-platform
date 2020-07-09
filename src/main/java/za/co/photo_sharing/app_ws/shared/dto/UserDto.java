@@ -29,6 +29,7 @@ public class UserDto implements Serializable {
     private List<AddressDTO> addresses;
     private CompanyDTO company;
     private LocalDateTime registrationDate;
+    private boolean roleUpdated = false;
     private AuthorityRoleTypeDTO roleType;
 
 

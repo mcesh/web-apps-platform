@@ -19,7 +19,8 @@ public enum ErrorMessages {
     NUMBER_NOT_NUMERIC("Please provide digital numbers"),
     APP_TOKEN_NOT_FOUND("AppToken not found"),
     USER_NOT_AUTHORIZED("User not authorized to use provided appToken"),
-    EMAIL_ADDRESS_NOT_FOUND("Email Address not found");
+    EMAIL_ADDRESS_NOT_FOUND("Email Address not found"),
+    AUTHORITY_NOT_APPLICABLE("Requested Authority not Applicable");
 
 
     private String errorMessage;

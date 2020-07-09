@@ -26,4 +26,5 @@ public interface UserService extends UserDetailsService {
     UserDto findByEmail(String email);
     void deleteUserByEmail(String email);
     UserDto addNewUserAddress(Long userId, AddressDTO addressDTO);
+    UserDto updateUserRoles(String email);
 }

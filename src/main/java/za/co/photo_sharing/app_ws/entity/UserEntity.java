@@ -75,6 +75,16 @@ public class UserEntity implements Serializable {
     @JsonIgnore
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private AuthorityRoleType roleType;
+    @Column(nullable = false)
+    private boolean roleUpdated = false;// TODO find a permanent solution
+
+    public boolean isRoleUpdated() {
+        return roleUpdated;
+    }
+
+    public void setRoleUpdated(boolean roleUpdated) {
+        this.roleUpdated = roleUpdated;
+    }
 
     public AuthorityRoleType getRoleType() {
         return roleType;
