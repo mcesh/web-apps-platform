@@ -20,6 +20,4 @@ public class UserDetailsRequestModel {
     private String username;
     private Long cellNumber;
     private String appToken = "NORMAL_USER";
-    private List<AddressRequestModel> addresses;
-    private CompanyRequestModel company;
 }

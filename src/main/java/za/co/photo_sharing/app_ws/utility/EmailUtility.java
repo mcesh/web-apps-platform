@@ -14,6 +14,8 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
+import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
+import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.shared.dto.AppTokenDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserAppRequestDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
@@ -70,56 +72,70 @@ public class EmailUtility {
 
 
 
-    public void sendAppReqVerificationMail(UserAppRequestDTO appRequestDTO, String userAgent, String webUrl) throws MessagingException, IOException {
+    public void sendAppReqVerificationMail(UserAppRequestDTO appRequestDTO, String userAgent, String webUrl) {
 
-        MimeMessage message = emailSender.createMimeMessage();
-        String emailVerificationToken = appRequestDTO.getEmailVerificationToken();
+        try {
+            MimeMessage message = emailSender.createMimeMessage();
+            String emailVerificationToken = appRequestDTO.getEmailVerificationToken();
 
-        if (userAgent.contains("Apache-HttpClient")) {
-            if (determineOperatingSystem().equalsIgnoreCase("linux")){
-                savePath = "/home/Token";
+            if (userAgent.contains("Apache-HttpClient")) {
+                if (determineOperatingSystem().equalsIgnoreCase("linux")){
+                    savePath = "/home/Token";
+                }
+                utils.generateFilePath.accept(savePath);
+                utils.generateFile.accept(savePath + "/appRequest.txt", appRequestDTO.getEmailVerificationToken());
+
             }
-            utils.generateFilePath.accept(savePath);
-            utils.generateFile.accept(savePath + "/appRequest.txt", appRequestDTO.getEmailVerificationToken());
-
+            MimeMessageHelper helper = new MimeMessageHelper(message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name());
+            helper.setTo(appRequestDTO.getEmail());
+            helper.setText("To confirm your account, please click here : "
+                    + webUrl +"photo-sharing-app-ws/users_app_request/request-app-email-verify?token=" + appRequestDTO.getEmailVerificationToken());
+            helper.setFrom(FROM);
+            helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
+            helper.setSentDate(new Date());
+            emailSender.send(message);
+            getLog().info("Email sent successfully with the following details {}, {}, and {}",
+                    message.getSubject(), message.getSentDate(),
+                    message.getAllRecipients());
+        }catch (MessagingException e){
+            getLog().info("Email Unsuccessfully sent {}", e.getMessage());
+            throw new UserServiceException(ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
         }
-        MimeMessageHelper helper = new MimeMessageHelper(message,
-                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                StandardCharsets.UTF_8.name());
-        helper.setTo(appRequestDTO.getEmail());
-        helper.setText("To confirm your account, please click here : "
-                + webUrl +"photo-sharing-app-ws/users_app_request/request-app-email-verify?token=" + appRequestDTO.getEmailVerificationToken());
-        helper.setFrom(FROM);
-        helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
-        helper.setSentDate(new Date());
-        emailSender.send(message);
-        getLog().info("Email sent successfully with the following details {}, {}, and {}",
-                message.getSubject(), message.getSentDate(),
-                message.getAllRecipients());
     }
 
-    public void sendAppToken(String tokenKey, String firstName, String email) throws MessagingException, IOException {
+    public void sendAppToken(String tokenKey, String firstName, String email) {
 
-        MimeMessage message = emailSender.createMimeMessage();
+        MimeMessage message = null;
+        try {
+
+            message = emailSender.createMimeMessage();
 
 
-        Context context = new Context();
-        context.setVariable("tokenKey",tokenKey);
-        context.setVariable("firstName",firstName);
-        String html = engine.process("appTokenTemplate", context);
+            Context context = new Context();
+            context.setVariable("tokenKey",tokenKey);
+            context.setVariable("firstName",firstName);
+            String html = engine.process("appTokenTemplate", context);
 
-        MimeMessageHelper helper = new MimeMessageHelper(message,
-                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                StandardCharsets.UTF_8.name());
-        helper.setTo(email);
-        helper.setText(html,true);
-        helper.setFrom(FROM);
-        helper.setSubject(APP_REQUEST_CONFIRMATION);
-        helper.setSentDate(new Date());
-        emailSender.send(message);
-        getLog().info("Email sent successfully with the following details {}, {}, and {}",
-                message.getSubject(), message.getSentDate(),
-                message.getAllRecipients());
+            MimeMessageHelper helper = new MimeMessageHelper(message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name());
+            helper.setTo(email);
+            helper.setText(html,true);
+            helper.setFrom(FROM);
+            helper.setSubject(APP_REQUEST_CONFIRMATION);
+            helper.setSentDate(new Date());
+            emailSender.send(message);
+
+            getLog().info("Email sent successfully with the following details {}, {}, and {}",
+                    message.getSubject(), message.getSentDate(),
+                    message.getAllRecipients());
+        }catch (MessagingException e){
+            getLog().info("Email Unsuccessfully sent {}", e.getMessage());
+            throw new UserServiceException(ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
+        }
+
     }
 
 
@@ -213,32 +229,39 @@ public class EmailUtility {
         return LOGGER;
     }
 
-    public void sendVerificationMail(UserDto userDto, String userAgent, String webUrl) throws MessagingException, IOException {
+    public void sendVerificationMail(UserDto userDto, String userAgent, String webUrl) {
 
-        MimeMessage message = emailSender.createMimeMessage();
-        String emailVerificationToken = userDto.getEmailVerificationToken();
+        try {
 
-        if (userAgent.contains("Apache-HttpClient")) {
-            if (determineOperatingSystem().equalsIgnoreCase("linux")){
-                savePath = "/home/Token";
+            MimeMessage message = emailSender.createMimeMessage();
+            String emailVerificationToken = userDto.getEmailVerificationToken();
+
+            if (userAgent.contains("Apache-HttpClient")) {
+                if (determineOperatingSystem().equalsIgnoreCase("linux")){
+                    savePath = "/home/Token";
+                }
+                utils.generateFilePath.accept(savePath);
+                utils.generateFile.accept(savePath + "/token.txt", userDto.getEmailVerificationToken());
+
             }
-            utils.generateFilePath.accept(savePath);
-            utils.generateFile.accept(savePath + "/token.txt", userDto.getEmailVerificationToken());
+            MimeMessageHelper helper = new MimeMessageHelper(message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name());
+            helper.setTo(userDto.getEmail());
+            helper.setText("To confirm your account, please click here : "
+                    + webUrl +"photo-sharing-app-ws/users/email-verification?token=" + userDto.getEmailVerificationToken());
+            helper.setFrom(FROM);
+            helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
+            helper.setSentDate(new Date());
+            emailSender.send(message);
+            getLog().info("Email sent successfully with the following details {}, {}, and {}",
+                    message.getSubject(), message.getSentDate(),
+                    message.getAllRecipients());
 
+        }catch (MessagingException e){
+            getLog().info("Email Unsuccessfully sent {}", e.getMessage());
+            throw new UserServiceException(ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
         }
-        MimeMessageHelper helper = new MimeMessageHelper(message,
-                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                StandardCharsets.UTF_8.name());
-        helper.setTo(userDto.getEmail());
-        helper.setText("To confirm your account, please click here : "
-                + webUrl +"photo-sharing-app-ws/users/email-verification?token=" + userDto.getEmailVerificationToken());
-        helper.setFrom(FROM);
-        helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
-        helper.setSentDate(new Date());
-        emailSender.send(message);
-        getLog().info("Email sent successfully with the following details {}, {}, and {}",
-                message.getSubject(), message.getSentDate(),
-                message.getAllRecipients());
     }
 
     private String newLine() {

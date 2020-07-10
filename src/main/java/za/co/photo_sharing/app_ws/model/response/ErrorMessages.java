@@ -20,7 +20,8 @@ public enum ErrorMessages {
     APP_TOKEN_NOT_FOUND("AppToken not found"),
     USER_NOT_AUTHORIZED("User not authorized to use provided appToken"),
     EMAIL_ADDRESS_NOT_FOUND("Email Address not found"),
-    AUTHORITY_NOT_APPLICABLE("Requested Authority not Applicable");
+    AUTHORITY_NOT_APPLICABLE("Requested Authority not Applicable"),
+    ERROR_SENDING_EMAIL("An Exception occurred when sending mail");
 
 
     private String errorMessage;

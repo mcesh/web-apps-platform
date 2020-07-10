@@ -85,23 +85,7 @@ public class UserServiceImpl implements UserService {
         if (username != null) {
             throw new UserServiceException(ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
         }
-        if (!isNumeric.test(user.getCompany().getCellNumber())) {
-            throw new UserServiceException(ErrorMessages.NUMBER_NOT_NUMERIC.getErrorMessage());
-        }
         Long userId = userIdFactory.buildUserId();
-        for (int i = 0; i < user.getAddresses().size(); i++) {
-            AddressDTO addressesDTO = user.getAddresses().get(i);
-            addressesDTO.setUserDetails(user);
-            addressesDTO.setAddressId(utils.generateAddressId(30));
-            addressesDTO.setUserId(userId);
-            user.getAddresses().set(i, addressesDTO);
-        }
-        CompanyDTO companyDTO = new CompanyDTO();
-        companyDTO.setCellNumber(user.getCompany().getCellNumber());
-        companyDTO.setCompanyName(user.getCompany().getCompanyName());
-        companyDTO.setCompanyType(user.getCompany().getCompanyType());
-        companyDTO.setUserDetails(user);
-        user.setCompany(companyDTO);
         Long roleKey;
         List<AppTokenDTO> emails = new ArrayList<>();
         if (user.getAppToken().equalsIgnoreCase("NORMAL_USER") ||
