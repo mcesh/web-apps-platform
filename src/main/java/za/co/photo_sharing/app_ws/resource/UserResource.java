@@ -380,7 +380,7 @@ public class UserResource {
         return modelMapper.map(addressesDto, UserRest.class);
     }
 
-    @Secured("ROLE_ADMIN")
+    //@Secured("ROLE_ADMIN")
     @ApiOperation(value="The Update User Roles Endpoint",
             notes="${userResource.UpdateUsersRoles.ApiOperation.Notes}")
     @ApiImplicitParams({

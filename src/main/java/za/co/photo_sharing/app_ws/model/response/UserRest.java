@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -21,7 +22,7 @@ public class UserRest {
     private String username;
     private Long cellNumber;
     private LocalDateTime registrationDate;
-    private AuthorityRoleRest roleType;
+    private Set<UserRolesRest> userRoles;
     private boolean roleUpdated = false;
     private List<AddressesRest> addresses;
     private CompanyRest company;

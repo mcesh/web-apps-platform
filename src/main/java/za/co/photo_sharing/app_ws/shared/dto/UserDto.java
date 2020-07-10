@@ -5,6 +5,7 @@ import lombok.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -30,7 +31,8 @@ public class UserDto implements Serializable {
     private CompanyDTO company;
     private LocalDateTime registrationDate;
     private boolean roleUpdated = false;
-    private AuthorityRoleTypeDTO roleType;
+    private Set<UserRolesDto> userRoles;
+    private Long roleTypeKey;
 
 
 }

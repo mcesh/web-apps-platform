@@ -10,7 +10,9 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -65,12 +67,34 @@ public class UserEntity implements Serializable {
     private PasswordResetToken resetToken;
 
     @JsonIgnore
+    @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<UserRole> userRoles = new HashSet<>();
+    @Column(nullable = false, length = 15)
+    private Long roleTypeKey;
+
+    public Long getRoleTypeKey() {
+        return roleTypeKey;
+    }
+
+    public void setRoleTypeKey(Long roleTypeKey) {
+        this.roleTypeKey = roleTypeKey;
+    }
+
+    public Set<UserRole> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(Set<UserRole> userRoles) {
+        this.userRoles = userRoles;
+    }
+
+    /*@JsonIgnore
     @ManyToMany(cascade = {CascadeType.MERGE},fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "users_id",
             referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
     @Fetch(value = FetchMode.SUBSELECT)
-    private Collection<Role> roles;
+    private Collection<Role> roles;*/
 
     @JsonIgnore
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -94,13 +118,13 @@ public class UserEntity implements Serializable {
         this.roleType = roleType;
     }
 
-    public Collection<Role> getRoles() {
+    /*public Collection<Role> getRoles() {
         return roles;
     }
 
     public void setRoles(Collection<Role> roles) {
         this.roles = roles;
-    }
+    }*/
 
     public long getId() {
         return id;

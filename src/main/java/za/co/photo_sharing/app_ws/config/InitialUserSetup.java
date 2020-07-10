@@ -9,12 +9,11 @@ import za.co.photo_sharing.app_ws.constants.UserAuthorityTypeKeys;
 import za.co.photo_sharing.app_ws.constants.UserRoleTypeKeys;
 import za.co.photo_sharing.app_ws.entity.Authority;
 import za.co.photo_sharing.app_ws.entity.Role;
+import za.co.photo_sharing.app_ws.entity.UserRole;
 import za.co.photo_sharing.app_ws.repo.AuthorityRepository;
 import za.co.photo_sharing.app_ws.repo.RoleRepository;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
 
 @Component
 public class InitialUserSetup {
@@ -31,9 +30,16 @@ public class InitialUserSetup {
         Authority readAuthority = createAuthority(UserAuthorityTypeKeys.READ_AUTHORITY);
         Authority writeAuthority = createAuthority(UserAuthorityTypeKeys.WRITE_AUTHORITY);
         Authority deleteAuthority = createAuthority(UserAuthorityTypeKeys.DELETE_AUTHORITY);
+        Set<Authority> user_authorities = new HashSet<>();
+        user_authorities.add(readAuthority);
+        user_authorities.add(writeAuthority);
 
-        createRole(UserRoleTypeKeys.ROLE_USER, Arrays.asList(readAuthority,writeAuthority));
-        createRole(UserRoleTypeKeys.ROLE_ADMIN, Arrays.asList(readAuthority,writeAuthority,deleteAuthority));
+        Set<Authority> admin_authorities = new HashSet<>();
+        admin_authorities.add(readAuthority);
+        admin_authorities.add(writeAuthority);
+        admin_authorities.add(deleteAuthority);
+        createRole(UserRoleTypeKeys.ROLE_USER, user_authorities);
+        createRole(UserRoleTypeKeys.ROLE_ADMIN, admin_authorities);
     }
 
     @Transactional
@@ -49,7 +55,7 @@ public class InitialUserSetup {
     }
 
     @Transactional
-    private Role createRole(String name, Collection<Authority> authorities){
+    private Role createRole(String name, Set<Authority> authorities){
         Role role = roleRepository.findByRoleName(name);
         if (Objects.isNull(role)){
             Role role_ = new Role();

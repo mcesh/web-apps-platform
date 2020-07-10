@@ -4,10 +4,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import za.co.photo_sharing.app_ws.entity.Authority;
-import za.co.photo_sharing.app_ws.entity.Role;
 import za.co.photo_sharing.app_ws.entity.UserEntity;
-import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
-import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
+import za.co.photo_sharing.app_ws.entity.UserRole;
 
 import java.util.*;
 
@@ -28,13 +26,13 @@ public class UserPrincipal implements UserDetails {
         List<GrantedAuthority> authorities = new ArrayList<>();
         List<Authority> authorityList = new ArrayList<>();
         //Get user Roles
-        Collection<Role> roles = userEntity.getRoles();
+        Set<UserRole> roles = userEntity.getUserRoles();
         if (roles == null){
             return authorities;
         }
         roles.forEach(role -> {
-            authorities.add(new SimpleGrantedAuthority(role.getRoleName()));
-            authorityList.addAll(role.getAuthorities());
+            authorities.add(new SimpleGrantedAuthority(role.getRole().getRoleName()));
+            authorityList.addAll(role.getRole().getAuthorities());
         });
         authorityList.forEach(authority -> {
             authorities.add(new SimpleGrantedAuthority(authority.getAuthorityName()));
