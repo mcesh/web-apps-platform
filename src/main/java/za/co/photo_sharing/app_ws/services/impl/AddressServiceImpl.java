@@ -15,9 +15,7 @@ import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class AddressServiceImpl implements AddressService {
@@ -33,8 +31,8 @@ public class AddressServiceImpl implements AddressService {
     private ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public List<AddressDTO> getAddresses(Long userId) {
-        List<AddressDTO> addressDTOS = new ArrayList<>();
+    public Set<AddressDTO> getAddresses(Long userId) {
+        Set<AddressDTO> addressDTOS = new HashSet<>();
 
         UserEntity userEntity = userRepo.findByUserId(userId);
         if (userEntity == null) return addressDTOS;

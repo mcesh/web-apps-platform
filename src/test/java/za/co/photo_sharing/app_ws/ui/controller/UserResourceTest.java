@@ -15,7 +15,9 @@ import za.co.photo_sharing.app_ws.shared.dto.CompanyDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -77,8 +79,8 @@ public class UserResourceTest {
                 .build();
     }
 
-    private List<AddressDTO> buildUserAddressesDto() {
-        List<AddressDTO> addressDTOS = new ArrayList<>();
+    private Set<AddressDTO> buildUserAddressesDto() {
+        Set<AddressDTO> addressDTOS = new HashSet<>();
         AddressDTO addressDTO = AddressDTO.builder()
                 .addressId(addressId)
                 .city("Johannesburg")

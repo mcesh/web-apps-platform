@@ -405,8 +405,8 @@ public class UserServiceImpl implements UserService {
         return roleType;
     }
 
-    private List<AddressEntity> buildAddresses(AddressDTO addressDTO, UserEntity user) {
-        List<AddressEntity> addresses = new ArrayList<>();
+    private Set<AddressEntity> buildAddresses(AddressDTO addressDTO, UserEntity user) {
+        Set<AddressEntity> addresses = new HashSet<>();
         AddressEntity address = new AddressEntity();
         address.setAddressId(utils.generateAddressId(30));
         address.setCity(addressDTO.getCity());

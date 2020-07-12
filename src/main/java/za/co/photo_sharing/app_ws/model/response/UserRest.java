@@ -24,7 +24,7 @@ public class UserRest {
     private LocalDateTime registrationDate;
     private Set<UserRolesRest> userRoles;
     private boolean roleUpdated = false;
-    private List<AddressesRest> addresses;
+    private Set<AddressesRest> addresses;
     private CompanyRest company;
     private Boolean emailVerificationStatus;
 }

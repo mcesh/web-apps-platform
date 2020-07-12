@@ -7,11 +7,12 @@ import za.co.photo_sharing.app_ws.entity.UserEntity;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 @Transactional
 public interface AddressRepository extends JpaRepository<AddressEntity, Long> {
-    List<AddressEntity> findAllByUserDetails(UserEntity userEntity);
+    Set<AddressEntity> findAllByUserDetails(UserEntity userEntity);
     AddressEntity findByAddressId(String addressId);
-    List<AddressEntity> findByUserId(Long userId);
+    Set<AddressEntity> findByUserId(Long userId);
 }

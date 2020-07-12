@@ -28,9 +28,7 @@ import za.co.photo_sharing.app_ws.utility.Utils;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -246,9 +244,9 @@ public class UserServiceImplTest {
         return userEntity;
     }
 
-    private List<AddressEntity> buildUserAddresses() {
+    private Set<AddressEntity> buildUserAddresses() {
 
-        List<AddressDTO> addressDTOS = buildUserAddressesDto();
+        Set<AddressDTO> addressDTOS = buildUserAddressesDto();
 
         Type addressEntity = new TypeToken<List<AddressEntity>>() {
         }.getType();
@@ -284,8 +282,8 @@ public class UserServiceImplTest {
                 .build();
     }
 
-    private List<AddressDTO> buildUserAddressesDto() {
-        List<AddressDTO> addressDTOS = new ArrayList<>();
+    private Set<AddressDTO> buildUserAddressesDto() {
+        Set<AddressDTO> addressDTOS = new HashSet<>();
         AddressDTO addressDTO = AddressDTO.builder()
                 .addressId(addressId)
                 .city("Johannesburg")

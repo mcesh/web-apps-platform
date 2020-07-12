@@ -15,6 +15,7 @@ import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
@@ -74,7 +75,7 @@ public class UserRepositoryIntegrationTests {
         userEntity.setUserId(userId);
         userEntity.setFirstName("Siyabonga");
         userEntity.setEmail(emailAddr);
-        userEntity.setAddresses(new ArrayList<>());
+        userEntity.setAddresses(new HashSet<>());
         userEntity.setLastName("Nxuseka");
         userEntity.setEncryptedPassword(encoder.encode("Password"));
         userEntity.setEmailVerificationStatus(Boolean.FALSE);

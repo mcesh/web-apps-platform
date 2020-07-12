@@ -99,7 +99,7 @@ public class EmailUtility {
             getLog().info("Email sent successfully with the following details {}, {}, and {}",
                     message.getSubject(), message.getSentDate(),
                     message.getAllRecipients());
-        }catch (MessagingException e){
+        }catch (Exception e){
             getLog().info("Email Unsuccessfully sent {}", e.getMessage());
             throw new UserServiceException(ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
         }

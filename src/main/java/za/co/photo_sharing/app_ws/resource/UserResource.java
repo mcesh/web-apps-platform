@@ -32,9 +32,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("users") // http://localhost:8080/users/photo-sharing-app-ws
@@ -186,11 +184,11 @@ public class UserResource {
             @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
     })
     @GetMapping(path = "/{user_id}/addresses", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public List<AddressesRest> getUserAddresses(@PathVariable String user_id) {
+    public Set<AddressesRest> getUserAddresses(@PathVariable String user_id) {
 
-        List<AddressesRest> addressesRests = new ArrayList<>();
+        Set<AddressesRest> addressesRests = new HashSet<>();
         Long userId = Long.parseLong(user_id);
-        List<AddressDTO> addressesDTO = addressService.getAddresses(userId);
+        Set<AddressDTO> addressesDTO = addressService.getAddresses(userId);
 
         if (addressesDTO != null && !CollectionUtils.isEmpty(addressesDTO)) {
             addressesDTO.forEach(addressDTO -> {
