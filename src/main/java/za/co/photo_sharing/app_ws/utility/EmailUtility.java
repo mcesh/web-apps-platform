@@ -13,16 +13,14 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
-import za.co.photo_sharing.app_ws.entity.UserEntity;
+import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
-import za.co.photo_sharing.app_ws.shared.dto.AppTokenDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserAppRequestDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Objects;
@@ -172,7 +170,7 @@ public class EmailUtility {
         }
         return returnValue;
     };
-    public BiFunction<UserEntity, String, Boolean> sendPasswordResetReq = ((userEntity, token) -> {
+    public BiFunction<UserProfile, String, Boolean> sendPasswordResetReq = ((userEntity, token) -> {
 
         boolean returnValue = false;
         final String PASSWORD_RESET_HTMLBODY = new StringBuilder().append("Hi, ")

@@ -41,7 +41,7 @@ public class AddressEntity implements Serializable {
     @JoinColumns({
             @JoinColumn(name="users_id")
     })
-    private UserEntity userDetails;
+    private UserProfile userDetails;
 
     @Column(length=15, nullable=false)
     private Long userId;
@@ -102,11 +102,11 @@ public class AddressEntity implements Serializable {
         this.type = type;
     }
 
-    public UserEntity getUserDetails() {
+    public UserProfile getUserDetails() {
         return userDetails;
     }
 
-    public void setUserDetails(UserEntity userDetails) {
+    public void setUserDetails(UserProfile userDetails) {
         this.userDetails = userDetails;
     }
     public Long getUserId() {

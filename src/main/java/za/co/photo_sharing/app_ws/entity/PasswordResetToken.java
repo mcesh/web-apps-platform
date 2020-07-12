@@ -22,7 +22,7 @@ public class PasswordResetToken implements Serializable {
     @JoinColumns({
             @JoinColumn(name="users_id")
     })
-    private UserEntity userDetails;
+    private UserProfile userDetails;
 
     public long getId() {
         return id;
@@ -40,11 +40,11 @@ public class PasswordResetToken implements Serializable {
         this.token = token;
     }
 
-    public UserEntity getUserDetails() {
+    public UserProfile getUserDetails() {
         return userDetails;
     }
 
-    public void setUserDetails(UserEntity userDetails) {
+    public void setUserDetails(UserProfile userDetails) {
         this.userDetails = userDetails;
     }
 

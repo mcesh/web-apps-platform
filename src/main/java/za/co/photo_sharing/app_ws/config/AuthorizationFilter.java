@@ -14,7 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import io.jsonwebtoken.Jwts;
-import za.co.photo_sharing.app_ws.entity.UserEntity;
+import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 
 public class AuthorizationFilter extends BasicAuthenticationFilter {
@@ -56,9 +56,9 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
                     .getSubject();
 
             if (user != null) {
-                UserEntity userEntity = userRepo.findByEmail(user);
-                if (Objects.isNull(userEntity)) return null;
-                UserPrincipal userPrincipal = new UserPrincipal(userEntity);
+                UserProfile userProfile = userRepo.findByEmail(user);
+                if (Objects.isNull(userProfile)) return null;
+                UserPrincipal userPrincipal = new UserPrincipal(userProfile);
                 return new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
             }
 

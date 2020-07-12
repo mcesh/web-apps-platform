@@ -4,7 +4,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import za.co.photo_sharing.app_ws.entity.Authority;
-import za.co.photo_sharing.app_ws.entity.UserEntity;
+import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.entity.UserRole;
 
 import java.util.*;
@@ -13,12 +13,12 @@ public class UserPrincipal implements UserDetails {
 
     private static final long serialVersionUID = 2365874215500256256L;
 
-    UserEntity userEntity;
+    UserProfile userProfile;
     private Long userId;
 
-    public UserPrincipal(UserEntity userEntity) {
-        this.userEntity = userEntity;
-        this.userId = userEntity.getUserId();
+    public UserPrincipal(UserProfile userProfile) {
+        this.userProfile = userProfile;
+        this.userId = userProfile.getUserId();
     }
 
     @Override
@@ -26,7 +26,7 @@ public class UserPrincipal implements UserDetails {
         List<GrantedAuthority> authorities = new ArrayList<>();
         List<Authority> authorityList = new ArrayList<>();
         //Get user Roles
-        Set<UserRole> roles = userEntity.getUserRoles();
+        Set<UserRole> roles = userProfile.getUserRoles();
         if (roles == null){
             return authorities;
         }
@@ -42,12 +42,12 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.userEntity.getEncryptedPassword();
+        return this.userProfile.getEncryptedPassword();
     }
 
     @Override
     public String getUsername() {
-        return this.userEntity.getEmail();
+        return this.userProfile.getEmail();
     }
 
     @Override
@@ -67,7 +67,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return this.userEntity.getEmailVerificationStatus();
+        return this.userProfile.getEmailVerificationStatus();
     }
 
     public Long getUserId() {

@@ -22,7 +22,7 @@ public class UserRole implements Serializable {
     @ManyToOne
     @JoinColumn(name = "users_id")
     @JsonIgnore
-    private UserEntity userDetails;
+    private UserProfile userDetails;
 
     @ManyToOne(fetch = FetchType.EAGER,cascade = CascadeType.MERGE)
     @JoinColumn(name = "role_id")
@@ -31,7 +31,7 @@ public class UserRole implements Serializable {
     private UserRole(){
 
     }
-    public UserRole(UserEntity user, Role role){
+    public UserRole(UserProfile user, Role role){
         this.userDetails = user;
         this.role = role;
     }

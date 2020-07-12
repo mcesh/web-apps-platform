@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import za.co.photo_sharing.app_ws.entity.AddressEntity;
 import za.co.photo_sharing.app_ws.entity.CompanyEntity;
-import za.co.photo_sharing.app_ws.entity.UserEntity;
+import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.impl.UserServiceImpl;
@@ -80,13 +80,13 @@ public class UserServiceImplTest {
         when(utils.generateAddressId(anyInt())).thenReturn("jhshcjcjc12");
         when(userIdFactory.buildUserId()).thenReturn(userId);
         when(bCryptPasswordEncoder.encode(anyString())).thenReturn(encryptedPassword);
-        UserEntity userEntity = getUserEntity();
-        when(userRepository.save(anyObject())).thenReturn(userEntity);
+        UserProfile userProfile = getUserEntity();
+        when(userRepository.save(anyObject())).thenReturn(userProfile);
         Mockito.doNothing().when(emailUtility).sendVerificationMail(any(UserDto.class), anyString(), webUrl);
         UserDto storedUserDetails = userService.createUser(buildUserDto(),"Apache-HttpClient", webUrl);
         assertNotNull(storedUserDetails);
-        assertEquals(userEntity.getFirstName(), storedUserDetails.getFirstName());
-        assertEquals(userEntity.getAddresses().size(), storedUserDetails.getAddresses().size());
+        assertEquals(userProfile.getFirstName(), storedUserDetails.getFirstName());
+        assertEquals(userProfile.getAddresses().size(), storedUserDetails.getAddresses().size());
         verify(utils, times(storedUserDetails.getAddresses().size())).generateAddressId(30);
         verify(userIdFactory, times(1)).buildUserId();
         verify(bCryptPasswordEncoder, times(1)).encode(anyString());
@@ -102,8 +102,8 @@ public class UserServiceImplTest {
         when(utils.generateAddressId(anyInt())).thenReturn("jhshcjcjc12");
         when(userIdFactory.buildUserId()).thenReturn(userId);
         when(bCryptPasswordEncoder.encode(anyString())).thenReturn(encryptedPassword);
-        UserEntity userEntity = getUserEntity();
-        when(userRepository.save(anyObject())).thenReturn(userEntity);
+        UserProfile userProfile = getUserEntity();
+        when(userRepository.save(anyObject())).thenReturn(userProfile);
         Mockito.doNothing().when(emailUtility).sendVerificationMail(any(UserDto.class),anyString(), webUrl);
         assertThrows(UserServiceException.class,
                 () -> {
@@ -121,8 +121,8 @@ public class UserServiceImplTest {
         when(utils.generateAddressId(anyInt())).thenReturn("jhshcjcjc12");
         when(userIdFactory.buildUserId()).thenReturn(userId);
         when(bCryptPasswordEncoder.encode(anyString())).thenReturn(encryptedPassword);
-        UserEntity userEntity = getUserEntity();
-        when(userRepository.save(anyObject())).thenReturn(userEntity);
+        UserProfile userProfile = getUserEntity();
+        when(userRepository.save(anyObject())).thenReturn(userProfile);
         Mockito.doNothing().when(emailUtility).sendVerificationMail(any(UserDto.class),anyString(), webUrl);
         assertThrows(UserServiceException.class,
                 () -> userService.createUser(buildUserDto(),"Apache-HttpClient", webUrl)
@@ -168,13 +168,13 @@ public class UserServiceImplTest {
 
     @Test
     public void shouldUpdateUserDetails(){
-        UserEntity userEntity = getUserEntity();
-        when(userRepository.findByUserId(anyLong())).thenReturn(userEntity);
-        when(userRepository.save(anyObject())).thenReturn(userEntity);
+        UserProfile userProfile = getUserEntity();
+        when(userRepository.findByUserId(anyLong())).thenReturn(userProfile);
+        when(userRepository.save(anyObject())).thenReturn(userProfile);
         UserDto user = buildUserDto();
         UserDto userDto = userService.updateUser(userId, user);
         assertNotNull(userDto);
-        assertEquals(userEntity.getFirstName(),user.getFirstName());
+        assertEquals(userProfile.getFirstName(),user.getFirstName());
     }
 
     @Test
@@ -217,31 +217,31 @@ public class UserServiceImplTest {
         assertTrue(userByFirstName.stream().map(UserDto::getFirstName).anyMatch(first_Name -> Objects.equals(firstName, first_Name)));
     }
 
-    private List<UserEntity> userEntities(){
-        List<UserEntity> entities = new ArrayList<>();
-        UserEntity userEntity;
+    private List<UserProfile> userEntities(){
+        List<UserProfile> entities = new ArrayList<>();
+        UserProfile userProfile;
         for (int user =0; user<=5;user++){
-            userEntity = getUserEntity();
-            entities.add(userEntity);
+            userProfile = getUserEntity();
+            entities.add(userProfile);
         }
         return entities;
     }
 
-    private UserEntity getUserEntity() {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(1L);
-        userEntity.setEmailVerificationStatus(Boolean.TRUE);
-        userEntity.setEmail("test9@gamil.com");
-        userEntity.setCellNumber(27856257412L);
-        userEntity.setLastName("Nxuseka");
-        userEntity.setFirstName(firstName);
-        userEntity.setUsername(userName);
-        userEntity.setEmailVerificationToken(emailVerificationToken);
-        userEntity.setUserId(userId);
-        userEntity.setEncryptedPassword(encryptedPassword);
-        userEntity.setCompany(buildCompany());
-        userEntity.setAddresses(buildUserAddresses());
-        return userEntity;
+    private UserProfile getUserEntity() {
+        UserProfile userProfile = new UserProfile();
+        userProfile.setId(1L);
+        userProfile.setEmailVerificationStatus(Boolean.TRUE);
+        userProfile.setEmail("test9@gamil.com");
+        userProfile.setCellNumber(27856257412L);
+        userProfile.setLastName("Nxuseka");
+        userProfile.setFirstName(firstName);
+        userProfile.setUsername(userName);
+        userProfile.setEmailVerificationToken(emailVerificationToken);
+        userProfile.setUserId(userId);
+        userProfile.setEncryptedPassword(encryptedPassword);
+        userProfile.setCompany(buildCompany());
+        userProfile.setAddresses(buildUserAddresses());
+        return userProfile;
     }
 
     private Set<AddressEntity> buildUserAddresses() {

@@ -16,7 +16,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users")
-public class UserEntity implements Serializable {
+public class UserProfile implements Serializable {
 
     private static final long serialVersionUID = 5313493413859894403L;
 
@@ -240,7 +240,7 @@ public class UserEntity implements Serializable {
 
     @Override
     public String toString() {
-        return "UserEntity{" +
+        return "UserProfile{" +
                 "id=" + id +
                 ", userId=" + userId +
                 ", username='" + username + '\'' +
@@ -255,6 +255,10 @@ public class UserEntity implements Serializable {
                 ", addresses=" + addresses +
                 ", company=" + company +
                 ", resetToken=" + resetToken +
+                ", userRoles=" + userRoles +
+                ", roleTypeKey=" + roleTypeKey +
+                ", roleType=" + roleType +
+                ", roleUpdated=" + roleUpdated +
                 '}';
     }
 }

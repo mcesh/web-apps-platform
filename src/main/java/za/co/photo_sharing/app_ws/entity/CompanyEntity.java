@@ -26,7 +26,7 @@ public class CompanyEntity {
     @JoinColumns({
             @JoinColumn(name="users_id")
     })
-    private UserEntity userDetails;
+    private UserProfile userDetails;
 
     public String getCompanyName() {
         return companyName;
@@ -51,11 +51,11 @@ public class CompanyEntity {
     public void setCellNumber(String cellNumber) {
         this.cellNumber = cellNumber;
     }
-    public UserEntity getUserDetails() {
+    public UserProfile getUserDetails() {
         return userDetails;
     }
 
-    public void setUserDetails(UserEntity userDetails) {
+    public void setUserDetails(UserProfile userDetails) {
         this.userDetails = userDetails;
     }
 

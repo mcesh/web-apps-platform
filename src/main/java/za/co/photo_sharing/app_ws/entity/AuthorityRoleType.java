@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "authority_role")
@@ -25,7 +24,7 @@ public class AuthorityRoleType implements Serializable {
     @JoinColumns({
             @JoinColumn(name="users_id")
     })
-    private UserEntity userDetails;
+    private UserProfile userDetails;
 
     public long getId() {
         return id;
@@ -63,11 +62,11 @@ public class AuthorityRoleType implements Serializable {
         this.roleTypeKey = roleTypeKey;
     }
 
-    public UserEntity getUserDetails() {
+    public UserProfile getUserDetails() {
         return userDetails;
     }
 
-    public void setUserDetails(UserEntity userDetails) {
+    public void setUserDetails(UserProfile userDetails) {
         this.userDetails = userDetails;
     }
 }

@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
         if (userRepo.findByEmail(user.getEmail()) != null) {
             throw new UserServiceException(ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
         }
-        UserEntity username = userRepo.findByUsername(user.getUsername());
+        UserProfile username = userRepo.findByUsername(user.getUsername());
         if (username != null) {
             throw new UserServiceException(ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
         }
@@ -114,7 +114,6 @@ public class UserServiceImpl implements UserService {
             }
             user.setRoleTypeKey(AuthorityRoleTypeKeys.ADMIN);
         }
-        //assignRoleKey(user, roleKey);
 
         Authority readAuthority = getAuthority(UserAuthorityTypeKeys.READ_AUTHORITY);
         Authority writeAuthority = getAuthority(UserAuthorityTypeKeys.WRITE_AUTHORITY);
@@ -123,22 +122,22 @@ public class UserServiceImpl implements UserService {
         Role role_user = getRole(UserRoleTypeKeys.ROLE_USER, Collections.singletonList(readAuthority));
         Role role_admin = getRole(UserRoleTypeKeys.ROLE_ADMIN, Arrays.asList(readAuthority, writeAuthority, deleteAuthority));
 
-        UserEntity userEntity = modelMapper.map(user, UserEntity.class);
-        userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(userId.toString()));
-        userEntity.setRegistrationDate(LocalDateTime.now());
-        userEntity.setUserId(userId);
+        UserProfile userProfile = modelMapper.map(user, UserProfile.class);
+        userProfile.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        userProfile.setEmailVerificationToken(utils.generateEmailVerificationToken(userId.toString()));
+        userProfile.setRegistrationDate(LocalDateTime.now());
+        userProfile.setUserId(userId);
         //TODO revisit this implementation
         Set<UserRole> userRoles = new HashSet<>();
         if (AuthorityRoleTypeKeys.USER.equals(user.getRoleTypeKey())){
-            userRoles.add(new UserRole(userEntity, role_user));
-            userEntity.setUserRoles(userRoles);
+            userRoles.add(new UserRole(userProfile, role_user));
+            userProfile.setUserRoles(userRoles);
         }else if (AuthorityRoleTypeKeys.ADMIN.equals(user.getRoleTypeKey())){
-            userRoles.add(new UserRole(userEntity, role_admin));
-            userEntity.setUserRoles(userRoles);
+            userRoles.add(new UserRole(userProfile, role_admin));
+            userProfile.setUserRoles(userRoles);
         }
 
-        UserEntity storedUserDetails = userRepo.save(userEntity);
+        UserProfile storedUserDetails = userRepo.save(userProfile);
         UserDto userDto = modelMapper.map(storedUserDetails, UserDto.class);
         emailUtility.sendVerificationMail(userDto, userAgent,webUrl);
         return userDto;
@@ -146,34 +145,34 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUser(String email) {
-        UserEntity byEmail = userRepo.findByEmail(email);
-        if (byEmail == null) throw new UsernameNotFoundException(email);
-        return modelMapper.map(byEmail, UserDto.class);
+        UserProfile userProfile = userRepo.findByEmail(email);
+        if (userProfile == null) throw new UsernameNotFoundException(email);
+        return modelMapper.map(userProfile, UserDto.class);
     }
 
     @Override
     public UserDto findByUsername(String username) {
-        UserEntity userEntity = userRepo.findByUsername(username);
-        if (userEntity == null)
+        UserProfile userProfile = userRepo.findByUsername(username);
+        if (userProfile == null)
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
-        return modelMapper.map(userEntity, UserDto.class);
+        return modelMapper.map(userProfile, UserDto.class);
     }
 
     @Override
     public UserDto findByFirstNameAndUserId(String firstName, Long userId) {
 
         UserDto userDto = new UserDto();
-        UserEntity byFirstName = userRepo.findByFirstNameAndUserId(firstName, userId);
-        if (Objects.isNull(byFirstName)) {
+        UserProfile profile = userRepo.findByFirstNameAndUserId(firstName, userId);
+        if (Objects.isNull(profile)) {
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
-        BeanUtils.copyProperties(byFirstName, userDto);
+        BeanUtils.copyProperties(profile, userDto);
         return userDto;
     }
 
     @Override
     public void deleteUser(Long userId) {
-        UserEntity userByUserId = userRepo.findByUserId(userId);
+        UserProfile userByUserId = userRepo.findByUserId(userId);
         if (userByUserId == null)
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         userRepo.delete(userByUserId);
@@ -181,7 +180,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto findByUserId(Long userId) {
-        UserEntity userByUserId = userRepo.findByUserId(userId);
+        UserProfile userByUserId = userRepo.findByUserId(userId);
         if (userByUserId == null) {
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
@@ -192,7 +191,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(Long userId, UserDto userDto) {
 
-        UserEntity userByUserId = userRepo.findByUserId(userId);
+        UserProfile userByUserId = userRepo.findByUserId(userId);
         if (userByUserId == null) throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
 
         userByUserId.setFirstName(userDto.getFirstName());
@@ -200,7 +199,7 @@ public class UserServiceImpl implements UserService {
         if (userDto.getCellNumber() != null) {
             userByUserId.setCellNumber(userDto.getCellNumber());
         }
-        UserEntity updatedUserDetails = userRepo.save(userByUserId);
+        UserProfile updatedUserDetails = userRepo.save(userByUserId);
 
         return modelMapper.map(updatedUserDetails, UserDto.class);
     }
@@ -209,12 +208,12 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> findUserByFirstName(String firstName) {
         List<UserDto> userDtos = new ArrayList<>();
 
-        List<UserEntity> userByFirstName = userRepo.findUserByFirstName(firstName);
+        List<UserProfile> userByFirstName = userRepo.findUserByFirstName(firstName);
         if (CollectionUtils.isEmpty(userByFirstName)) {
             throw new UserServiceException(ErrorMessages.NO_USERS_FOUND.getErrorMessage());
         }
         userByFirstName.stream()
-                .sorted(Comparator.comparing(UserEntity::getFirstName))
+                .sorted(Comparator.comparing(UserProfile::getFirstName))
                 .forEach(userEntity -> {
                     UserDto userDto = modelMapper.map(userEntity, UserDto.class);
                     userDtos.add(userDto);
@@ -230,14 +229,14 @@ public class UserServiceImpl implements UserService {
 
         Pageable pageableRequest = PageRequest.of(page, limit);
 
-        Page<UserEntity> usersPage = userRepo.findAll(pageableRequest);
-        List<UserEntity> users = usersPage.getContent();
+        Page<UserProfile> usersPage = userRepo.findAll(pageableRequest);
+        List<UserProfile> users = usersPage.getContent();
         if (CollectionUtils.isEmpty(users)) {
             throw new UserServiceException(ErrorMessages.NO_USERS_FOUND.getErrorMessage());
         }
 
         users.stream()
-                .sorted(Comparator.comparing(UserEntity::getFirstName))
+                .sorted(Comparator.comparing(UserProfile::getFirstName))
                 .forEach(userEntity -> {
                     UserDto userDto = modelMapper.map(userEntity, UserDto.class);
                     returnValue.add(userDto);
@@ -249,13 +248,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean verifyEmailToken(String token) {
         boolean isVerified = false;
-        UserEntity userEntity = userRepo.findUserByEmailVerificationToken(token);
-        if (userEntity != null) {
+        UserProfile userProfile = userRepo.findUserByEmailVerificationToken(token);
+        if (userProfile != null) {
             boolean hasTokenExpired = Utils.hasTokenExpired(token);
             if (!hasTokenExpired) {
-                userEntity.setEmailVerificationToken(null);
-                userEntity.setEmailVerificationStatus(Boolean.TRUE);
-                userRepo.save(userEntity);
+                userProfile.setEmailVerificationToken(null);
+                userProfile.setEmailVerificationStatus(Boolean.TRUE);
+                userRepo.save(userProfile);
                 isVerified = true;
             } else {
                 throw new UserServiceException(ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
@@ -268,15 +267,15 @@ public class UserServiceImpl implements UserService {
     public boolean requestPasswordReset(String email, String userAgent) {
         boolean returnValue = false;
 
-        UserEntity userEntity = userRepo.findByEmail(email);
-        Optional<UserEntity> entity = Optional.ofNullable(Optional.ofNullable(userEntity)
+        UserProfile userProfile = userRepo.findByEmail(email);
+        Optional<UserProfile> entity = Optional.ofNullable(Optional.ofNullable(userProfile)
                 .orElseThrow(() -> new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage())));
 
         if (entity.isPresent()) {
-            String token = utils.generatePasswordResetToken(userEntity.getUserId().toString());
+            String token = utils.generatePasswordResetToken(userProfile.getUserId().toString());
             PasswordResetToken passwordResetToken = new PasswordResetToken();
             passwordResetToken.setToken(token);
-            passwordResetToken.setUserDetails(userEntity);
+            passwordResetToken.setUserDetails(userProfile);
             resetRequestRepository.save(passwordResetToken);
             if (userAgent.contains("Apache-HttpClient")) {
                 if (emailUtility.determineOperatingSystem().equalsIgnoreCase("linux")) {
@@ -285,7 +284,7 @@ public class UserServiceImpl implements UserService {
                 utils.generateFilePath.accept(savePath);
                 utils.generateFile.accept(savePath + "/passwordResetToken.txt", token);
             }
-            returnValue = emailUtility.sendPasswordResetReq.apply(userEntity, token);
+            returnValue = emailUtility.sendPasswordResetReq.apply(userProfile, token);
         }
 
 
@@ -306,9 +305,9 @@ public class UserServiceImpl implements UserService {
         }
 
         String encodedPassword = bCryptPasswordEncoder.encode(newPassword);
-        UserEntity userEntity = passwordResetToken.getUserDetails();
-        userEntity.setEncryptedPassword(encodedPassword);
-        UserEntity userPasswordUpdate = userRepo.save(userEntity);
+        UserProfile userProfile = passwordResetToken.getUserDetails();
+        userProfile.setEncryptedPassword(encodedPassword);
+        UserProfile userPasswordUpdate = userRepo.save(userProfile);
         if (userPasswordUpdate != null && userPasswordUpdate.getEncryptedPassword()
                 .equalsIgnoreCase(encodedPassword)) {
             hasUpdated = true;
@@ -325,15 +324,15 @@ public class UserServiceImpl implements UserService {
 
         Pageable pageableRequest = PageRequest.of(page, limit);
 
-        Page<UserEntity> usersPage = userRepo.findAllUsersWithConfirmedEmailAddress(pageableRequest);
+        Page<UserProfile> usersPage = userRepo.findAllUsersWithConfirmedEmailAddress(pageableRequest);
 
-        List<UserEntity> users = usersPage.getContent();
+        List<UserProfile> users = usersPage.getContent();
 
         if (CollectionUtils.isEmpty(users)) {
             return userDtos;
         }
         users.stream()
-                .sorted(Comparator.comparing(UserEntity::getRegistrationDate).reversed())
+                .sorted(Comparator.comparing(UserProfile::getRegistrationDate).reversed())
                 .forEach(userEntity -> {
                     UserDto userDto = new UserDto();
                     modelMapper.map(userEntity, userDto);
@@ -344,7 +343,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto findByEmail(String email) {
-        UserEntity userRepoByEmail = userRepo.findByEmail(email);
+        UserProfile userRepoByEmail = userRepo.findByEmail(email);
         if (userRepoByEmail == null) {
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
@@ -354,24 +353,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUserByEmail(String email) {
-        UserEntity userEntity = userRepo.findByEmail(email);
-        if (userEntity == null)
+        UserProfile userProfile = userRepo.findByEmail(email);
+        if (userProfile == null)
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
-        userRepo.delete(userEntity);
+        userRepo.delete(userProfile);
     }
 
     @Override
     public UserDto addNewUserAddress(Long userId, AddressDTO addressDTO) {
-        UserEntity userById = userRepo.findByUserId(userId);
+        UserProfile userById = userRepo.findByUserId(userId);
         if (Objects.isNull(userById)) throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         userById.setAddresses(buildAddresses(addressDTO, userById));
-        UserEntity storedUserAddress = userRepo.save(userById);
+        UserProfile storedUserAddress = userRepo.save(userById);
         return modelMapper.map(storedUserAddress,UserDto.class);
     }
 
     @Override
     public UserDto updateUserRoles(String email) {
-        UserEntity user = userRepo.findByEmail(email);
+        UserProfile user = userRepo.findByEmail(email);
         if (Objects.isNull(user)) throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         List<UserRole> roles = user.getUserRoles().stream()
                 .filter(userRole -> userRole.getRole().getRoleName().equalsIgnoreCase(UserRoleTypeKeys.ROLE_ADMIN))
@@ -388,7 +387,7 @@ public class UserServiceImpl implements UserService {
         Set<UserRole> userRoles = new HashSet<>();
         userRoles.add(new UserRole(user, role_admin));
         user.setUserRoles(userRoles);
-        UserEntity storedUser = userRepo.save(user);
+        UserProfile storedUser = userRepo.save(user);
         return modelMapper.map(storedUser, UserDto.class);
     }
 
@@ -397,15 +396,15 @@ public class UserServiceImpl implements UserService {
         return roleRepository.findByRoleName(string);
     }
 
-    private AuthorityRoleType buildRoleType(UserEntity userEntity) {
+    private AuthorityRoleType buildRoleType(UserProfile userProfile) {
         AuthorityRoleType roleType = new AuthorityRoleType();
         roleType.setRoleTypeKey(AuthorityRoleTypeKeys.ADMIN);
-        roleType.setAssignedOn(userEntity.getRoleType().getAssignedOn());
+        roleType.setAssignedOn(userProfile.getRoleType().getAssignedOn());
         roleType.setUpdatedOn(LocalDateTime.now());
         return roleType;
     }
 
-    private Set<AddressEntity> buildAddresses(AddressDTO addressDTO, UserEntity user) {
+    private Set<AddressEntity> buildAddresses(AddressDTO addressDTO, UserProfile user) {
         Set<AddressEntity> addresses = new HashSet<>();
         AddressEntity address = new AddressEntity();
         address.setAddressId(utils.generateAddressId(30));
@@ -423,11 +422,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        UserEntity userEntity = userRepo.findByEmail(email);
-        if (userEntity == null) {
+        UserProfile userProfile = userRepo.findByEmail(email);
+        if (userProfile == null) {
             throw new UsernameNotFoundException("Email address not found: {} " + email);
         }
-        return new UserPrincipal(userEntity);
+        return new UserPrincipal(userProfile);
     }
 
     private Authority getAuthority(String authority){
