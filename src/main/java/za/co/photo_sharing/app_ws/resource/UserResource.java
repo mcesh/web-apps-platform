@@ -378,7 +378,7 @@ public class UserResource {
         return modelMapper.map(addressesDto, UserRest.class);
     }
 
-    //@Secured("ROLE_ADMIN")
+    @Secured("ROLE_ADMIN")
     @ApiOperation(value="The Update User Roles Endpoint",
             notes="${userResource.UpdateUsersRoles.ApiOperation.Notes}")
     @ApiImplicitParams({
@@ -387,7 +387,6 @@ public class UserResource {
     @PutMapping(path = "updateRoles/{email}",produces = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
     public UserRest updateUserRoles(@PathVariable String email) {
-        UserRest userRest = new UserRest();
         UserDto user = userService.updateUserRoles(email);
         return modelMapper.map(user, UserRest.class);
     }

@@ -28,5 +28,5 @@ public interface UserService extends UserDetailsService {
     void deleteUserByEmail(String email);
     UserDto addNewUserAddress(Long userId, AddressDTO addressDTO);
     UserDto updateUserRoles(String email);
-    public Role findUserRoleByName(String string);
+    Role findUserRoleByName(String name);
 }

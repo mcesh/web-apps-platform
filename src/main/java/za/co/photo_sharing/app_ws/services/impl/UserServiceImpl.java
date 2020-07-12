@@ -115,25 +115,17 @@ public class UserServiceImpl implements UserService {
             user.setRoleTypeKey(AuthorityRoleTypeKeys.ADMIN);
         }
 
-        Authority readAuthority = getAuthority(UserAuthorityTypeKeys.READ_AUTHORITY);
-        Authority writeAuthority = getAuthority(UserAuthorityTypeKeys.WRITE_AUTHORITY);
-        Authority deleteAuthority = getAuthority(UserAuthorityTypeKeys.DELETE_AUTHORITY);
-
-        Role role_user = getRole(UserRoleTypeKeys.ROLE_USER, Collections.singletonList(readAuthority));
-        Role role_admin = getRole(UserRoleTypeKeys.ROLE_ADMIN, Arrays.asList(readAuthority, writeAuthority, deleteAuthority));
-
         UserProfile userProfile = modelMapper.map(user, UserProfile.class);
         userProfile.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userProfile.setEmailVerificationToken(utils.generateEmailVerificationToken(userId.toString()));
         userProfile.setRegistrationDate(LocalDateTime.now());
         userProfile.setUserId(userId);
-        //TODO revisit this implementation
         Set<UserRole> userRoles = new HashSet<>();
         if (AuthorityRoleTypeKeys.USER.equals(user.getRoleTypeKey())){
-            userRoles.add(new UserRole(userProfile, role_user));
+            userRoles.add(new UserRole(userProfile, userService.findUserRoleByName(UserRoleTypeKeys.ROLE_USER)));
             userProfile.setUserRoles(userRoles);
         }else if (AuthorityRoleTypeKeys.ADMIN.equals(user.getRoleTypeKey())){
-            userRoles.add(new UserRole(userProfile, role_admin));
+            userRoles.add(new UserRole(userProfile, userService.findUserRoleByName(UserRoleTypeKeys.ROLE_ADMIN)));
             userProfile.setUserRoles(userRoles);
         }
 
@@ -378,22 +370,18 @@ public class UserServiceImpl implements UserService {
         if (!CollectionUtils.isEmpty(roles)){
             throw new UserServiceException(ErrorMessages.AUTHORITY_NOT_APPLICABLE.getErrorMessage());
         }
-        Authority readAuthority = getAuthority(UserAuthorityTypeKeys.READ_AUTHORITY);
-        Authority writeAuthority = getAuthority(UserAuthorityTypeKeys.WRITE_AUTHORITY);
-        Authority deleteAuthority = getAuthority(UserAuthorityTypeKeys.DELETE_AUTHORITY);
 
-        Role role_admin = getRole(UserRoleTypeKeys.ROLE_ADMIN, Arrays.asList(readAuthority, writeAuthority, deleteAuthority));
         user.setRoleUpdated(Boolean.TRUE);
         Set<UserRole> userRoles = new HashSet<>();
-        userRoles.add(new UserRole(user, role_admin));
+        userRoles.add(new UserRole(user, userService.findUserRoleByName(UserRoleTypeKeys.ROLE_ADMIN)));
         user.setUserRoles(userRoles);
         UserProfile storedUser = userRepo.save(user);
         return modelMapper.map(storedUser, UserDto.class);
     }
 
     @Override
-    public Role findUserRoleByName(String string) {
-        return roleRepository.findByRoleName(string);
+    public Role findUserRoleByName(String name) {
+        return roleRepository.findByRoleName(name);
     }
 
     private AuthorityRoleType buildRoleType(UserProfile userProfile) {
@@ -427,12 +415,5 @@ public class UserServiceImpl implements UserService {
             throw new UsernameNotFoundException("Email address not found: {} " + email);
         }
         return new UserPrincipal(userProfile);
-    }
-
-    private Authority getAuthority(String authority){
-        return authorityRepository.findByAuthorityName(authority);
-    }
-    private Role getRole(String name, Collection<Authority> authorities){
-        return roleRepository.findByRoleName(name);
     }
 }
