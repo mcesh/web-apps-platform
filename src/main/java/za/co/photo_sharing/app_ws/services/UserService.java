@@ -2,6 +2,7 @@ package za.co.photo_sharing.app_ws.services;
 
 
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.entity.Role;
 import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
@@ -29,4 +30,5 @@ public interface UserService extends UserDetailsService {
     UserDto addNewUserAddress(Long userId, AddressDTO addressDTO);
     UserDto updateUserRoles(String email);
     Role findUserRoleByName(String name);
+    void uploadUserProfileImage(String email, MultipartFile file);
 }

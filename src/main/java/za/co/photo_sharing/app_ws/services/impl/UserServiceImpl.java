@@ -1,6 +1,7 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.http.entity.ContentType;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +17,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.config.UserPrincipal;
 import za.co.photo_sharing.app_ws.constants.AuthorityRoleTypeKeys;
+import za.co.photo_sharing.app_ws.constants.BucketName;
 import za.co.photo_sharing.app_ws.constants.UserAuthorityTypeKeys;
 import za.co.photo_sharing.app_ws.constants.UserRoleTypeKeys;
 import za.co.photo_sharing.app_ws.entity.*;
@@ -37,6 +40,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static org.apache.http.entity.ContentType.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -70,6 +75,8 @@ public class UserServiceImpl implements UserService {
     private UserAppReqService appReqService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private FileStoreService fileStoreService;
 
     private ModelMapper modelMapper = new ModelMapper();
     private Predicate<String> isNumeric = str -> str.matches("-?\\d+(\\.\\d+)?");
@@ -383,6 +390,46 @@ public class UserServiceImpl implements UserService {
     @Override
     public Role findUserRoleByName(String name) {
         return roleRepository.findByRoleName(name);
+    }
+
+    @Override
+    public void uploadUserProfileImage(String email, MultipartFile file) {
+        UserProfile userProfile = userRepo.findByEmail(email);
+        getUser(userProfile);
+        isImage(file);
+        Map<String, String> metadata = extractMetadata(file);
+
+        String path = String.format("%s/%s", BucketName.PROFILE_IMAGE.getBucketName(), userProfile.getUsername());
+
+        String fileName = String.format("%s-%s", file.getOriginalFilename(), UUID.randomUUID().toString().substring(0, 7));
+
+        try {
+            fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
+            userProfile.setUserProfileImageLink(fileName);
+            userRepo.save(userProfile);
+        }catch (IOException e){
+            throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
+        }
+    }
+
+    private Map<String, String> extractMetadata(MultipartFile file) {
+        Map<String,String> metadata = new HashMap<>();
+        metadata.put("Content-Type",file.getContentType());
+        metadata.put("Content-Length", String.valueOf(file.getSize()));
+        return metadata;
+    }
+
+    private void isImage(MultipartFile file) {
+        if (!Arrays.asList(IMAGE_JPEG.getMimeType(), IMAGE_GIF.getMimeType(), IMAGE_PNG.getMimeType())
+                .contains(file.getContentType())){
+            throw new UserServiceException(ErrorMessages.INCORRECT_IMAGE_FORMAT.getErrorMessage());
+        }
+    }
+
+    private void getUser(UserProfile userProfile) {
+        if (Objects.isNull(userProfile)){
+            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        }
     }
 
     private Set<AddressEntity> buildAddresses(AddressDTO addressDTO, UserProfile user) {

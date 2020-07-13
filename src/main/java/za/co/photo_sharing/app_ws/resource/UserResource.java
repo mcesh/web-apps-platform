@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import za.co.photo_sharing.app_ws.model.request.AddressRequestModel;
 import za.co.photo_sharing.app_ws.model.request.PasswordResetModel;
@@ -389,5 +390,24 @@ public class UserResource {
     public UserRest updateUserRoles(@PathVariable String email) {
         UserDto user = userService.updateUserRoles(email);
         return modelMapper.map(user, UserRest.class);
+    }
+
+    @ApiOperation(value="The Upload User Profile Image Endpoint",
+            notes="${userResource.UploadImage.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @PostMapping(path = "upload/profile-image/{email}",
+            produces = {MediaType.MULTIPART_FORM_DATA_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE})
+    public OperationStatusModel uploadImage(@PathVariable String email,
+                                            @RequestParam("file") MultipartFile file){
+        OperationStatusModel statusModel = new OperationStatusModel();
+        statusModel.setOperationName(RequestOperationName.IMAGE_UPLOAD.name());
+        statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
+        userService.uploadUserProfileImage(email,file);
+        statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
+
+        return statusModel;
     }
 }

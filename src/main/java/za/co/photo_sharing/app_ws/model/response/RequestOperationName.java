@@ -5,5 +5,6 @@ public enum RequestOperationName {
     VERIFY_EMAIL,
     PASSWORD_RESET_REQUEST,
     PASSWORD_RESET,
+    IMAGE_UPLOAD,
     SIGN_OUT
 }
