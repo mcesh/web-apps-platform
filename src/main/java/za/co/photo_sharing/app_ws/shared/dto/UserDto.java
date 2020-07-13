@@ -33,6 +33,7 @@ public class UserDto implements Serializable {
     private boolean roleUpdated = false;
     private Set<UserRolesDto> userRoles;
     private Long roleTypeKey;
+    private String userProfileImageLink;
 
 
 }

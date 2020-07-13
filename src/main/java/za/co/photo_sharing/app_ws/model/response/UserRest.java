@@ -27,4 +27,5 @@ public class UserRest {
     private Set<AddressesRest> addresses;
     private CompanyRest company;
     private Boolean emailVerificationStatus;
+    private String userProfileImageLink;
 }

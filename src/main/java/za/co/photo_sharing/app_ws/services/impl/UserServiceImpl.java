@@ -120,6 +120,7 @@ public class UserServiceImpl implements UserService {
         userProfile.setEmailVerificationToken(utils.generateEmailVerificationToken(userId.toString()));
         userProfile.setRegistrationDate(LocalDateTime.now());
         userProfile.setUserId(userId);
+        userProfile.setUserProfileImageLink("");
         Set<UserRole> userRoles = new HashSet<>();
         if (AuthorityRoleTypeKeys.USER.equals(user.getRoleTypeKey())){
             userRoles.add(new UserRole(userProfile, userService.findUserRoleByName(UserRoleTypeKeys.ROLE_USER)));
@@ -382,14 +383,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public Role findUserRoleByName(String name) {
         return roleRepository.findByRoleName(name);
-    }
-
-    private AuthorityRoleType buildRoleType(UserProfile userProfile) {
-        AuthorityRoleType roleType = new AuthorityRoleType();
-        roleType.setRoleTypeKey(AuthorityRoleTypeKeys.ADMIN);
-        roleType.setAssignedOn(userProfile.getRoleType().getAssignedOn());
-        roleType.setUpdatedOn(LocalDateTime.now());
-        return roleType;
     }
 
     private Set<AddressEntity> buildAddresses(AddressDTO addressDTO, UserProfile user) {

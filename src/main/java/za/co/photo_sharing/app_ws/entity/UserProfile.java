@@ -9,10 +9,7 @@ import org.hibernate.annotations.FetchMode;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -71,6 +68,48 @@ public class UserProfile implements Serializable {
     private Set<UserRole> userRoles = new HashSet<>();
     @Column(nullable = false, length = 15)
     private Long roleTypeKey;
+    @Column(length = 120)
+    private String userProfileImageLink;
+
+    public UserProfile(Long userId,
+                       String username,
+                       String firstName,
+                       String lastName,
+                       String email,
+                       String encryptedPassword,
+                       String emailVerificationToken,
+                       Boolean emailVerificationStatus,
+                       Long cellNumber,
+                       LocalDateTime registrationDate,
+                       Set<AddressEntity> addresses,
+                       CompanyEntity company,
+                       PasswordResetToken resetToken,
+                       Set<UserRole> userRoles,
+                       Long roleTypeKey,
+                       String userProfileImageLink,
+                       AuthorityRoleType roleType, boolean roleUpdated) {
+        this.userId = userId;
+        this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.encryptedPassword = encryptedPassword;
+        this.emailVerificationToken = emailVerificationToken;
+        this.emailVerificationStatus = emailVerificationStatus;
+        this.cellNumber = cellNumber;
+        this.registrationDate = registrationDate;
+        this.addresses = addresses;
+        this.company = company;
+        this.resetToken = resetToken;
+        this.userRoles = userRoles;
+        this.roleTypeKey = roleTypeKey;
+        this.userProfileImageLink = userProfileImageLink;
+        this.roleType = roleType;
+        this.roleUpdated = roleUpdated;
+    }
+
+    public UserProfile() {
+    }
 
     public Long getRoleTypeKey() {
         return roleTypeKey;
@@ -87,14 +126,6 @@ public class UserProfile implements Serializable {
     public void setUserRoles(Set<UserRole> userRoles) {
         this.userRoles = userRoles;
     }
-
-    /*@JsonIgnore
-    @ManyToMany(cascade = {CascadeType.MERGE},fetch = FetchType.EAGER)
-    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "users_id",
-            referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
-    @Fetch(value = FetchMode.SUBSELECT)
-    private Collection<Role> roles;*/
 
     @JsonIgnore
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -117,14 +148,6 @@ public class UserProfile implements Serializable {
     public void setRoleType(AuthorityRoleType roleType) {
         this.roleType = roleType;
     }
-
-    /*public Collection<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Collection<Role> roles) {
-        this.roles = roles;
-    }*/
 
     public long getId() {
         return id;
@@ -238,6 +261,14 @@ public class UserProfile implements Serializable {
         this.resetToken = resetToken;
     }
 
+    public String getUserProfileImageLink() {
+        return userProfileImageLink;
+    }
+
+    public void setUserProfileImageLink(String userProfileImageLink) {
+        this.userProfileImageLink = userProfileImageLink;
+    }
+
     @Override
     public String toString() {
         return "UserProfile{" +
@@ -257,8 +288,43 @@ public class UserProfile implements Serializable {
                 ", resetToken=" + resetToken +
                 ", userRoles=" + userRoles +
                 ", roleTypeKey=" + roleTypeKey +
+                ", userProfileImageLink='" + userProfileImageLink + '\'' +
                 ", roleType=" + roleType +
                 ", roleUpdated=" + roleUpdated +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof UserProfile)) return false;
+        UserProfile that = (UserProfile) obj;
+        return getId() == that.getId() &&
+                isRoleUpdated() == that.isRoleUpdated() &&
+                Objects.equals(getUserId(),that.getUserId()) &&
+                Objects.equals(getUsername(),that.getUsername()) &&
+                Objects.equals(getFirstName(),that.getFirstName()) &&
+                Objects.equals(getLastName(),that.getLastName()) &&
+                Objects.equals(getEmail(),that.getEmail()) &&
+                Objects.equals(getEncryptedPassword(),that.getEncryptedPassword()) &&
+                Objects.equals(getEmailVerificationToken(),that.getEmailVerificationToken()) &&
+                Objects.equals(getEmailVerificationStatus(),that.getEmailVerificationStatus()) &&
+                Objects.equals(getCellNumber(),that.getCellNumber()) &&
+                Objects.equals(getRegistrationDate(),that.getRegistrationDate()) &&
+                Objects.equals(getAddresses(),that.getAddresses()) &&
+                Objects.equals(getCompany(),that.getCompany()) &&
+                Objects.equals(getResetToken(),that.getResetToken()) &&
+                Objects.equals(getUserRoles(),that.getUserRoles()) &&
+                Objects.equals(getRoleTypeKey(),that.getRoleTypeKey()) &&
+                Objects.equals(getUserProfileImageLink(), that.getUserProfileImageLink()) &&
+                Objects.equals(getRoleType(),that.getRoleType());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getUserId(), getUsername(), getFirstName(), getLastName(), getEmail(),
+                getEncryptedPassword(), getEmailVerificationToken(), getEmailVerificationStatus(),
+                getCellNumber(), getRegistrationDate(), getAddresses(), getCompany(), getResetToken(),
+                getUserRoles(), getRoleTypeKey(), getRoleType(), isRoleUpdated(), getUserProfileImageLink());
     }
 }
