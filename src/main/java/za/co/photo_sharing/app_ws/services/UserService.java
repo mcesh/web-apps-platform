@@ -31,4 +31,5 @@ public interface UserService extends UserDetailsService {
     UserDto updateUserRoles(String email);
     Role findUserRoleByName(String name);
     void uploadUserProfileImage(String email, MultipartFile file);
+    byte[] downloadUserProfileImage(String email);
 }

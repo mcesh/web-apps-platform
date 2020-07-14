@@ -1,7 +1,6 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.http.entity.ContentType;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.config.UserPrincipal;
 import za.co.photo_sharing.app_ws.constants.AuthorityRoleTypeKeys;
 import za.co.photo_sharing.app_ws.constants.BucketName;
-import za.co.photo_sharing.app_ws.constants.UserAuthorityTypeKeys;
 import za.co.photo_sharing.app_ws.constants.UserRoleTypeKeys;
 import za.co.photo_sharing.app_ws.entity.*;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
@@ -410,6 +408,26 @@ public class UserServiceImpl implements UserService {
         }catch (IOException e){
             throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
         }
+    }
+
+    @Override
+    public byte[] downloadUserProfileImage(String email) {
+        UserProfile user = userRepo.findByEmail(email);
+        if (Objects.isNull(user)){
+            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        }
+
+        String path = String.format("%s/%s", BucketName.PROFILE_IMAGE.getBucketName(),
+                user.getUsername());
+       if (!StringUtils.isEmpty(user.getUserProfileImageLink())){
+           String key = user.getUserProfileImageLink();
+           return fileStoreService.download(path,key);
+       }
+       // default-profile-picture
+       String defaultPicturePath = String.format("%s/%s", BucketName.PROFILE_IMAGE.getBucketName(),
+               "default-profile-picture");
+       String defaultProfileKey = "default-image.png";
+       return fileStoreService.download(defaultPicturePath,defaultProfileKey);
     }
 
     private Map<String, String> extractMetadata(MultipartFile file) {

@@ -410,4 +410,17 @@ public class UserResource {
 
         return statusModel;
     }
+
+    @ApiOperation(value="The Download User Profile Image Endpoint",
+            notes="${userResource.DownImage.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @GetMapping(path = "download/profile-image/{email}",
+            produces = {MediaType.IMAGE_GIF_VALUE,
+                    MediaType.IMAGE_JPEG_VALUE,
+                    MediaType.IMAGE_PNG_VALUE})
+    public byte[] downloadProfileImage(@PathVariable String email){
+        return userService.downloadUserProfileImage(email);
+    }
 }
