@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("users_app_request") // http://localhost:8080/users_app_request/photo-sharing-app-ws
+@RequestMapping("users_app_request") // http://localhost:8080/users_app_request/web-apps-platform
 public class UserAppRequestResource {
 
     private ModelMapper modelMapper = new ModelMapper();
@@ -30,7 +30,7 @@ public class UserAppRequestResource {
     @Autowired
     private UserAppReqService appReqService;
 
-    //http://localhost:8080/users_app_request/photo-sharing-app-ws/request-app-dev
+    //http://localhost:8080/users_app_request/web-apps-platform/request-app-dev
     @ApiOperation(value="The Request Application Endpoint",
             notes="${userAppRequestResource.RequestAppDevelopment.ApiOperation.Notes}")
     @PostMapping(value = "/request-app-dev",

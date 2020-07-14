@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.util.*;
 
 @RestController
-@RequestMapping("users") // http://localhost:8080/users/photo-sharing-app-ws
+@RequestMapping("users") // http://localhost:8080/users/web-apps-platform
 public class UserResource {
 
     private static Logger LOGGER = LoggerFactory.getLogger(EmailUtility.class);

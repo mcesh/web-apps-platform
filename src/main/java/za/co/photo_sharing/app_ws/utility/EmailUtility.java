@@ -89,7 +89,7 @@ public class EmailUtility {
                     StandardCharsets.UTF_8.name());
             helper.setTo(appRequestDTO.getEmail());
             helper.setText("To confirm your account, please click here : "
-                    + webUrl +"photo-sharing-app-ws/users_app_request/request-app-email-verify?token=" + appRequestDTO.getEmailVerificationToken());
+                    + webUrl +"web-apps-platform/users_app_request/request-app-email-verify?token=" + appRequestDTO.getEmailVerificationToken());
             helper.setFrom(FROM);
             helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
             helper.setSentDate(new Date());
@@ -152,7 +152,7 @@ public class EmailUtility {
                     StandardCharsets.UTF_8.name());
             helper.setTo(Objects.requireNonNull(userDto).getEmail());
             helper.setText("To confirm your account, please click here : "
-                    + "http://157.230.240.44:8080/photo-sharing-app-ws/users/email-verification?token=" + userDto.getEmailVerificationToken());
+                    + "http://157.230.240.44:8080/web-apps-platform/users/email-verification?token=" + userDto.getEmailVerificationToken());
             helper.setFrom(FROM);
             helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
             helper.setSentDate(new Date());
@@ -247,7 +247,7 @@ public class EmailUtility {
                     StandardCharsets.UTF_8.name());
             helper.setTo(userDto.getEmail());
             helper.setText("To confirm your account, please click here : "
-                    + webUrl +"photo-sharing-app-ws/users/email-verification?token=" + userDto.getEmailVerificationToken());
+                    + webUrl +"web-apps-platform/users/email-verification?token=" + userDto.getEmailVerificationToken());
             helper.setFrom(FROM);
             helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
             helper.setSentDate(new Date());

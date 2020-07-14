@@ -44,6 +44,8 @@ import static org.apache.http.entity.ContentType.*;
 @Service
 public class UserServiceImpl implements UserService {
 
+    public static final String DEFAULT_PROFILE_FOLDER = "default-profile-picture";
+    public static final String DEFAULT_PROFILE_KEY = "default-image.png";
     private static String savePath = "C:/Token";
     private static Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -61,8 +63,6 @@ public class UserServiceImpl implements UserService {
     private JavaMailSender mailSender;
     @Autowired
     private PasswordResetRequestRepository resetRequestRepository;
-    /*@Autowired
-    private AppTokenRepository appTokenRepository;*/
     @Autowired
     AuthorityRepository authorityRepository;
     @Autowired
@@ -425,9 +425,8 @@ public class UserServiceImpl implements UserService {
        }
        // default-profile-picture
        String defaultPicturePath = String.format("%s/%s", BucketName.PROFILE_IMAGE.getBucketName(),
-               "default-profile-picture");
-       String defaultProfileKey = "default-image.png";
-       return fileStoreService.download(defaultPicturePath,defaultProfileKey);
+               DEFAULT_PROFILE_FOLDER);
+        return fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
     }
 
     private Map<String, String> extractMetadata(MultipartFile file) {
