@@ -17,7 +17,7 @@ public enum ErrorMessages {
     TOKEN_EXPIRED("Token has expired"),
     TOKEN_NOT_FOUND("Token value not found"),
     NUMBER_NOT_NUMERIC("Please provide digital numbers"),
-    APP_TOKEN_NOT_FOUND("AppToken not found"),
+    APP_TOKEN_NOT_FOUND("Token not found"),
     USER_NOT_AUTHORIZED("User not authorized to use provided appToken"),
     EMAIL_ADDRESS_NOT_FOUND("Email Address not found"),
     AUTHORITY_NOT_APPLICABLE("Requested Authority not Applicable"),

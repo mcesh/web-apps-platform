@@ -9,11 +9,11 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>za.co</groupId>
-	<artifactId>photosharing.app_ws</artifactId>
+	<artifactId>web-apps-platform</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>photosharing.app_ws</name>
+	<name>web-apps-platform</name>
 	<packaging>war</packaging>
-	<description>Photo Sharing Web Application</description>
+	<description>Web Apps Platform Application</description>
 
 	<properties>
 		<java.version>1.8</java.version>

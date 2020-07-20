@@ -71,6 +71,12 @@ public class UserProfile implements Serializable {
     @Column(length = 120)
     private String userProfileImageLink;
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private AuthorityRoleType roleType;
+    @Column(nullable = false)
+    private boolean roleUpdated = false;// TODO find a permanent solution
+
     public UserProfile(Long userId,
                        String username,
                        String firstName,
@@ -126,12 +132,6 @@ public class UserProfile implements Serializable {
     public void setUserRoles(Set<UserRole> userRoles) {
         this.userRoles = userRoles;
     }
-
-    @JsonIgnore
-    @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private AuthorityRoleType roleType;
-    @Column(nullable = false)
-    private boolean roleUpdated = false;// TODO find a permanent solution
 
     public boolean isRoleUpdated() {
         return roleUpdated;

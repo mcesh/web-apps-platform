@@ -115,7 +115,7 @@ public class UserAppReqServiceImpl implements UserAppReqService {
         AppToken byTokenKey = tokenRepository.findByTokenKey(tokenKey);
 
         if (Objects.isNull(byTokenKey)){
-            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(ErrorMessages.APP_TOKEN_NOT_FOUND.getErrorMessage());
         }
         return modelMapper.map(byTokenKey,AppTokenDTO.class);
     }
