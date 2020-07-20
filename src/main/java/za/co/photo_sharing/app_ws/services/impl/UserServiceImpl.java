@@ -75,6 +75,8 @@ public class UserServiceImpl implements UserService {
     private UserService userService;
     @Autowired
     private FileStoreService fileStoreService;
+    @Autowired
+    private UserAppReqRepository appReqRepository;
 
     private ModelMapper modelMapper = new ModelMapper();
     private Predicate<String> isNumeric = str -> str.matches("-?\\d+(\\.\\d+)?");
@@ -95,28 +97,16 @@ public class UserServiceImpl implements UserService {
         }
         Long userId = userIdFactory.buildUserId();
         Long roleKey;
-        List<AppTokenDTO> emails = new ArrayList<>();
-        if (user.getAppToken().equalsIgnoreCase("NORMAL_USER") ||
-                StringUtils.isEmpty(user.getAppToken())) {
+        String appTokeKey;
+        UserAppRequest userAppRequest = appReqRepository.findByEmail(user.getEmail());
+        if (Objects.isNull(userAppRequest)){
+            appTokeKey = "NORMAL_USER";
+        }else {
+            appTokeKey = userAppRequest.getAppToken().getTokenKey();
+        }
+        if (appTokeKey.equalsIgnoreCase("NORMAL_USER")) {
             user.setRoleTypeKey(AuthorityRoleTypeKeys.USER);
         }else {
-            AppTokenDTO tokenDTO = appReqService.findByTokenKey(user.getAppToken());
-            if (Objects.isNull(tokenDTO)){
-                throw new UserServiceException(ErrorMessages.APP_TOKEN_NOT_FOUND.getErrorMessage());
-            }
-            emails.add(tokenDTO);
-            boolean isEmailAssociated = emails.stream().anyMatch(appTokenDTO -> {
-                if (appTokenDTO.getPrimaryEmail().equalsIgnoreCase(user.getEmail())){
-                    return true;
-                }else if (appTokenDTO.getUserAppRequest().getSecondaryEmail().equalsIgnoreCase(user.getEmail())){
-                    return true;
-                }else if (appTokenDTO.getUserAppRequest().getThirdEmail().equalsIgnoreCase(user.getEmail())){
-                    return true;
-                }else return appTokenDTO.getUserAppRequest().getFourthEmail().equalsIgnoreCase(user.getEmail());
-            });
-            if (BooleanUtils.isFalse(isEmailAssociated)){
-                throw new UserServiceException(ErrorMessages.USER_NOT_AUTHORIZED.getErrorMessage());
-            }
             user.setRoleTypeKey(AuthorityRoleTypeKeys.ADMIN);
         }
 

@@ -19,5 +19,4 @@ public class UserDetailsRequestModel {
     private String password;
     private String username;
     private Long cellNumber;
-    private String appToken = "NORMAL_USER";
 }

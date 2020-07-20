@@ -256,7 +256,7 @@ public class EmailUtility {
                     message.getSubject(), message.getSentDate(),
                     message.getAllRecipients());
 
-        }catch (MessagingException e){
+        }catch (Exception    e){
             getLog().info("Email Unsuccessfully sent {}", e.getMessage());
             throw new UserServiceException(ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
         }
