@@ -16,6 +16,8 @@ public class SecurityConstants {
     public static final String PASSWORD_RESET_URL = "/users/password-reset";
     public static final String LOG_OUT_URL = "/users/logout";
     public static final String H2_CONSOLE = "/h2-console/**";
+    public static final String AUTHORITIES_KEY = "scopes";
+    public static final String IS_ADMIN = "admin";
 
     public static String getTokenSecret()
     {

@@ -3,6 +3,7 @@ package za.co.photo_sharing.app_ws.config;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -13,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,9 +22,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import za.co.photo_sharing.app_ws.SpringApplicationContext;
+import za.co.photo_sharing.app_ws.constants.UserRoleTypeKeys;
 import za.co.photo_sharing.app_ws.model.request.UserLoginRequestModel;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
+
+import static za.co.photo_sharing.app_ws.config.SecurityConstants.IS_ADMIN;
+import static za.co.photo_sharing.app_ws.config.SecurityConstants.AUTHORITIES_KEY;
 
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
@@ -60,10 +66,20 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                                             HttpServletResponse res,
                                             FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
-
+        final String authorities = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+         final boolean admin;
+        if (authorities.contains(UserRoleTypeKeys.ROLE_ADMIN)){
+            admin = Boolean.TRUE;
+        }else {
+            admin = Boolean.FALSE;
+        }
         String userName = ((UserPrincipal) auth.getPrincipal()).getUsername();
         String token = Jwts.builder()
                 .setSubject(userName)
+                .claim(IS_ADMIN, admin)
+                .claim(AUTHORITIES_KEY,authorities)
                 .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
                 .compact();
