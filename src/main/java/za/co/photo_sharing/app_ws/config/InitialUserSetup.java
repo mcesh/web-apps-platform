@@ -1,5 +1,7 @@
 package za.co.photo_sharing.app_ws.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -12,12 +14,15 @@ import za.co.photo_sharing.app_ws.entity.Role;
 import za.co.photo_sharing.app_ws.entity.UserRole;
 import za.co.photo_sharing.app_ws.repo.AuthorityRepository;
 import za.co.photo_sharing.app_ws.repo.RoleRepository;
+import za.co.photo_sharing.app_ws.utility.EmailUtility;
 
 import java.util.*;
 
 @Component
+
 public class InitialUserSetup {
 
+    private static Logger LOGGER = LoggerFactory.getLogger(InitialUserSetup.class);
     @Autowired
     AuthorityRepository authorityRepository;
     @Autowired
@@ -25,45 +30,11 @@ public class InitialUserSetup {
 
     @EventListener
     @Transactional
-    public void onApplicationEvent(ApplicationReadyEvent event){
-        System.out.println("From application Ready event...");
-        Authority readAuthority = createAuthority(UserAuthorityTypeKeys.READ_AUTHORITY);
-        Authority writeAuthority = createAuthority(UserAuthorityTypeKeys.WRITE_AUTHORITY);
-        Authority deleteAuthority = createAuthority(UserAuthorityTypeKeys.DELETE_AUTHORITY);
-        Set<Authority> user_authorities = new HashSet<>();
-        user_authorities.add(readAuthority);
-        user_authorities.add(writeAuthority);
-
-        Set<Authority> admin_authorities = new HashSet<>();
-        admin_authorities.add(readAuthority);
-        admin_authorities.add(writeAuthority);
-        admin_authorities.add(deleteAuthority);
-        createRole(UserRoleTypeKeys.ROLE_USER, user_authorities);
-        createRole(UserRoleTypeKeys.ROLE_ADMIN, admin_authorities);
+    public void onApplicationEvent(ApplicationReadyEvent event) {
+        getLog().info("Application running: {} ", event.getTimestamp());
     }
 
-    @Transactional
-    private Authority createAuthority(String name){
-        Authority authority = authorityRepository.findByAuthorityName(name);
-        if (Objects.isNull(authority)){
-            Authority auth = new Authority();
-            auth.setAuthorityName(name);
-            authority = auth;
-            authorityRepository.save(auth);
-        }
-        return authority;
-    }
-
-    @Transactional
-    private Role createRole(String name, Set<Authority> authorities){
-        Role role = roleRepository.findByRoleName(name);
-        if (Objects.isNull(role)){
-            Role role_ = new Role();
-            role_.setRoleName(name);
-            role_.setAuthorities(authorities);
-            role = role_;
-            roleRepository.save(role_);
-        }
-        return role;
+    public static Logger getLog() {
+        return LOGGER;
     }
 }
