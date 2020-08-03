@@ -27,13 +27,14 @@ import za.co.photo_sharing.app_ws.model.request.UserLoginRequestModel;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
-import static za.co.photo_sharing.app_ws.config.SecurityConstants.IS_ADMIN;
-import static za.co.photo_sharing.app_ws.config.SecurityConstants.AUTHORITIES_KEY;
+import static za.co.photo_sharing.app_ws.config.SecurityConstants.*;
 
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
 
     private String contentType;
+
+    private UserService userService;
 
     public AuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
@@ -69,25 +70,26 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         final String authorities = auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
-         final boolean admin;
+        String userName = ((UserPrincipal) auth.getPrincipal()).getUsername();
+        userService = (UserService) SpringApplicationContext.getBean("userServiceImpl");
+        UserDto user = userService.getUser(userName);
+        final boolean admin;
         if (authorities.contains(UserRoleTypeKeys.ROLE_ADMIN)){
             admin = Boolean.TRUE;
         }else {
             admin = Boolean.FALSE;
         }
-        String userName = ((UserPrincipal) auth.getPrincipal()).getUsername();
         String token = Jwts.builder()
                 .setSubject(userName)
                 .claim(IS_ADMIN, admin)
+                .claim(NAME,user.getFirstName())
                 .claim(AUTHORITIES_KEY,authorities)
                 .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
                 .compact();
-        UserService userService = (UserService) SpringApplicationContext.getBean("userServiceImpl");
-        UserDto userDto = userService.getUser(userName);
 
         res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
-        res.addHeader("UserID", userDto.getUserId().toString());
+        res.addHeader("UserID", user.getUserId().toString());
 
     }
 
