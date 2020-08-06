@@ -82,7 +82,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String token = Jwts.builder()
                 .setSubject(userName)
                 .claim(IS_ADMIN, admin)
-                .claim(NAME,user.getFirstName())
+                .claim(NAME,user.getFirstName() + " " + user.getLastName())
                 .claim(AUTHORITIES_KEY,authorities)
                 .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
