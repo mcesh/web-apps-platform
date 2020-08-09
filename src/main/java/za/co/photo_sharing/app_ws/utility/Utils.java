@@ -7,7 +7,10 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.config.SecurityConstants;
+import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
+import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -15,11 +18,11 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
+import static org.apache.http.entity.ContentType.*;
 
 @Component
 public class Utils {
@@ -157,5 +160,19 @@ public class Utils {
 
         }
 
+    }
+
+    public void isImage(MultipartFile file) {
+        if (!Arrays.asList(IMAGE_JPEG.getMimeType(), IMAGE_GIF.getMimeType(), IMAGE_PNG.getMimeType())
+                .contains(file.getContentType())){
+            throw new UserServiceException(ErrorMessages.INCORRECT_IMAGE_FORMAT.getErrorMessage());
+        }
+    }
+
+    public Map<String, String> extractMetadata(MultipartFile file) {
+        Map<String,String> metadata = new HashMap<>();
+        metadata.put("Content-Type",file.getContentType());
+        metadata.put("Content-Length", String.valueOf(file.getSize()));
+        return metadata;
     }
 }

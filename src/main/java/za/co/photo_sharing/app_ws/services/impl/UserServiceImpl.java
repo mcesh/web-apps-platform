@@ -387,8 +387,8 @@ public class UserServiceImpl implements UserService {
     public void uploadUserProfileImage(String email, MultipartFile file) {
         UserProfile userProfile = userRepo.findByEmail(email);
         getUser(userProfile);
-        isImage(file);
-        Map<String, String> metadata = extractMetadata(file);
+        utils.isImage(file);
+        Map<String, String> metadata = utils.extractMetadata(file);
 
         String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
                 PROFILE_IMAGES, userProfile.getUsername());
@@ -422,20 +422,6 @@ public class UserServiceImpl implements UserService {
        String defaultPicturePath = String.format("%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
                DEFAULT_PROFILE_FOLDER);
         return fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
-    }
-
-    private Map<String, String> extractMetadata(MultipartFile file) {
-        Map<String,String> metadata = new HashMap<>();
-        metadata.put("Content-Type",file.getContentType());
-        metadata.put("Content-Length", String.valueOf(file.getSize()));
-        return metadata;
-    }
-
-    private void isImage(MultipartFile file) {
-        if (!Arrays.asList(IMAGE_JPEG.getMimeType(), IMAGE_GIF.getMimeType(), IMAGE_PNG.getMimeType())
-                .contains(file.getContentType())){
-            throw new UserServiceException(ErrorMessages.INCORRECT_IMAGE_FORMAT.getErrorMessage());
-        }
     }
 
     private void getUser(UserProfile userProfile) {
