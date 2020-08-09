@@ -2,7 +2,7 @@ package za.co.photo_sharing.app_ws.constants;
 
 public enum BucketName {
 
-    PROFILE_IMAGE("photoapp");
+    WEB_APP_PLATFORM_FILE_STORAGE_SPACE("photoapp");
 
     private String bucketName;
 

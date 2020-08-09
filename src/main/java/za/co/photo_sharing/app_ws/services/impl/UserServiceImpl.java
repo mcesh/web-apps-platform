@@ -1,6 +1,5 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +45,10 @@ public class UserServiceImpl implements UserService {
 
     public static final String DEFAULT_PROFILE_FOLDER = "default-profile-picture";
     public static final String DEFAULT_PROFILE_KEY = "default-image.png";
+    public static final String PROFILE_IMAGES = "PROFILE_IMAGES";
+    public static final String BLOG_IMAGES = "BLOG_IMAGES";
+    public static final String GALLERY_IMAGES = "GALLERY_IMAGES";
+    public static final String IMAGE_SLIDER = "GALLERY_IMAGES";
     private static String savePath = "C:/Token";
     private static Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -387,7 +390,8 @@ public class UserServiceImpl implements UserService {
         isImage(file);
         Map<String, String> metadata = extractMetadata(file);
 
-        String path = String.format("%s/%s", BucketName.PROFILE_IMAGE.getBucketName(), userProfile.getUsername());
+        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
+                PROFILE_IMAGES, userProfile.getUsername());
 
         String fileName = String.format("%s-%s", file.getOriginalFilename(), UUID.randomUUID().toString().substring(0, 7));
 
@@ -407,14 +411,15 @@ public class UserServiceImpl implements UserService {
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
 
-        String path = String.format("%s/%s", BucketName.PROFILE_IMAGE.getBucketName(),
+        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
+                PROFILE_IMAGES,
                 user.getUsername());
        if (!StringUtils.isEmpty(user.getUserProfileImageLink())){
            String key = user.getUserProfileImageLink();
            return fileStoreService.download(path,key);
        }
        // default-profile-picture
-       String defaultPicturePath = String.format("%s/%s", BucketName.PROFILE_IMAGE.getBucketName(),
+       String defaultPicturePath = String.format("%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
                DEFAULT_PROFILE_FOLDER);
         return fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
     }
