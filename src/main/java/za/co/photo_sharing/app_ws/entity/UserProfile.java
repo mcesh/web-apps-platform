@@ -1,7 +1,10 @@
 package za.co.photo_sharing.app_ws.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -77,6 +80,10 @@ public class UserProfile implements Serializable {
     @Column(nullable = false)
     private boolean roleUpdated = false;// TODO find a permanent solution
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<ImageGallery> imageGallery;
+
     public UserProfile(Long userId,
                        String username,
                        String firstName,
@@ -93,7 +100,9 @@ public class UserProfile implements Serializable {
                        Set<UserRole> userRoles,
                        Long roleTypeKey,
                        String userProfileImageLink,
-                       AuthorityRoleType roleType, boolean roleUpdated) {
+                       AuthorityRoleType roleType,
+                       boolean roleUpdated,
+                       Set<ImageGallery> imageGallery) {
         this.userId = userId;
         this.username = username;
         this.firstName = firstName;
@@ -112,6 +121,7 @@ public class UserProfile implements Serializable {
         this.userProfileImageLink = userProfileImageLink;
         this.roleType = roleType;
         this.roleUpdated = roleUpdated;
+        this.imageGallery = imageGallery;
     }
 
     public UserProfile() {
@@ -269,6 +279,14 @@ public class UserProfile implements Serializable {
         this.userProfileImageLink = userProfileImageLink;
     }
 
+    public Set<ImageGallery> getImageGallery() {
+        return imageGallery;
+    }
+
+    public void setImageGallery(Set<ImageGallery> imageGallery) {
+        this.imageGallery = imageGallery;
+    }
+
     @Override
     public String toString() {
         return "UserProfile{" +
@@ -291,6 +309,7 @@ public class UserProfile implements Serializable {
                 ", userProfileImageLink='" + userProfileImageLink + '\'' +
                 ", roleType=" + roleType +
                 ", roleUpdated=" + roleUpdated +
+                ", imageGallery=" + imageGallery +
                 '}';
     }
 
@@ -317,14 +336,31 @@ public class UserProfile implements Serializable {
                 Objects.equals(getUserRoles(),that.getUserRoles()) &&
                 Objects.equals(getRoleTypeKey(),that.getRoleTypeKey()) &&
                 Objects.equals(getUserProfileImageLink(), that.getUserProfileImageLink()) &&
+                Objects.equals(getImageGallery(), that.getImageGallery()) &&
                 Objects.equals(getRoleType(),that.getRoleType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getUserId(), getUsername(), getFirstName(), getLastName(), getEmail(),
-                getEncryptedPassword(), getEmailVerificationToken(), getEmailVerificationStatus(),
-                getCellNumber(), getRegistrationDate(), getAddresses(), getCompany(), getResetToken(),
-                getUserRoles(), getRoleTypeKey(), getRoleType(), isRoleUpdated(), getUserProfileImageLink());
+        return Objects.hash(getId(),
+                getUserId(),
+                getUsername(),
+                getFirstName(),
+                getLastName(),
+                getEmail(),
+                getEncryptedPassword(),
+                getEmailVerificationToken(),
+                getEmailVerificationStatus(),
+                getCellNumber(),
+                getRegistrationDate(),
+                getAddresses(),
+                getCompany(),
+                getResetToken(),
+                getUserRoles(),
+                getRoleTypeKey(),
+                getRoleType(),
+                isRoleUpdated(),
+                getUserProfileImageLink(),
+                getImageGallery());
     }
 }

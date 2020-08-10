@@ -1,6 +1,7 @@
 package za.co.photo_sharing.app_ws.shared.dto;
 
 import lombok.*;
+import za.co.photo_sharing.app_ws.entity.ImageGallery;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -34,6 +35,7 @@ public class UserDto implements Serializable {
     private Set<UserRolesDto> userRoles;
     private Long roleTypeKey;
     private String userProfileImageLink;
+    private Set<ImageGalleryDTO> imageGallery;
 
 
 }

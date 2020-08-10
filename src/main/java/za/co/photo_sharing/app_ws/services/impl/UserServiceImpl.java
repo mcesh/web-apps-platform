@@ -405,6 +405,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void uploadUserGalleryImages(String email, MultipartFile file, String caption) {
+        UserProfile userProfile = userRepo.findByEmail(email);
+        getUser(userProfile);
+        utils.isImage(file);
+        Map<String, String> metadata = utils.extractMetadata(file);
+
+        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
+                GALLERY_IMAGES, userProfile.getUsername());
+
+        String fileName = String.format("%s-%s", file.getOriginalFilename(), UUID.randomUUID().toString().substring(0, 7));
+
+        try {
+            fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
+            Set<ImageGallery> imageGalleries = new HashSet<>();
+            ImageGallery imageGallery = new ImageGallery();
+            imageGallery.setCaption(caption);
+            imageGallery.setUserId(userProfile.getUserId());
+            imageGallery.setImageUrl(fileName);
+            imageGallery.setUserDetails(userProfile);
+            imageGalleries.add(imageGallery);
+            userProfile.setImageGallery(imageGalleries);
+            userRepo.save(userProfile);
+        }catch (IOException e){
+            throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
+        }
+    }
+
+    @Override
     public byte[] downloadUserProfileImage(String email) {
         UserProfile user = userRepo.findByEmail(email);
         if (Objects.isNull(user)){

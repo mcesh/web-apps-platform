@@ -28,4 +28,5 @@ public class UserRest {
     private CompanyRest company;
     private Boolean emailVerificationStatus;
     private String userProfileImageLink;
+    private Set<ImageGalleryRest> imageGallery;
 }
