@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
+import com.google.common.primitives.Bytes;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,19 +27,19 @@ import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.*;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.services.UserService;
-import za.co.photo_sharing.app_ws.shared.dto.*;
+import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
+import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.EmailUtility;
 import za.co.photo_sharing.app_ws.utility.UserIdFactory;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.mail.MessagingException;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static org.apache.http.entity.ContentType.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -430,6 +431,31 @@ public class UserServiceImpl implements UserService {
         }catch (IOException e){
             throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
         }
+    }
+
+    @Override
+    public List<byte[]> downloadUserGalleryImages(String email) {
+
+        UserProfile user = userRepo.findByEmail(email);
+        if (Objects.isNull(user)){
+            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        }
+
+        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
+                GALLERY_IMAGES,
+                user.getUsername());
+        byte[] images;
+        List<byte[]> imageResults = new ArrayList<>();
+        if (user.getImageGallery().size() > 0){
+            user.getImageGallery().forEach(imageGallery -> {
+                String imageUrl = imageGallery.getImageUrl();
+                byte[] bytes = fileStoreService.downloadUserImages(path, imageUrl);
+                imageResults.add(bytes);
+
+            });
+
+        }
+        return imageResults;
     }
 
     @Override
