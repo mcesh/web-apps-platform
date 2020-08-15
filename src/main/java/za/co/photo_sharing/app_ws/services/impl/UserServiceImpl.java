@@ -433,6 +433,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Set<za.co.photo_sharing.app_ws.model.response.ImageGallery> downloadUserGalleryImages(String email) {
+        UserProfile userProfile = userRepo.findByEmail(email);
+        getUser(userProfile);
+        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
+                GALLERY_IMAGES,
+                userProfile.getUsername());
+        Set<za.co.photo_sharing.app_ws.model.response.ImageGallery>  imageGalleries = new HashSet<>();
+        if (userProfile.getImageGallery().size() > 0){
+            userProfile.getImageGallery().forEach(imageGallery -> {
+                String imageUrl = imageGallery.getImageUrl();
+                byte[] bytes = fileStoreService.downloadUserImages(path, imageUrl);
+                za.co.photo_sharing.app_ws.model.response.ImageGallery gallery = new za.co.photo_sharing.app_ws.model.response.ImageGallery();
+                gallery.setCaption(imageGallery.getCaption());
+                gallery.setImage(bytes);
+                imageGalleries.add(gallery);
+
+            });
+
+        }
+        return imageGalleries;
+    }
+
+    @Override
     public byte[] downloadUserProfileImage(String email) {
         UserProfile user = userRepo.findByEmail(email);
         if (Objects.isNull(user)){

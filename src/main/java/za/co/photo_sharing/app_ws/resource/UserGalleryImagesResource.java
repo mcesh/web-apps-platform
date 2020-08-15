@@ -10,13 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import za.co.photo_sharing.app_ws.model.response.OperationStatusModel;
-import za.co.photo_sharing.app_ws.model.response.RequestOperationName;
-import za.co.photo_sharing.app_ws.model.response.RequestOperationStatus;
-import za.co.photo_sharing.app_ws.model.response.UserRest;
+import za.co.photo_sharing.app_ws.model.response.*;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.EmailUtility;
+
+import java.util.Set;
 
 @RestController
 @RequestMapping("api/gallery") // http://localhost:8080/users/web-apps-platform
@@ -46,6 +45,23 @@ public class UserGalleryImagesResource {
         statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
 
         return statusModel;
+    }
+
+    @ApiOperation(value="The Download User Gallery Images Endpoint",
+            notes="${userResource.DownloadImages.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}",
+                    paramType="header")
+    })
+    @GetMapping(path = "download/gallery-images/{email}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,})
+     public Set<ImageGallery> downloadGalleryImages(@PathVariable String email){
+
+        getLog().info("Retrieving a list of images...");
+        Set<ImageGallery> galleryImages = userService.downloadUserGalleryImages(email);
+        getLog().info("Images retrieved {} ", galleryImages.size());
+        return galleryImages;
+
     }
 
     public static Logger getLog() {
