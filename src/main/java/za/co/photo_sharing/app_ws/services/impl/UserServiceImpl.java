@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
+
 import com.google.common.primitives.Bytes;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ import za.co.photo_sharing.app_ws.utility.Utils;
 import javax.mail.MessagingException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Predicate;
@@ -434,7 +436,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<byte[]> downloadUserGalleryImages(String email) {
+    public Set<za.co.photo_sharing.app_ws.model.response.ImageGallery>  downloadUserGalleryImages(String email) {
 
         UserProfile user = userRepo.findByEmail(email);
         if (Objects.isNull(user)){
@@ -445,12 +447,15 @@ public class UserServiceImpl implements UserService {
                 GALLERY_IMAGES,
                 user.getUsername());
         byte[] images;
-        List<byte[]> imageResults = new ArrayList<>();
+        Set<za.co.photo_sharing.app_ws.model.response.ImageGallery>  imageResults = new HashSet<>();
         if (user.getImageGallery().size() > 0){
             user.getImageGallery().forEach(imageGallery -> {
                 String imageUrl = imageGallery.getImageUrl();
                 byte[] bytes = fileStoreService.downloadUserImages(path, imageUrl);
-                imageResults.add(bytes);
+                za.co.photo_sharing.app_ws.model.response.ImageGallery gallery = new za.co.photo_sharing.app_ws.model.response.ImageGallery();
+                gallery.setCaption(imageGallery.getCaption());
+                gallery.setImage(bytes);
+                imageResults.add(gallery);
 
             });
 

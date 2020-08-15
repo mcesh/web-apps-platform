@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import za.co.photo_sharing.app_ws.model.response.ImageGallery;
 import za.co.photo_sharing.app_ws.model.response.OperationStatusModel;
 import za.co.photo_sharing.app_ws.model.response.RequestOperationName;
 import za.co.photo_sharing.app_ws.model.response.RequestOperationStatus;
@@ -19,7 +20,9 @@ import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.utility.EmailUtility;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("api/gallery") // http://localhost:8080/users/web-apps-platform
@@ -51,32 +54,22 @@ public class UserGalleryImagesResource {
     }
 
     @ApiOperation(value="The Download User Gallery Images Endpoint",
-            notes="${userResource.DownImage.ApiOperation.Notes}")
+            notes="${userResource.DownloadImages.ApiOperation.Notes}")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
     })
-    @GetMapping(path = "download/gallery-image/{email}",
+    @GetMapping(path = "download/gallery-images/{email}",
             produces = {MediaType.IMAGE_GIF_VALUE,
                     MediaType.IMAGE_JPEG_VALUE,
                     MediaType.IMAGE_PNG_VALUE,
                     MediaType.APPLICATION_OCTET_STREAM_VALUE,
                     MediaType.TEXT_PLAIN_VALUE,
                     MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<byte[]>> downloadProfileImage(@PathVariable String email){
-        HttpHeaders headers = new HttpHeaders();
-        ArrayList<MediaType> acceptableMediaTypes = new ArrayList<>();
-        acceptableMediaTypes.add(MediaType.IMAGE_JPEG);
-        acceptableMediaTypes.add(MediaType.APPLICATION_OCTET_STREAM);
-        acceptableMediaTypes.add(MediaType.IMAGE_PNG    );
-
-
+    public Set<ImageGallery> downloadGalleryImages(@PathVariable String email){
         getLog().info("Retrieving a list of images...");
-        List<byte[]> bytes = userService.downloadUserGalleryImages(email);
+        Set<ImageGallery> bytes = userService.downloadUserGalleryImages(email);
         getLog().info("Images retrieved {} ", bytes.size());
-        headers.setAccept(acceptableMediaTypes);
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_PNG)
-                .body(bytes);
+        return bytes;
     }
 
     private MediaType contentType(String keyname) {
