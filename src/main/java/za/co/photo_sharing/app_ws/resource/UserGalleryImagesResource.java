@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import za.co.photo_sharing.app_ws.model.response.RequestOperationStatus;
 import za.co.photo_sharing.app_ws.model.response.UserRest;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
+import za.co.photo_sharing.app_ws.utility.EmailUtility;
 
 @RestController
 @RequestMapping("api/gallery") // http://localhost:8080/users/web-apps-platform
@@ -22,6 +25,7 @@ public class UserGalleryImagesResource {
     @Autowired
     private UserService userService;
     private ModelMapper modelMapper = new ModelMapper();
+    private static Logger LOGGER = LoggerFactory.getLogger(UserGalleryImagesResource.class);
 
     @ApiOperation(value="The Upload User Gallery Images Endpoint",
             notes="${userResource.GalleryImages.ApiOperation.Notes}")
@@ -37,9 +41,14 @@ public class UserGalleryImagesResource {
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.IMAGE_UPLOAD.name());
         statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
+        getLog().info("Uploading Image for {}, caption is {} " , email, caption);
         userService.uploadUserGalleryImages(email,file, caption);
         statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
 
         return statusModel;
+    }
+
+    public static Logger getLog() {
+        return LOGGER;
     }
 }

@@ -393,7 +393,7 @@ public class UserServiceImpl implements UserService {
         String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
                 PROFILE_IMAGES, userProfile.getUsername());
 
-        String fileName = String.format("%s-%s", file.getOriginalFilename(), UUID.randomUUID().toString().substring(0, 7));
+        String fileName = String.format("%s-%s", UUID.randomUUID().toString().substring(0, 7), file.getOriginalFilename());
 
         try {
             fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
@@ -414,7 +414,7 @@ public class UserServiceImpl implements UserService {
         String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
                 GALLERY_IMAGES, userProfile.getUsername());
 
-        String fileName = String.format("%s-%s", file.getOriginalFilename(), UUID.randomUUID().toString().substring(0, 7));
+        String fileName = String.format("%s-%s", UUID.randomUUID().toString().substring(0, 7), file.getOriginalFilename());
 
         try {
             fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
