@@ -33,6 +33,7 @@ import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Predicate;
@@ -456,7 +457,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public byte[] downloadUserProfileImage(String email) {
+    public String downloadUserProfileImage(String email) {
         UserProfile user = userRepo.findByEmail(email);
         if (Objects.isNull(user)){
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
@@ -467,12 +468,14 @@ public class UserServiceImpl implements UserService {
                 user.getUsername());
        if (!StringUtils.isEmpty(user.getUserProfileImageLink())){
            String key = user.getUserProfileImageLink();
-           return fileStoreService.download(path,key);
+           byte[] profilePic = fileStoreService.download(path, key);
+           return Base64.getEncoder().encodeToString(profilePic);
        }
        // default-profile-picture
        String defaultPicturePath = String.format("%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
                DEFAULT_PROFILE_FOLDER);
-        return fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
+        byte[] defaultProfilePic = fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
+        return Base64.getEncoder().encodeToString(defaultProfilePic);
     }
 
     private void getUser(UserProfile userProfile) {

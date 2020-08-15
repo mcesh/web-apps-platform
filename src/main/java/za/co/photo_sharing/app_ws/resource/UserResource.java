@@ -417,10 +417,11 @@ public class UserResource {
             @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
     })
     @GetMapping(path = "download/profile-image/{email}",
-            produces = {MediaType.IMAGE_GIF_VALUE,
-                    MediaType.IMAGE_JPEG_VALUE,
-                    MediaType.IMAGE_PNG_VALUE})
-    public byte[] downloadProfileImage(@PathVariable String email){
-        return userService.downloadUserProfileImage(email);
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public String downloadProfileImage(@PathVariable String email){
+        getLog().info("Getting Profile Picture for {} " , email);
+        String profileImage = userService.downloadUserProfileImage(email);
+        getLog().info("Profile Picture: {} ", profileImage);
+        return profileImage;
     }
 }

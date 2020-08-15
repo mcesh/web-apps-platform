@@ -35,5 +35,5 @@ public interface UserService extends UserDetailsService {
     void uploadUserProfileImage(String email, MultipartFile file);
     void uploadUserGalleryImages(String email, MultipartFile file,String caption);
     Set<ImageGallery> downloadUserGalleryImages(String email);
-    byte[] downloadUserProfileImage(String email);
+    String downloadUserProfileImage(String email);
 }
