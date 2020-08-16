@@ -33,7 +33,7 @@ public interface UserService extends UserDetailsService {
     UserDto updateUserRoles(String email);
     Role findUserRoleByName(String name);
     void uploadUserProfileImage(String email, MultipartFile file);
-    void uploadUserGalleryImages(String email, MultipartFile file,String caption);
+    void uploadUserGalleryImages(String email, MultipartFile file,String caption, String categoryName);
     Set<ImageGallery> downloadUserGalleryImages(String email);
     String downloadUserProfileImage(String email);
 }

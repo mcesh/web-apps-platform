@@ -22,8 +22,10 @@ import za.co.photo_sharing.app_ws.constants.BucketName;
 import za.co.photo_sharing.app_ws.constants.UserRoleTypeKeys;
 import za.co.photo_sharing.app_ws.entity.*;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
+import za.co.photo_sharing.app_ws.model.response.CategoryRest;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.*;
+import za.co.photo_sharing.app_ws.services.CategoryService;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.*;
@@ -33,13 +35,11 @@ import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static org.apache.http.entity.ContentType.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -81,6 +81,10 @@ public class UserServiceImpl implements UserService {
     private FileStoreService fileStoreService;
     @Autowired
     private UserAppReqRepository appReqRepository;
+    @Autowired
+    private CategoryService categoryService;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     private ModelMapper modelMapper = new ModelMapper();
     private Predicate<String> isNumeric = str -> str.matches("-?\\d+(\\.\\d+)?");
@@ -387,7 +391,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void uploadUserProfileImage(String email, MultipartFile file) {
         UserProfile userProfile = userRepo.findByEmail(email);
-        getUser(userProfile);
+        utils.getUser(userProfile);
         utils.isImage(file);
         Map<String, String> metadata = utils.extractMetadata(file);
 
@@ -406,28 +410,38 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void uploadUserGalleryImages(String email, MultipartFile file, String caption) {
+    public void uploadUserGalleryImages(String email, MultipartFile file, String caption, String categoryName) {
         UserProfile userProfile = userRepo.findByEmail(email);
-        getUser(userProfile);
+        utils.getUser(userProfile);
         utils.isImage(file);
+        String username = userProfile.getUsername();
+        Category categoryNameResponse = categoryService.findByUsernameAndCategoryName(username, categoryName);
+        if (Objects.isNull(categoryNameResponse)){
+            throw new UserServiceException(ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
+        }
         Map<String, String> metadata = utils.extractMetadata(file);
 
         String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
-                GALLERY_IMAGES, userProfile.getUsername());
+                GALLERY_IMAGES, username);
 
         String fileName = String.format("%s-%s", UUID.randomUUID().toString().substring(0, 7), file.getOriginalFilename());
 
         try {
             fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
+            Category galleryCategory =
+                    categoryService.findByUsernameAndCategoryName(username,categoryName);
+
             Set<ImageGallery> imageGalleries = new HashSet<>();
             ImageGallery imageGallery = new ImageGallery();
             imageGallery.setCaption(caption);
             imageGallery.setUserId(userProfile.getUserId());
             imageGallery.setImageUrl(fileName);
             imageGallery.setUserDetails(userProfile);
+            imageGallery.setCategory(galleryCategory);
             imageGalleries.add(imageGallery);
             userProfile.setImageGallery(imageGalleries);
             userRepo.save(userProfile);
+
         }catch (IOException e){
             throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
         }
@@ -436,18 +450,27 @@ public class UserServiceImpl implements UserService {
     @Override
     public Set<za.co.photo_sharing.app_ws.model.response.ImageGallery> downloadUserGalleryImages(String email) {
         UserProfile userProfile = userRepo.findByEmail(email);
-        getUser(userProfile);
+        utils.getUser(userProfile);
         String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
                 GALLERY_IMAGES,
                 userProfile.getUsername());
         Set<za.co.photo_sharing.app_ws.model.response.ImageGallery>  imageGalleries = new HashSet<>();
         if (userProfile.getImageGallery().size() > 0){
             userProfile.getImageGallery().forEach(imageGallery -> {
+                CategoryRest categoryRest = new CategoryRest();
+                String categoryName;
                 String imageUrl = imageGallery.getImageUrl();
+                if (imageGallery.getCategory()!=null){
+                    categoryName = imageGallery.getCategory().getName();
+                }else {
+                    categoryName = "";
+                }
+                categoryRest.setName(categoryName);
                 byte[] bytes = fileStoreService.downloadUserImages(path, imageUrl);
                 za.co.photo_sharing.app_ws.model.response.ImageGallery gallery = new za.co.photo_sharing.app_ws.model.response.ImageGallery();
                 gallery.setCaption(imageGallery.getCaption());
                 gallery.setImage(bytes);
+                gallery.setCategory(categoryRest);
                 imageGalleries.add(gallery);
 
             });
@@ -476,12 +499,6 @@ public class UserServiceImpl implements UserService {
                DEFAULT_PROFILE_FOLDER);
         byte[] defaultProfilePic = fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
         return Base64.getEncoder().encodeToString(defaultProfilePic);
-    }
-
-    private void getUser(UserProfile userProfile) {
-        if (Objects.isNull(userProfile)){
-            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
-        }
     }
 
     private Set<AddressEntity> buildAddresses(AddressDTO addressDTO, UserProfile user) {

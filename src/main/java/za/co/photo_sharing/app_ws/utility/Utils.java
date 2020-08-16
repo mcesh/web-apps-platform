@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.config.SecurityConstants;
+import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 
@@ -174,5 +175,11 @@ public class Utils {
         metadata.put("Content-Type",file.getContentType());
         metadata.put("Content-Length", String.valueOf(file.getSize()));
         return metadata;
+    }
+
+    public void getUser(UserProfile userProfile) {
+        if (Objects.isNull(userProfile)){
+            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        }
     }
 }

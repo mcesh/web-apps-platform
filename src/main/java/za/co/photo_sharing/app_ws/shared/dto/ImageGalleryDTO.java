@@ -15,4 +15,5 @@ public class ImageGalleryDTO {
     private Long userId;
     private String imageUrl;
     private UserDto userDetails;
+    private CategoryDTO category;
 }
