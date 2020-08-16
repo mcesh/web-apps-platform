@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ImageGallery {
+public class CategoryRest {
 
-    private String caption;
-    private CategoryRest category;
-    private byte[] image;
+    private String name;
 }

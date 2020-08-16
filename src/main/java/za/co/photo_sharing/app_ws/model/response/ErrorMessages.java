@@ -23,7 +23,9 @@ public enum ErrorMessages {
     AUTHORITY_NOT_APPLICABLE("Requested Authority not Applicable"),
     ERROR_SENDING_EMAIL("An Exception occurred while sending mail"),
     ERROR_UPLOADING("Cannot Upload Empty file"),
-    INCORRECT_IMAGE_FORMAT("File must me an image");
+    INCORRECT_IMAGE_FORMAT("File must me an image"),
+    CATEGORY_NOT_FOUND("Category not found"),
+    CATEGORY_ALREADY_EXISTS("Category already exists");
 
 
     private String errorMessage;

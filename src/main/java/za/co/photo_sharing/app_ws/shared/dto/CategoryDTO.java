@@ -1,4 +1,4 @@
-package za.co.photo_sharing.app_ws.model.response;
+package za.co.photo_sharing.app_ws.shared.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ImageGallery {
+public class CategoryDTO {
 
-    private String caption;
-    private CategoryRest category;
-    private byte[] image;
+    private String name;
 }
