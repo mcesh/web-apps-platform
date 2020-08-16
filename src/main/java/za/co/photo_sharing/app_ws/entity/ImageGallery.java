@@ -36,8 +36,10 @@ public class ImageGallery implements Serializable {
     private UserProfile userDetails;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "category_id")
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumns({
+            @JoinColumn(name="category_id")
+    })
     private Category category;
 
     public Category getCategory() {

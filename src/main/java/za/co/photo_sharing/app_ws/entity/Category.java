@@ -1,8 +1,13 @@
 package za.co.photo_sharing.app_ws.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.util.Set;
 
 @Entity
 @Table(name = "category")
@@ -16,6 +21,10 @@ public class Category implements Serializable {
     private String name;
     @Column(nullable = false, length = 15)
     private String username;
+    
+    @JsonIgnore
+    @OneToMany(mappedBy = "category")
+    private Set<ImageGallery> imageGallery;
 
     public Long getId() {
         return id;
@@ -39,5 +48,13 @@ public class Category implements Serializable {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public Set<ImageGallery> getImageGallery() {
+        return imageGallery;
+    }
+
+    public void setImageGallery(Set<ImageGallery> imageGallery) {
+        this.imageGallery = imageGallery;
     }
 }

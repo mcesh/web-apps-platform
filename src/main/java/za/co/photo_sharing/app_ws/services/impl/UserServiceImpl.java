@@ -83,6 +83,8 @@ public class UserServiceImpl implements UserService {
     private UserAppReqRepository appReqRepository;
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     private ModelMapper modelMapper = new ModelMapper();
     private Predicate<String> isNumeric = str -> str.matches("-?\\d+(\\.\\d+)?");
@@ -412,32 +414,34 @@ public class UserServiceImpl implements UserService {
         UserProfile userProfile = userRepo.findByEmail(email);
         utils.getUser(userProfile);
         utils.isImage(file);
-        Category categoryNameResponse = categoryService.findByUsernameAndCategoryName(userProfile.getUsername(), categoryName);
+        String username = userProfile.getUsername();
+        Category categoryNameResponse = categoryService.findByUsernameAndCategoryName(username, categoryName);
         if (Objects.isNull(categoryNameResponse)){
             throw new UserServiceException(ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }
         Map<String, String> metadata = utils.extractMetadata(file);
 
         String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
-                GALLERY_IMAGES, userProfile.getUsername());
+                GALLERY_IMAGES, username);
 
         String fileName = String.format("%s-%s", UUID.randomUUID().toString().substring(0, 7), file.getOriginalFilename());
 
         try {
             fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
+            Category galleryCategory =
+                    categoryService.findByUsernameAndCategoryName(username,categoryName);
+
             Set<ImageGallery> imageGalleries = new HashSet<>();
-            Category category = new Category();
-            category.setName(categoryNameResponse.getName());
-            category.setUsername(userProfile.getUsername());
             ImageGallery imageGallery = new ImageGallery();
             imageGallery.setCaption(caption);
             imageGallery.setUserId(userProfile.getUserId());
             imageGallery.setImageUrl(fileName);
             imageGallery.setUserDetails(userProfile);
-            imageGallery.setCategory(category);
+            imageGallery.setCategory(galleryCategory);
             imageGalleries.add(imageGallery);
             userProfile.setImageGallery(imageGalleries);
             userRepo.save(userProfile);
+
         }catch (IOException e){
             throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
         }
