@@ -12,6 +12,7 @@ import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.rmi.UnknownHostException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -43,7 +44,7 @@ public class FileStoreService {
         try {
             S3Object object = s3.getObject(path, key);
             return IOUtils.toByteArray(object.getObjectContent());
-        } catch (AmazonServiceException | IOException e) {
+        } catch (Exception e) {
             throw new IllegalStateException("Failed to download file to s3", e);
         }
     }

@@ -3,20 +3,18 @@ package za.co.photo_sharing.app_ws.service.impl;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import za.co.photo_sharing.app_ws.entity.AddressEntity;
-import za.co.photo_sharing.app_ws.entity.CompanyEntity;
-import za.co.photo_sharing.app_ws.entity.UserProfile;
+import za.co.photo_sharing.app_ws.entity.*;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
+import za.co.photo_sharing.app_ws.repo.RoleRepository;
+import za.co.photo_sharing.app_ws.repo.UserAppReqRepository;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
+import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.services.impl.UserServiceImpl;
 import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.CompanyDTO;
@@ -55,7 +53,11 @@ public class UserServiceImplTest {
     String emailVerificationToken = "etYHNBAHA252285125-4514554124GThasghasgjczdbchxdc";
     private String webUrl;
     @InjectMocks
-    private UserServiceImpl userService;
+    @Spy
+    private UserServiceImpl userServiceImpl;
+
+    @Mock
+    private UserService service;
     @Mock
     private UserRepo userRepository;
     @Mock
@@ -64,6 +66,10 @@ public class UserServiceImplTest {
     private UserIdFactory userIdFactory;
     @Mock
     private EmailUtility emailUtility;
+    @Mock
+    private UserAppReqRepository appReqRepository;
+    @Mock
+    private RoleRepository roleRepository;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -80,19 +86,48 @@ public class UserServiceImplTest {
         when(utils.generateAddressId(anyInt())).thenReturn("jhshcjcjc12");
         when(userIdFactory.buildUserId()).thenReturn(userId);
         when(bCryptPasswordEncoder.encode(anyString())).thenReturn(encryptedPassword);
+        when(roleRepository.findByRoleName(anyString())).thenReturn(buildRole());
+        when(appReqRepository.findByEmail(anyString())).thenReturn(null);
         UserProfile userProfile = getUserEntity();
         when(userRepository.save(anyObject())).thenReturn(userProfile);
-        Mockito.doNothing().when(emailUtility).sendVerificationMail(any(UserDto.class), anyString(), webUrl);
-        UserDto storedUserDetails = userService.createUser(buildUserDto(),"Apache-HttpClient", webUrl);
+        when(service.findUserRoleByName(anyString())).thenReturn(buildRole());
+        Mockito.doNothing().when(emailUtility).sendVerificationMail(anyObject(),eq("HTTP"), eq("www.localhost:8080"));
+        UserDto storedUserDetails = userServiceImpl.createUser(buildUserDto(),"Apache-HttpClient", webUrl);
         assertNotNull(storedUserDetails);
         assertEquals(userProfile.getFirstName(), storedUserDetails.getFirstName());
         assertEquals(userProfile.getAddresses().size(), storedUserDetails.getAddresses().size());
-        verify(utils, times(storedUserDetails.getAddresses().size())).generateAddressId(30);
         verify(userIdFactory, times(1)).buildUserId();
         verify(bCryptPasswordEncoder, times(1)).encode(anyString());
         verify(userRepository,times(1)).save(anyObject());
 
 
+    }
+
+    private Role buildRole() {
+        Role role = new Role();
+        role.setAuthorities(grantAuthorities());
+        role.setRoleIdId(2L);
+        role.setRoleName("ROLE_USER");
+        role.setUserRoles(buildUserRoles());
+        return role;
+    }
+
+    private Set<UserRole> buildUserRoles() {
+        Set<UserRole> userRoles = new HashSet<>();
+        UserRole userRole = new UserRole();
+        userRole.setUserDetails(getUserEntity());
+        userRole.setId(3L);
+        userRoles.add(userRole);
+        return userRoles;
+    }
+
+    private Set<Authority> grantAuthorities() {
+        Set<Authority> authorities = new HashSet<>();
+        Authority authority = new Authority();
+        authority.setAuthorityName("READ_AUTHORITY");
+        authority.setId(5L);
+        authorities.add(authority);
+        return authorities;
     }
 
     @Test
@@ -104,10 +139,10 @@ public class UserServiceImplTest {
         when(bCryptPasswordEncoder.encode(anyString())).thenReturn(encryptedPassword);
         UserProfile userProfile = getUserEntity();
         when(userRepository.save(anyObject())).thenReturn(userProfile);
-        Mockito.doNothing().when(emailUtility).sendVerificationMail(any(UserDto.class),anyString(), webUrl);
+        Mockito.doNothing().when(emailUtility).sendVerificationMail(anyObject(),eq("HTTP"), eq("www.localhost:8080"));
         assertThrows(UserServiceException.class,
                 () -> {
-                    userService.createUser(buildUserDto(),"Apache-HttpClient", webUrl);
+                    userServiceImpl.createUser(buildUserDto(),"Apache-HttpClient", webUrl);
                 }
         );
 
@@ -123,9 +158,9 @@ public class UserServiceImplTest {
         when(bCryptPasswordEncoder.encode(anyString())).thenReturn(encryptedPassword);
         UserProfile userProfile = getUserEntity();
         when(userRepository.save(anyObject())).thenReturn(userProfile);
-        Mockito.doNothing().when(emailUtility).sendVerificationMail(any(UserDto.class),anyString(), webUrl);
+        Mockito.doNothing().when(emailUtility).sendVerificationMail(anyObject(),eq("HTTP"), eq("www.localhost:8080"));
         assertThrows(UserServiceException.class,
-                () -> userService.createUser(buildUserDto(),"Apache-HttpClient", webUrl)
+                () -> userServiceImpl.createUser(buildUserDto(),"Apache-HttpClient", webUrl)
         );
 
     }
@@ -133,7 +168,7 @@ public class UserServiceImplTest {
     @Test
     public void getUser() {
         when(userRepository.findByEmail(anyString())).thenReturn(getUserEntity());
-        UserDto userDto = userService.getUser("test9@gamil.com");
+        UserDto userDto = userServiceImpl.getUser("test9@gamil.com");
         assertNotNull(userDto);
         assertEquals(firstName, userDto.getFirstName());
         assertTrue(userDto.getAddresses().stream().map(AddressDTO::getPostalCode).anyMatch(id -> Objects.equals(postalCode, id)));
@@ -144,7 +179,7 @@ public class UserServiceImplTest {
         when(userRepository.findByEmail(anyString())).thenReturn(null);
         assertThrows(UsernameNotFoundException.class,
                 () -> {
-                    userService.getUser("test9@gamil.com");
+                    userServiceImpl.getUser("test9@gamil.com");
                 }
         );
 
@@ -153,7 +188,7 @@ public class UserServiceImplTest {
     @Test
     public void shouldGetUserByUsername() {
         when(userRepository.findByUsername(anyString())).thenReturn(getUserEntity());
-        UserDto byUsername = userService.findByUsername(userName);
+        UserDto byUsername = userServiceImpl.findByUsername(userName);
         assertNotNull(byUsername);
         assertEquals(userName, byUsername.getUsername());
     }
@@ -162,7 +197,7 @@ public class UserServiceImplTest {
     public void shouldThrowExceptionWhenUsernameIsNull() {
         when(userRepository.findByUsername(anyString())).thenReturn(null);
         assertThrows(UserServiceException.class,
-                () -> userService.findByUsername(userName)
+                () -> userServiceImpl.findByUsername(userName)
         );
     }
 
@@ -172,7 +207,7 @@ public class UserServiceImplTest {
         when(userRepository.findByUserId(anyLong())).thenReturn(userProfile);
         when(userRepository.save(anyObject())).thenReturn(userProfile);
         UserDto user = buildUserDto();
-        UserDto userDto = userService.updateUser(userId, user);
+        UserDto userDto = userServiceImpl.updateUser(userId, user);
         assertNotNull(userDto);
         assertEquals(userProfile.getFirstName(),user.getFirstName());
     }
@@ -181,7 +216,7 @@ public class UserServiceImplTest {
     public void shouldFindByFirstNameAndUserId(){
         when(userRepository.findByFirstNameAndUserId(anyString(),anyLong()))
                 .thenReturn(getUserEntity());
-        UserDto firstNameAndUserId = userService.findByFirstNameAndUserId(firstName, userId);
+        UserDto firstNameAndUserId = userServiceImpl.findByFirstNameAndUserId(firstName, userId);
         assertNotNull(firstNameAndUserId);
 
     }
@@ -190,12 +225,12 @@ public class UserServiceImplTest {
         when(userRepository.findByFirstNameAndUserId(anyString(),anyLong()))
                 .thenReturn(null);
         assertThrows(UserServiceException.class,
-                () -> userService.findByFirstNameAndUserId(firstName,userId));
+                () -> userServiceImpl.findByFirstNameAndUserId(firstName,userId));
     }
     @Test
     public void shouldGetUserByUserId(){
         when(userRepository.findByUserId(anyLong())).thenReturn(getUserEntity());
-        UserDto userDto = userService.findByUserId(userId);
+        UserDto userDto = userServiceImpl.findByUserId(userId);
         assertNotNull(userDto);
         assertEquals(userId, userDto.getUserId().longValue());
     }
@@ -204,14 +239,14 @@ public class UserServiceImplTest {
     public void shouldThrowAnExceptionWhenUserNotFound(){
         when(userRepository.findByUserId(anyLong())).thenReturn(null);
         assertThrows(UserServiceException.class,
-                () -> userService.findByUserId(userId)
+                () -> userServiceImpl.findByUserId(userId)
                 );
     }
 
     @Test
     public void shouldFindUsersByFirstName(){
         doReturn(userEntities()).when(userRepository).findUserByFirstName(anyString());
-        List<UserDto> userByFirstName = userService.findUserByFirstName(firstName);
+        List<UserDto> userByFirstName = userServiceImpl.findUserByFirstName(firstName);
         assertNotNull(userByFirstName);
         assertEquals(userByFirstName.size(), 6);
         assertTrue(userByFirstName.stream().map(UserDto::getFirstName).anyMatch(first_Name -> Objects.equals(firstName, first_Name)));
@@ -248,7 +283,7 @@ public class UserServiceImplTest {
 
         Set<AddressDTO> addressDTOS = buildUserAddressesDto();
 
-        Type addressEntity = new TypeToken<List<AddressEntity>>() {
+        Type addressEntity = new TypeToken<Set<AddressEntity>>() {
         }.getType();
         return new ModelMapper().map(addressDTOS, addressEntity);
     }
