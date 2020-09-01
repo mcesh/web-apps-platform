@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.util.IOUtils;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class FileStoreService {
 
     @Autowired
@@ -33,7 +35,9 @@ public class FileStoreService {
                     map.forEach(metadata::addUserMetadata);
                 }
             });
+            log.info("Uploading image with fileName {} ", fileName);
             s3.putObject(path,fileName,inputStream,metadata);
+            log.info("File uploaded successfully {} " ,fileName);
         }catch (Exception e){
             throw new UserServiceException("Failed to store file to DigitalOceans Bucket "
                     + e.getMessage());
@@ -51,6 +55,7 @@ public class FileStoreService {
 
     public byte[] downloadUserImages(String path, String key) {
         try {
+            log.info("Retrieving image with key {} ", key);
             S3Object object = s3.getObject(path, key);
             return IOUtils.toByteArray(object.getObjectContent());
         } catch (AmazonServiceException | IOException e) {

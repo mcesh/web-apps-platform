@@ -63,7 +63,7 @@ public class UserGalleryImagesResource {
             produces = {MediaType.APPLICATION_JSON_VALUE,})
      public Set<ImageGallery> downloadGalleryImages(@PathVariable String email){
 
-        getLog().info("Retrieving a list of images...");
+        getLog().info("Retrieving a list of images... {} ", email);
         Set<ImageGallery> galleryImages = userService.downloadUserGalleryImages(email);
         getLog().info("Images retrieved {} ", galleryImages.size());
         return galleryImages;
