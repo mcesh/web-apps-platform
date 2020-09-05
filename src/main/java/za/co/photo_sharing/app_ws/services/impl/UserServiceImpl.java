@@ -37,6 +37,7 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -50,6 +51,7 @@ public class UserServiceImpl implements UserService {
     public static final String BLOG_IMAGES = "BLOG_IMAGES";
     public static final String GALLERY_IMAGES = "GALLERY_IMAGES";
     public static final String IMAGE_SLIDER = "GALLERY_IMAGES";
+    public static final String BUCKET_NAME = BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName();
     private static String savePath = "C:/Token";
     private static Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -468,6 +470,7 @@ public class UserServiceImpl implements UserService {
                 categoryRest.setName(categoryName);
                 byte[] bytes = fileStoreService.downloadUserImages(path, imageUrl);
                 za.co.photo_sharing.app_ws.model.response.ImageGallery gallery = new za.co.photo_sharing.app_ws.model.response.ImageGallery();
+                gallery.setId(imageGallery.getId());
                 gallery.setCaption(imageGallery.getCaption());
                 gallery.setImage(bytes);
                 gallery.setCategory(categoryRest);
@@ -495,7 +498,7 @@ public class UserServiceImpl implements UserService {
            return Base64.getEncoder().encodeToString(profilePic);
        }
        // default-profile-picture
-       String defaultPicturePath = String.format("%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
+       String defaultPicturePath = String.format("%s/%s", BUCKET_NAME,
                DEFAULT_PROFILE_FOLDER);
         byte[] defaultProfilePic = fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
         return Base64.getEncoder().encodeToString(defaultProfilePic);
@@ -524,5 +527,46 @@ public class UserServiceImpl implements UserService {
             throw new UsernameNotFoundException("Email address not found: {} " + email);
         }
         return new UserPrincipal(userProfile);
+    }
+
+    public Set<za.co.photo_sharing.app_ws.model.response.ImageGallery> fetchUserImages(String email){
+        UserProfile userProfile = userRepo.findByEmail(email);
+        utils.getUser(userProfile);
+        String folder = userProfile.getUsername();
+        String path = String.format("%s/%s/%s", BUCKET_NAME,
+                GALLERY_IMAGES,
+                userProfile.getUsername());
+        Set<za.co.photo_sharing.app_ws.model.response.ImageGallery>  imageGalleries = new HashSet<>();
+        Set<String> images = fileStoreService.fetchImages(BUCKET_NAME, folder, path);
+        AtomicInteger imageIndex = new AtomicInteger();
+        if (!CollectionUtils.isEmpty(images)){
+            userProfile.getImageGallery().forEach(imageGallery -> {
+                String[] imageArrays = new String[images.size()];
+                imageArrays = images.toArray(imageArrays);
+                String image = getImage(imageArrays[imageIndex.get()]);
+
+                byte[] imageByte = image.getBytes();
+                CategoryRest categoryRest = new CategoryRest();
+                String categoryName;
+                if (imageGallery.getCategory()!=null){
+                    categoryName = imageGallery.getCategory().getName();
+                }else {
+                    categoryName = "";
+                }
+                categoryRest.setName(categoryName);
+                za.co.photo_sharing.app_ws.model.response.ImageGallery gallery = new za.co.photo_sharing.app_ws.model.response.ImageGallery();
+                gallery.setCaption(imageGallery.getCaption());
+                gallery.setImage(imageByte);
+                gallery.setCategory(categoryRest);
+                imageGalleries.add(gallery);
+                imageIndex.getAndIncrement();
+
+            });
+        }
+        return imageGalleries;
+    }
+
+    private String getImage(String imageArray) {
+        return imageArray;
     }
 }
