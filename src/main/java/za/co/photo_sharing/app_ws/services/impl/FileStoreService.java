@@ -73,17 +73,7 @@ public class FileStoreService {
             objectSummaries.stream()
                     .filter(s3ObjectSummary -> s3ObjectSummary.getKey().contains(folder))
                     .forEach(s3ObjectSummary -> {
-                        String[] key = s3ObjectSummary.getKey().split("/");
-                        String imageKey = key[2];
-                        S3Object obj = s3.getObject(path, imageKey);
-                        byte[] bytes;
-                        try {
-                            bytes = IOUtils.toByteArray(obj.getObjectContent());
-                        } catch (Exception e) {
-                            throw new IllegalStateException("Failed to download file to s3", e);
-                        }
-                        String image = Base64.getEncoder().encodeToString(bytes);
-                        images.add(image);
+                        images.add(s3ObjectSummary.getKey());
                     });
         }
         return images;
