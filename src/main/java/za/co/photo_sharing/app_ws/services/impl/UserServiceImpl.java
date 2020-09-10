@@ -37,7 +37,6 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -439,7 +438,7 @@ public class UserServiceImpl implements UserService {
             imageGallery.setUserDetails(userProfile);
             imageGallery.setCategory(galleryCategory);
             imageGalleries.add(imageGallery);
-            userProfile.setImageGallery(imageGalleries);
+            userProfile.setImageGalleries(imageGalleries);
             userRepo.save(userProfile);
 
         }catch (IOException e){
@@ -455,8 +454,8 @@ public class UserServiceImpl implements UserService {
                 GALLERY_IMAGES,
                 userProfile.getUsername());
         Set<za.co.photo_sharing.app_ws.model.response.ImageGallery>  imageGalleries = new HashSet<>();
-        if (userProfile.getImageGallery().size() > 0){
-            userProfile.getImageGallery().forEach(imageGallery -> {
+        if (userProfile.getImageGalleries().size() > 0){
+            userProfile.getImageGalleries().forEach(imageGallery -> {
                 CategoryRest categoryRest = new CategoryRest();
                 String categoryName;
                 String imageUrl = imageGallery.getImageUrl();

@@ -1,13 +1,8 @@
 package za.co.photo_sharing.app_ws.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -82,7 +77,7 @@ public class UserProfile implements Serializable {
 
     @JsonIgnore
     @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<ImageGallery> imageGallery;
+    private Set<ImageGallery> imageGalleries;
 
     public UserProfile(Long userId,
                        String username,
@@ -102,7 +97,7 @@ public class UserProfile implements Serializable {
                        String userProfileImageLink,
                        AuthorityRoleType roleType,
                        boolean roleUpdated,
-                       Set<ImageGallery> imageGallery) {
+                       Set<ImageGallery> imageGalleries) {
         this.userId = userId;
         this.username = username;
         this.firstName = firstName;
@@ -121,7 +116,7 @@ public class UserProfile implements Serializable {
         this.userProfileImageLink = userProfileImageLink;
         this.roleType = roleType;
         this.roleUpdated = roleUpdated;
-        this.imageGallery = imageGallery;
+        this.imageGalleries = imageGalleries;
     }
 
     public UserProfile() {
@@ -279,12 +274,12 @@ public class UserProfile implements Serializable {
         this.userProfileImageLink = userProfileImageLink;
     }
 
-    public Set<ImageGallery> getImageGallery() {
-        return imageGallery;
+    public Set<ImageGallery> getImageGalleries() {
+        return imageGalleries;
     }
 
-    public void setImageGallery(Set<ImageGallery> imageGallery) {
-        this.imageGallery = imageGallery;
+    public void setImageGalleries(Set<ImageGallery> imageGalleries) {
+        this.imageGalleries = imageGalleries;
     }
 
     @Override
@@ -309,7 +304,7 @@ public class UserProfile implements Serializable {
                 ", userProfileImageLink='" + userProfileImageLink + '\'' +
                 ", roleType=" + roleType +
                 ", roleUpdated=" + roleUpdated +
-                ", imageGallery=" + imageGallery +
+                ", imageGallery=" + imageGalleries +
                 '}';
     }
 
@@ -336,7 +331,7 @@ public class UserProfile implements Serializable {
                 Objects.equals(getUserRoles(),that.getUserRoles()) &&
                 Objects.equals(getRoleTypeKey(),that.getRoleTypeKey()) &&
                 Objects.equals(getUserProfileImageLink(), that.getUserProfileImageLink()) &&
-                Objects.equals(getImageGallery(), that.getImageGallery()) &&
+                Objects.equals(getImageGalleries(), that.getImageGalleries()) &&
                 Objects.equals(getRoleType(),that.getRoleType());
     }
 
@@ -361,6 +356,6 @@ public class UserProfile implements Serializable {
                 getRoleType(),
                 isRoleUpdated(),
                 getUserProfileImageLink(),
-                getImageGallery());
+                getImageGalleries());
     }
 }
