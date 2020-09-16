@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 
@@ -28,6 +29,10 @@ public class ImageGallery implements Serializable {
     @Column(nullable = false, length = 120)
     private String imageUrl;
 
+    @Lob
+    @NotNull
+    private String base64StringImage;
+
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumns({
@@ -41,6 +46,14 @@ public class ImageGallery implements Serializable {
             @JoinColumn(name="category_id")
     })
     private Category category;
+
+    public String getBase64StringImage() {
+        return base64StringImage;
+    }
+
+    public void setBase64StringImage(String base64StringImage) {
+        this.base64StringImage = base64StringImage;
+    }
 
     public Category getCategory() {
         return category;

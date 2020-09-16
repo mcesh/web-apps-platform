@@ -416,6 +416,8 @@ public class UserServiceImpl implements UserService {
         UserProfile userProfile = userRepo.findByEmail(email);
         utils.getUser(userProfile);
         utils.isImage(file);
+        long fileSize = file.getSize();
+        getLog().info("File Size {} " , fileSize);
         String username = userProfile.getUsername();
         Category categoryNameResponse = categoryService.findByUsernameAndCategoryName(username, categoryName);
         if (Objects.isNull(categoryNameResponse)){
@@ -430,19 +432,30 @@ public class UserServiceImpl implements UserService {
 
         try {
             fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
+            byte[] image = fileStoreService.download(path, fileName);
+            String base64Image  = Base64.getEncoder().encodeToString(image);
+            int fileLength = base64Image.length();
+            getLog().info("base64Image {}, Size {} ", base64Image, fileLength);
+            if (fileLength > 4194304){
+                String objectName = GALLERY_IMAGES + username + fileName;
+                fileStoreService.deleteObject(BUCKET_NAME, objectName);
+                throw new UserServiceException(ErrorMessages.FILE_TOO_LARGE.getErrorMessage());
+            }
             Category galleryCategory =
                     categoryService.findByUsernameAndCategoryName(username,categoryName);
 
-            Set<ImageGallery> imageGalleries = new HashSet<>();
-            ImageGallery imageGallery = new ImageGallery();
-            imageGallery.setCaption(caption);
-            imageGallery.setUserId(userProfile.getUserId());
-            imageGallery.setImageUrl(fileName);
-            imageGallery.setUserDetails(userProfile);
-            imageGallery.setCategory(galleryCategory);
-            imageGalleries.add(imageGallery);
-            userProfile.setImageGallery(imageGalleries);
-            userRepo.save(userProfile);
+                Set<ImageGallery> imageGalleries = new HashSet<>();
+                ImageGallery imageGallery = new ImageGallery();
+                imageGallery.setCaption(caption);
+                imageGallery.setUserId(userProfile.getUserId());
+                imageGallery.setImageUrl(fileName);
+                imageGallery.setUserDetails(userProfile);
+                imageGallery.setCategory(galleryCategory);
+                imageGallery.setBase64StringImage(base64Image);
+                imageGalleries.add(imageGallery);
+                userProfile.setImageGalleries(imageGalleries);
+                userRepo.save(userProfile);
+
 
         }catch (IOException e){
             throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
@@ -457,22 +470,15 @@ public class UserServiceImpl implements UserService {
                 GALLERY_IMAGES,
                 userProfile.getUsername());
         Set<za.co.photo_sharing.app_ws.model.response.ImageGallery>  imageGalleries = new HashSet<>();
-        if (userProfile.getImageGallery().size() > 0){
-            userProfile.getImageGallery().forEach(imageGallery -> {
+        if (userProfile.getImageGalleries().size() > 0){
+            userProfile.getImageGalleries().forEach(imageGallery -> {
                 CategoryRest categoryRest = new CategoryRest();
-                String categoryName;
-                String imageUrl = imageGallery.getImageUrl();
-                if (imageGallery.getCategory()!=null){
-                    categoryName = imageGallery.getCategory().getName();
-                }else {
-                    categoryName = "";
-                }
+                String categoryName = imageGallery.getCategory().getName();
                 categoryRest.setName(categoryName);
-                byte[] bytes = fileStoreService.downloadUserImages(path, imageUrl);
                 za.co.photo_sharing.app_ws.model.response.ImageGallery gallery = new za.co.photo_sharing.app_ws.model.response.ImageGallery();
                 gallery.setId(imageGallery.getId());
                 gallery.setCaption(imageGallery.getCaption());
-                gallery.setImage(bytes);
+                gallery.setImage(imageGallery.getBase64StringImage());
                 gallery.setCategory(categoryRest);
                 imageGalleries.add(gallery);
 
@@ -540,7 +546,7 @@ public class UserServiceImpl implements UserService {
         Set<String> images = fileStoreService.fetchImages(BUCKET_NAME, folder, path);
         AtomicInteger imageIndex = new AtomicInteger();
         if (!CollectionUtils.isEmpty(images)){
-            userProfile.getImageGallery().forEach(imageGallery -> {
+            userProfile.getImageGalleries().forEach(imageGallery -> {
                 String[] imageArrays = new String[images.size()];
                 imageArrays = images.toArray(imageArrays);
                 String image = getImage(imageArrays[imageIndex.get()]);
@@ -556,7 +562,7 @@ public class UserServiceImpl implements UserService {
                 categoryRest.setName(categoryName);
                 za.co.photo_sharing.app_ws.model.response.ImageGallery gallery = new za.co.photo_sharing.app_ws.model.response.ImageGallery();
                 gallery.setCaption(imageGallery.getCaption());
-                gallery.setImage(imageByte);
+                gallery.setImage(imageByte.toString());
                 gallery.setCategory(categoryRest);
                 imageGalleries.add(gallery);
                 imageIndex.getAndIncrement();

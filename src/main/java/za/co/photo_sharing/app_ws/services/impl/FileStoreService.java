@@ -54,14 +54,8 @@ public class FileStoreService {
         }
     }
 
-    public byte[] downloadUserImages(String path, String key) {
-        try {
-            log.info("Retrieving image with key {} ", key);
-            S3Object object = s3.getObject(path, key);
-            return IOUtils.toByteArray(object.getObjectContent());
-        } catch (AmazonServiceException | IOException e) {
-            throw new IllegalStateException("Failed to download file to s3", e);
-        }
+    public void deleteObject(String bucketName, String objectName){
+        s3.deleteObject(bucketName,objectName);
     }
 
     public Set<String> fetchImages(String bucketName, String folder,String path){
