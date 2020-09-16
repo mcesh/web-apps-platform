@@ -25,7 +25,8 @@ public enum ErrorMessages {
     ERROR_UPLOADING("Cannot Upload Empty file"),
     INCORRECT_IMAGE_FORMAT("File must me an image"),
     CATEGORY_NOT_FOUND("Category not found"),
-    CATEGORY_ALREADY_EXISTS("Category already exists");
+    CATEGORY_ALREADY_EXISTS("Category already exists"),
+    FILE_TOO_LARGE("File too large");
 
 
     private String errorMessage;

@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ImageGallery {
 
+    private long id;
     private String caption;
     private CategoryRest category;
-    private byte[] image;
+    private String image;
 }

@@ -37,6 +37,8 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -49,6 +51,7 @@ public class UserServiceImpl implements UserService {
     public static final String BLOG_IMAGES = "BLOG_IMAGES";
     public static final String GALLERY_IMAGES = "GALLERY_IMAGES";
     public static final String IMAGE_SLIDER = "GALLERY_IMAGES";
+    public static final String BUCKET_NAME = BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName();
     private static String savePath = "C:/Token";
     private static Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -413,6 +416,8 @@ public class UserServiceImpl implements UserService {
         UserProfile userProfile = userRepo.findByEmail(email);
         utils.getUser(userProfile);
         utils.isImage(file);
+        long fileSize = file.getSize();
+        getLog().info("File Size {} " , fileSize);
         String username = userProfile.getUsername();
         Category categoryNameResponse = categoryService.findByUsernameAndCategoryName(username, categoryName);
         if (Objects.isNull(categoryNameResponse)){
@@ -427,19 +432,30 @@ public class UserServiceImpl implements UserService {
 
         try {
             fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
+            byte[] image = fileStoreService.download(path, fileName);
+            String base64Image  = Base64.getEncoder().encodeToString(image);
+            int fileLength = base64Image.length();
+            getLog().info("base64Image {}, Size {} ", base64Image, fileLength);
+            if (fileLength > 4194304){
+                String objectName = GALLERY_IMAGES + username + fileName;
+                fileStoreService.deleteObject(BUCKET_NAME, objectName);
+                throw new UserServiceException(ErrorMessages.FILE_TOO_LARGE.getErrorMessage());
+            }
             Category galleryCategory =
                     categoryService.findByUsernameAndCategoryName(username,categoryName);
 
-            Set<ImageGallery> imageGalleries = new HashSet<>();
-            ImageGallery imageGallery = new ImageGallery();
-            imageGallery.setCaption(caption);
-            imageGallery.setUserId(userProfile.getUserId());
-            imageGallery.setImageUrl(fileName);
-            imageGallery.setUserDetails(userProfile);
-            imageGallery.setCategory(galleryCategory);
-            imageGalleries.add(imageGallery);
-            userProfile.setImageGalleries(imageGalleries);
-            userRepo.save(userProfile);
+                Set<ImageGallery> imageGalleries = new HashSet<>();
+                ImageGallery imageGallery = new ImageGallery();
+                imageGallery.setCaption(caption);
+                imageGallery.setUserId(userProfile.getUserId());
+                imageGallery.setImageUrl(fileName);
+                imageGallery.setUserDetails(userProfile);
+                imageGallery.setCategory(galleryCategory);
+                imageGallery.setBase64StringImage(base64Image);
+                imageGalleries.add(imageGallery);
+                userProfile.setImageGalleries(imageGalleries);
+                userRepo.save(userProfile);
+
 
         }catch (IOException e){
             throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
@@ -457,18 +473,12 @@ public class UserServiceImpl implements UserService {
         if (userProfile.getImageGalleries().size() > 0){
             userProfile.getImageGalleries().forEach(imageGallery -> {
                 CategoryRest categoryRest = new CategoryRest();
-                String categoryName;
-                String imageUrl = imageGallery.getImageUrl();
-                if (imageGallery.getCategory()!=null){
-                    categoryName = imageGallery.getCategory().getName();
-                }else {
-                    categoryName = "";
-                }
+                String categoryName = imageGallery.getCategory().getName();
                 categoryRest.setName(categoryName);
-                byte[] bytes = fileStoreService.downloadUserImages(path, imageUrl);
                 za.co.photo_sharing.app_ws.model.response.ImageGallery gallery = new za.co.photo_sharing.app_ws.model.response.ImageGallery();
+                gallery.setId(imageGallery.getId());
                 gallery.setCaption(imageGallery.getCaption());
-                gallery.setImage(bytes);
+                gallery.setImage(imageGallery.getBase64StringImage());
                 gallery.setCategory(categoryRest);
                 imageGalleries.add(gallery);
 
@@ -494,7 +504,7 @@ public class UserServiceImpl implements UserService {
            return Base64.getEncoder().encodeToString(profilePic);
        }
        // default-profile-picture
-       String defaultPicturePath = String.format("%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
+       String defaultPicturePath = String.format("%s/%s", BUCKET_NAME,
                DEFAULT_PROFILE_FOLDER);
         byte[] defaultProfilePic = fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
         return Base64.getEncoder().encodeToString(defaultProfilePic);
@@ -523,5 +533,46 @@ public class UserServiceImpl implements UserService {
             throw new UsernameNotFoundException("Email address not found: {} " + email);
         }
         return new UserPrincipal(userProfile);
+    }
+
+    public Set<za.co.photo_sharing.app_ws.model.response.ImageGallery> fetchUserImages(String email){
+        UserProfile userProfile = userRepo.findByEmail(email);
+        utils.getUser(userProfile);
+        String folder = userProfile.getUsername();
+        String path = String.format("%s/%s/%s", BUCKET_NAME,
+                GALLERY_IMAGES,
+                userProfile.getUsername());
+        Set<za.co.photo_sharing.app_ws.model.response.ImageGallery>  imageGalleries = new HashSet<>();
+        Set<String> images = fileStoreService.fetchImages(BUCKET_NAME, folder, path);
+        AtomicInteger imageIndex = new AtomicInteger();
+        if (!CollectionUtils.isEmpty(images)){
+            userProfile.getImageGalleries().forEach(imageGallery -> {
+                String[] imageArrays = new String[images.size()];
+                imageArrays = images.toArray(imageArrays);
+                String image = getImage(imageArrays[imageIndex.get()]);
+
+                byte[] imageByte = image.getBytes();
+                CategoryRest categoryRest = new CategoryRest();
+                String categoryName;
+                if (imageGallery.getCategory()!=null){
+                    categoryName = imageGallery.getCategory().getName();
+                }else {
+                    categoryName = "";
+                }
+                categoryRest.setName(categoryName);
+                za.co.photo_sharing.app_ws.model.response.ImageGallery gallery = new za.co.photo_sharing.app_ws.model.response.ImageGallery();
+                gallery.setCaption(imageGallery.getCaption());
+                gallery.setImage(imageByte.toString());
+                gallery.setCategory(categoryRest);
+                imageGalleries.add(gallery);
+                imageIndex.getAndIncrement();
+
+            });
+        }
+        return imageGalleries;
+    }
+
+    private String getImage(String imageArray) {
+        return imageArray;
     }
 }
