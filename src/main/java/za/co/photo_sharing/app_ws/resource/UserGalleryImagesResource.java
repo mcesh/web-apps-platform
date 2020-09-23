@@ -18,6 +18,7 @@ import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.EmailUtility;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -84,6 +85,20 @@ public class UserGalleryImagesResource {
         Category category = categoryService.save(categoryName, username);
         getLog().info("Category created  {} ", category.getName());
         return category;
+
+    }
+
+
+    @ApiOperation(value="Get Categories Endpoint",
+            notes="${userResource.GetCategories.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}",
+                    paramType="header")
+    })
+    @GetMapping(path = "categories/{email}",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<Category> getCategories(@PathVariable String email){
+        return categoryService.findAllCategoriesByUsername(email);
 
     }
 

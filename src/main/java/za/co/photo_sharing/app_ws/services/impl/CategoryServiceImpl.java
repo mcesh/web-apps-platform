@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import za.co.photo_sharing.app_ws.entity.Category;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
@@ -14,6 +15,8 @@ import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -38,6 +41,22 @@ public class CategoryServiceImpl implements CategoryService {
         Category savedCategory = categoryRepository.save(category);
         getLog().info("Category created for {} ", savedCategory.getUsername());
         return savedCategory;
+    }
+
+    @Override
+    public List<Category> findAllCategoriesByUsername(String email) {
+        UserDto userServiceByEmail = userService.findByEmail(email);
+        if (Objects.isNull(userServiceByEmail)){
+            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        }
+        String username = userServiceByEmail.getUsername();
+        List<Category> categories = categoryRepository.findAllCategoriesByUsername(username);
+        if (!CollectionUtils.isEmpty(categories)){
+            categories.forEach(category -> {
+                getLog().info("Category Found {} ", category.getName());
+            });
+        }
+        return categories;
     }
 
     @Transactional

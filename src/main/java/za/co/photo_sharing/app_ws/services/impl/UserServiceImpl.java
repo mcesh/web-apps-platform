@@ -223,8 +223,6 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getUsers(int page, int limit) {
         List<UserDto> returnValue = new ArrayList<>();
 
-        if (page > 0) page = page - 1;
-
         Pageable pageableRequest = PageRequest.of(page, limit);
 
         Page<UserProfile> usersPage = userRepo.findAll(pageableRequest);
@@ -397,7 +395,7 @@ public class UserServiceImpl implements UserService {
         utils.isImage(file);
         Map<String, String> metadata = utils.extractMetadata(file);
 
-        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
+        String path = String.format("%s/%s/%s", BUCKET_NAME,
                 PROFILE_IMAGES, userProfile.getUsername());
 
         String fileName = String.format("%s-%s", UUID.randomUUID().toString().substring(0, 7), file.getOriginalFilename());
@@ -466,9 +464,6 @@ public class UserServiceImpl implements UserService {
     public Set<za.co.photo_sharing.app_ws.model.response.ImageGallery> downloadUserGalleryImages(String email) {
         UserProfile userProfile = userRepo.findByEmail(email);
         utils.getUser(userProfile);
-        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
-                GALLERY_IMAGES,
-                userProfile.getUsername());
         Set<za.co.photo_sharing.app_ws.model.response.ImageGallery>  imageGalleries = new HashSet<>();
         if (userProfile.getImageGalleries().size() > 0){
             userProfile.getImageGalleries().forEach(imageGallery -> {
