@@ -14,7 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.entity.Category;
 import za.co.photo_sharing.app_ws.model.response.*;
 import za.co.photo_sharing.app_ws.services.CategoryService;
+import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.services.UserService;
+import za.co.photo_sharing.app_ws.shared.dto.UserClientDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.EmailUtility;
 
@@ -30,6 +32,9 @@ public class UserGalleryImagesResource {
     private  UserService userService;
     @Autowired
     private  CategoryService categoryService;
+    @Autowired
+    private UserAppReqService appReqService;
+
     private ModelMapper modelMapper = new ModelMapper();
     private static Logger LOGGER = LoggerFactory.getLogger(UserGalleryImagesResource.class);
 
@@ -60,12 +65,12 @@ public class UserGalleryImagesResource {
             @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}",
                     paramType="header")
     })
-    @GetMapping(path = "download/gallery-images/{email}",
+    @GetMapping(path = "download/gallery-images/{clientID}",
             produces = {MediaType.APPLICATION_JSON_VALUE,})
-     public Set<ImageGallery> downloadGalleryImages(@PathVariable String email){
-
-        getLog().info("Retrieving a list of images... {} ", email);
-        Set<ImageGallery> galleryImages = userService.downloadUserGalleryImages(email);
+     public Set<ImageGallery> downloadGalleryImages(@PathVariable String clientID){
+        UserClientDTO clientDTO = appReqService.findByClientID(clientID);
+        getLog().info("Retrieving a list of images... {} ", clientDTO.getEmail());
+        Set<ImageGallery> galleryImages = userService.downloadUserGalleryImages(clientDTO.getEmail());
         getLog().info("Images retrieved {} ", galleryImages.size());
         return galleryImages;
 

@@ -1,19 +1,24 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import za.co.photo_sharing.app_ws.entity.AppToken;
 import za.co.photo_sharing.app_ws.entity.UserAppRequest;
+import za.co.photo_sharing.app_ws.entity.UserClient;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.AppTokenRepository;
 import za.co.photo_sharing.app_ws.repo.UserAppReqRepository;
+import za.co.photo_sharing.app_ws.repo.UserClientRepository;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.shared.dto.AppTokenDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserAppRequestDTO;
+import za.co.photo_sharing.app_ws.shared.dto.UserClientDTO;
 import za.co.photo_sharing.app_ws.utility.EmailUtility;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
@@ -33,9 +38,14 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     private EmailUtility emailUtility;
     @Autowired
     private AppTokenRepository tokenRepository;
+    @Autowired
+    private UserAppReqService appReqService;
+    @Autowired
+    private UserClientRepository clientRepository;
 
     private static String firstName;
     private static String tokenKey;
+    private static Logger LOGGER = LoggerFactory.getLogger(UserAppReqServiceImpl.class);
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -91,9 +101,8 @@ public class UserAppReqServiceImpl implements UserAppReqService {
                 }else {
                     firstName = userByEmailVerificationToken.getFirstName();
                 }
-                String tokenKey = userByEmailVerificationToken.getAppToken().getTokenKey();
                 String email = userByEmailVerificationToken.getEmail();
-                emailUtility.sendAppToken(tokenKey,firstName,email);
+                appReqService.generateUserClient(email);
                 isVerified = true;
             }else {
                 throw new UserServiceException(ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
@@ -130,7 +139,56 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     }
 
     @Override
+    public UserClientDTO generateUserClient(String email) {
+        UserAppRequestDTO appRequestDTO = appReqService.findByEmail(email);
+        if (!appRequestDTO.getEmailVerificationStatus()){
+            throw new UserServiceException(ErrorMessages.USER_NOT_VERIFIED.getErrorMessage());
+        }
+        if (clientRepository.findByEmail(email) !=null){
+            throw new UserServiceException(ErrorMessages.CLIENT_ID_ALREADY_DEFINED.getErrorMessage());
+        }
+        String clientID = utils.generateClientID(email);
+        UserClient userClient = new UserClient();
+        userClient.setEmail(email);
+        userClient.setCreationTime(LocalDateTime.now());
+        userClient.setClientID(clientID);
+        UserClient savedClientInfo = clientRepository.save(userClient);
+        UserClientDTO userClientDTO = modelMapper.map(savedClientInfo, UserClientDTO.class);
+        getLog().info("Client ID: {} ", userClientDTO.getClientID());
+
+        return userClientDTO;
+    }
+
+    @Override
+    public UserClientDTO findByClientID(String clientID) {
+        String email;
+        UserClientDTO clientDTO = new UserClientDTO();
+        if (clientID.contains("@")){
+            email = clientID;
+            appReqService.findByEmail(email);
+            UserClient client = clientRepository.findByEmail(email);
+            if (Objects.isNull(client)){
+                throw new UserServiceException(ErrorMessages.CLIENT_INFORMATION_NOT_FOUND.getErrorMessage());
+            }
+            clientDTO = modelMapper.map(client, UserClientDTO.class);
+            getLog().info("Client Info {} ", clientDTO);
+            return clientDTO;
+        }
+        UserClient userClient = clientRepository.findByClientID(clientID);
+        if (Objects.isNull(userClient)) {
+            throw new UserServiceException(ErrorMessages.CLIENT_INFORMATION_NOT_FOUND.getErrorMessage());
+        }
+
+        clientDTO = modelMapper.map(userClient, UserClientDTO.class);
+        getLog().info("Client Info {} ", clientDTO);
+        return clientDTO;
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         return null;
+    }
+    public static Logger getLog() {
+        return LOGGER;
     }
 }

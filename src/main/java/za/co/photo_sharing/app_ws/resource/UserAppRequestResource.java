@@ -14,6 +14,7 @@ import za.co.photo_sharing.app_ws.model.request.UserAppRequestModel;
 import za.co.photo_sharing.app_ws.model.response.*;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.shared.dto.UserAppRequestDTO;
+import za.co.photo_sharing.app_ws.shared.dto.UserClientDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import javax.mail.MessagingException;
@@ -115,6 +116,30 @@ public class UserAppRequestResource {
     public UserAppReqRest getUserByEmailAddress(@PathVariable String email) {
         UserAppRequestDTO appRequestDTO = appReqService.findByEmail(email);
         return modelMapper.map(appRequestDTO, UserAppReqRest.class);
+    }
+
+    @ApiOperation(value="Generate client ID Endpoint",
+            notes="${userResource.ClientID.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @PostMapping(path = "client/id/{email}",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public UserClientDTO generateUserClientID(@PathVariable String email){
+        getLog().info("Generating Client ID for {} " , email);
+        return appReqService.generateUserClient(email);
+    }
+
+    @ApiOperation(value="Get Client Info By ClientID Endpoint",
+            notes="${userAppRequestResource.ClientInfoByClientID.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}",
+                    paramType="header")
+    })
+    @GetMapping(path = "client_id/{clientID}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public UserClientDTO getClientInfoByClientID(@PathVariable String clientID) {
+        getLog().info("Getting Client Info for {} " , clientID);
+        return appReqService.findByClientID(clientID);
     }
 
     public static Logger getLog() {

@@ -26,7 +26,10 @@ public enum ErrorMessages {
     INCORRECT_IMAGE_FORMAT("File must me an image"),
     CATEGORY_NOT_FOUND("Category not found"),
     CATEGORY_ALREADY_EXISTS("Category already exists"),
-    FILE_TOO_LARGE("File too large");
+    FILE_TOO_LARGE("File too large"),
+    USER_NOT_VERIFIED("user email address not verified"),
+    CLIENT_ID_ALREADY_DEFINED("Client ID already exists for this user"),
+    CLIENT_INFORMATION_NOT_FOUND("Client information not found");
 
 
     private String errorMessage;

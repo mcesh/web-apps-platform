@@ -20,7 +20,7 @@ public class UserAppRequest implements Serializable {
     private String firstName;
     @Column(nullable = false)
     private String lastName;
-    @Column(nullable = false, length = 50, unique = true)
+    @Column(nullable = false, length = 85, unique = true)
     private String email;
     @Column(nullable = false)
     private String webType;

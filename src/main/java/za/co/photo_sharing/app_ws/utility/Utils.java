@@ -45,6 +45,15 @@ public class Utils {
         return emailToken + randomString;
     }
 
+    public String generateClientID(String email){
+
+        String emailToken = email.split("@")[0];
+
+        String randomString = generateRandomString(13);
+
+        return emailToken + randomString;
+    }
+
     private String generateRandomString(int length) {
         StringBuilder returnValue = new StringBuilder(length);
 
