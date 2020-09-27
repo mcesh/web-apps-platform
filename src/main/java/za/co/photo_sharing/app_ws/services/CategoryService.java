@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface CategoryService {
 
-    Category findByUsernameAndCategoryName(String username, String name);
+    Category findByEmailAndCategoryName(String email, String name);
     Category save(String category, String username);
-    List<Category> findAllCategoriesByUsername(String email);
+    List<Category> findAllCategoriesByEmail(String email);
 }

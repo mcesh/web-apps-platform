@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -417,7 +416,7 @@ public class UserServiceImpl implements UserService {
         long fileSize = file.getSize();
         getLog().info("File Size {} " , fileSize);
         String username = userProfile.getUsername();
-        Category categoryNameResponse = categoryService.findByUsernameAndCategoryName(username, categoryName);
+        Category categoryNameResponse = categoryService.findByEmailAndCategoryName(email, categoryName);
         if (Objects.isNull(categoryNameResponse)){
             throw new UserServiceException(ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }
@@ -439,8 +438,6 @@ public class UserServiceImpl implements UserService {
                 fileStoreService.deleteObject(BUCKET_NAME, objectName);
                 throw new UserServiceException(ErrorMessages.FILE_TOO_LARGE.getErrorMessage());
             }
-            Category galleryCategory =
-                    categoryService.findByUsernameAndCategoryName(username,categoryName);
 
                 Set<ImageGallery> imageGalleries = new HashSet<>();
                 ImageGallery imageGallery = new ImageGallery();
@@ -448,7 +445,7 @@ public class UserServiceImpl implements UserService {
                 imageGallery.setUserId(userProfile.getUserId());
                 imageGallery.setImageUrl(fileName);
                 imageGallery.setUserDetails(userProfile);
-                imageGallery.setCategory(galleryCategory);
+                imageGallery.setCategory(categoryNameResponse);
                 imageGallery.setBase64StringImage(base64Image);
                 imageGalleries.add(imageGallery);
                 userProfile.setImageGalleries(imageGalleries);

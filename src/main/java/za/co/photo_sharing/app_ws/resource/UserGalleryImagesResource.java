@@ -3,7 +3,6 @@ package za.co.photo_sharing.app_ws.resource;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +16,6 @@ import za.co.photo_sharing.app_ws.services.CategoryService;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserClientDTO;
-import za.co.photo_sharing.app_ws.shared.dto.UserDto;
-import za.co.photo_sharing.app_ws.utility.EmailUtility;
 
 import java.util.List;
 import java.util.Set;
@@ -82,12 +79,12 @@ public class UserGalleryImagesResource {
             @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}",
                     paramType="header")
     })
-    @PostMapping(path = "category/new-category/{categoryName}/{username}",
+    @PostMapping(path = "category/new-category/{categoryName}/{email}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public Category createCategory(@PathVariable String categoryName, String username){
+    public Category createCategory(@PathVariable String categoryName, String email){
 
         getLog().info("Adding new category....");
-        Category category = categoryService.save(categoryName, username);
+        Category category = categoryService.save(categoryName, email);
         getLog().info("Category created  {} ", category.getName());
         return category;
 
@@ -103,7 +100,7 @@ public class UserGalleryImagesResource {
     @GetMapping(path = "categories/{email}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<Category> getCategories(@PathVariable String email){
-        return categoryService.findAllCategoriesByUsername(email);
+        return categoryService.findAllCategoriesByEmail(email);
 
     }
 

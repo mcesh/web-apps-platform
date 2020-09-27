@@ -10,9 +10,9 @@ import java.util.List;
 
 public interface CategoryRepository  extends JpaRepository<Category, Long> {
     Category findByName(String name);
-    @Query(value = "select category from Category category where category.username =:username and category.name =:name")
-    Category findByUsernameAndCategoryName(@Param("username") String username, @Param("name") String name);
+    @Query(value = "select category from Category category where category.email =:email and category.name =:name")
+    Category findByEmailAndCategoryName(@Param("email") String email, @Param("name") String name);
 
-    @Query(value = "select category from Category category where category.username =:username")
-    List<Category> findAllCategoriesByUsername(@Param("username") String username);
+    @Query(value = "select category from Category category where category.email =:email")
+    List<Category> findAllCategoriesByEmail(@Param("email") String email);
 }

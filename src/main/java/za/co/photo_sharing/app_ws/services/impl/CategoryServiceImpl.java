@@ -15,7 +15,6 @@ import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,27 +29,26 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional
     @Override
-    public Category save(String categoryName, String username) {
-        Category category_ = categoryRepository.findByUsernameAndCategoryName(username, categoryName);
+    public Category save(String categoryName, String email) {
+        Category category_ = categoryRepository.findByEmailAndCategoryName(email, categoryName);
         if (Objects.nonNull(category_)){
             throw new UserServiceException(ErrorMessages.CATEGORY_ALREADY_EXISTS.getErrorMessage());
         }
         Category category = new Category();
         category.setName(categoryName);
-        category.setUsername(userService.findByUsername(username).getUsername());
+        category.setEmail(userService.findByEmail(email).getEmail());
         Category savedCategory = categoryRepository.save(category);
-        getLog().info("Category created for {} ", savedCategory.getUsername());
+        getLog().info("Category created for {} ", savedCategory.getEmail());
         return savedCategory;
     }
 
     @Override
-    public List<Category> findAllCategoriesByUsername(String email) {
+    public List<Category> findAllCategoriesByEmail(String email) {
         UserDto userServiceByEmail = userService.findByEmail(email);
         if (Objects.isNull(userServiceByEmail)){
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
-        String username = userServiceByEmail.getUsername();
-        List<Category> categories = categoryRepository.findAllCategoriesByUsername(username);
+        List<Category> categories = categoryRepository.findAllCategoriesByEmail(email);
         if (!CollectionUtils.isEmpty(categories)){
             categories.forEach(category -> {
                 getLog().info("Category Found {} ", category.getName());
@@ -61,8 +59,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional
     @Override
-    public Category findByUsernameAndCategoryName(String username, String name) {
-        Category category = categoryRepository.findByUsernameAndCategoryName(username, name);
+    public Category findByEmailAndCategoryName(String email, String name) {
+        Category category = categoryRepository.findByEmailAndCategoryName(email, name);
         if (Objects.isNull(category)){
             throw new UserServiceException(ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }

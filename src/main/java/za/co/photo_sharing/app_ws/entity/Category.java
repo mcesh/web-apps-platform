@@ -1,8 +1,6 @@
 package za.co.photo_sharing.app_ws.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -20,7 +18,7 @@ public class Category implements Serializable {
     @NotBlank(message = "Category name is required")
     private String name;
     @Column(nullable = false, length = 15)
-    private String username;
+    private String email;
     
     @JsonIgnore
     @OneToMany(mappedBy = "category")
@@ -42,12 +40,12 @@ public class Category implements Serializable {
         this.name = name;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Set<ImageGallery> getImageGallery() {
