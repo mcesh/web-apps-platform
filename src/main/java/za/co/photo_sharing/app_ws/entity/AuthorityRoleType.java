@@ -16,7 +16,7 @@ public class AuthorityRoleType implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @Column(nullable = false, length = 5)
+    @Column(nullable = false, length = 26)
     private long roleTypeKey;
 
     @JsonIgnore
