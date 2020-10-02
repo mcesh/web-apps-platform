@@ -17,7 +17,7 @@ public class Category implements Serializable {
     private Long id;
     @NotBlank(message = "Category name is required")
     private String name;
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false, length = 105)
     private String email;
     
     @JsonIgnore

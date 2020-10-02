@@ -20,13 +20,13 @@ public class ImageGallery implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 85)
     private String caption;
 
     @Column(nullable = false, length = 75)
     private Long userId;
 
-    @Column(nullable = false, length = 120)
+    @Column(nullable = false)
     private String imageUrl;
 
     @Lob
