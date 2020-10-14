@@ -1,5 +1,9 @@
 package za.co.photo_sharing.app_ws.constants;
 
+import lombok.*;
+
+@Getter
+@NoArgsConstructor
 public enum ArticlesStatus {
 
     DELETED(-1, "deleted"),

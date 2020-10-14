@@ -1,7 +1,10 @@
 package za.co.photo_sharing.app_ws.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.joda.time.LocalDate;
+import za.co.photo_sharing.app_ws.constants.ArticleStatusTypeKeys;
 import za.co.photo_sharing.app_ws.constants.ArticlesStatus;
 
 import javax.persistence.*;
@@ -9,7 +12,9 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "article")
@@ -39,14 +44,23 @@ public class Article implements Serializable {
     private String base64StringImage;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_article_id")
+    @JoinColumn(name = "article_id")
     private List<Comment> commentList;
 
     @Column(nullable = false, length = 150)
     private String email;
 
-    @Convert(converter = ArticleStatusConverter.class)
-    private ArticlesStatus status = ArticlesStatus.DRAFT;
+    private String status;
+
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "post_tag", joinColumns = @JoinColumn(name = "post_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"))
+    private Set<Tag> tags;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     public long getId() {
         return id;
@@ -112,56 +126,33 @@ public class Article implements Serializable {
         this.email = email;
     }
 
-    public ArticlesStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(ArticlesStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
-    @Transient
-    public boolean isDraft() {
-        return status == ArticlesStatus.DRAFT;
+    public Set<Tag> getTags() {
+        return tags;
     }
-    @Getter
-    public enum Status {
-        DELETED(-1, "deleted"),
-        DRAFT(0, "draft"),
-        PUBLISHED(1, "published"),
-        UNPUBLISHED(2, "unpublished");
 
-        private int code;
-        private String text;
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
+    }
 
-        Status(int code, String text) {
-            this.code = code;
-            this.text = text;
-        }
+    public Category getCategory() {
+        return category;
+    }
 
-        @Override
-        public String toString() {
-            return text;
-        }
+    public void setCategory(Category category) {
+        this.category = category;
+    }
 
-        public static Status findByCode(int code) {
-            for (Status status : Status.values()) {
-                if (status.code == code) {
-                    return status;
-                }
-            }
-
-            return null;
-        }
-
-        public static Status findByText(String text) {
-            for (Status status : Status.values()) {
-                if (status.text.equals(text)) {
-                    return status;
-                }
-            }
-
-            return null;
+    public void initPublishDate() {
+        if (postedDate == null) {
+            postedDate = LocalDateTime.now();
         }
     }
 }

@@ -4,14 +4,21 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.config.SecurityConstants;
+import za.co.photo_sharing.app_ws.constants.BucketName;
+import za.co.photo_sharing.app_ws.entity.Category;
 import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
+import za.co.photo_sharing.app_ws.services.impl.FileStoreService;
+import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -24,6 +31,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static org.apache.http.entity.ContentType.*;
+import static za.co.photo_sharing.app_ws.services.impl.ArticleServiceImpl.ARTICLE_IMAGES;
 
 @Component
 public class Utils {
@@ -31,6 +39,10 @@ public class Utils {
     private final Random RANDOM = new SecureRandom();
     private final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private final String NUMBERS = "0123456789";
+    private static Logger LOGGER = LoggerFactory.getLogger(Utils.class);
+
+    @Autowired
+    private FileStoreService fileStoreService;
 
     public String generateAddressId(int length){
         return generateRandomString(length);
@@ -191,4 +203,41 @@ public class Utils {
             throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
     }
+
+    public String uploadFile(MultipartFile file, UserDto userDto, String folder){
+
+        long fileSize = file.getSize();
+        getLog().info("File Size {} " , fileSize);
+        String username = userDto.getUsername();
+
+        Map<String, String> metadata = extractMetadata(file);
+
+        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
+                folder, username);
+
+        String fileName = String.format("%s-%s", UUID.randomUUID().toString().substring(0, 7), file.getOriginalFilename());
+        String base64Image;
+        try {
+            fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
+            byte[] image = fileStoreService.download(path, fileName);
+            base64Image = Base64.getEncoder().encodeToString(image);
+            int fileLength = base64Image.length();
+            getLog().info("base64Image {}, Size {} ", base64Image, fileLength);
+            if (fileLength > 4194304){
+                String objectName = folder + username + fileName;
+                fileStoreService.deleteObject(folder, objectName);
+                throw new UserServiceException(ErrorMessages.FILE_TOO_LARGE.getErrorMessage());
+            }
+
+        }catch (IOException e){
+            throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
+        }
+
+        return base64Image;
+    }
+
+    public static Logger getLog() {
+        return LOGGER;
+    }
+
 }

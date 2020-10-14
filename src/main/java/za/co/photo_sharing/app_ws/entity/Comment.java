@@ -25,4 +25,8 @@ public class Comment implements Serializable {
     @CreationTimestamp
     @Column(nullable = false, length = 30)
     private Date postedDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "article_id")
+    private Article article;
 }

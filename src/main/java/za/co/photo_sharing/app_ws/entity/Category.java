@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -17,12 +18,15 @@ public class Category implements Serializable {
     private Long id;
     @NotBlank(message = "Category name is required")
     private String name;
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false)
     private String email;
     
     @JsonIgnore
     @OneToMany(mappedBy = "category")
     private Set<ImageGallery> imageGallery;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Article> articles;
 
     public Long getId() {
         return id;
