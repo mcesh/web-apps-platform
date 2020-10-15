@@ -42,7 +42,7 @@ public class UserProfile implements Serializable {
     @Column(nullable = false)
     private Boolean emailVerificationStatus = false;
 
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false, length = 45)
     private Long cellNumber;
 
     @CreationTimestamp

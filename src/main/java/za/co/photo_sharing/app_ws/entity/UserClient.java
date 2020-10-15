@@ -16,13 +16,13 @@ public class UserClient implements Serializable {
     @GeneratedValue(strategy = GenerationType.TABLE)
     private long id;
 
-    @Column(nullable = false,length = 85)
+    @Column(nullable = false,length = 105)
     private String email;
 
     @CreationTimestamp
     @Column(nullable = false, length = 30)
     private LocalDateTime creationTime;
-    @Column(nullable = false, length = 95)
+    @Column(nullable = false, length = 125)
     private String clientID;
 
     public long getId() {

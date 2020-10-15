@@ -21,10 +21,10 @@ public class AddressEntity implements Serializable {
     @Column(length=30, nullable=false)
     private String addressId;
 
-    @Column(length=30, nullable=false)
+    @Column(length=65, nullable=false)
     private String city;
 
-    @Column(length=30, nullable=false)
+    @Column(length=65, nullable=false)
     private String country;
 
     @Column(length=100, nullable=false)
@@ -33,7 +33,7 @@ public class AddressEntity implements Serializable {
     @Column(length=15, nullable=false)
     private String postalCode;
 
-    @Column(length=10, nullable=false)
+    @Column(length=45, nullable=false)
     private String type;
 
     @JsonIgnore

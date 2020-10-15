@@ -18,7 +18,7 @@ public class AppToken implements Serializable {
     @Column(nullable = false, length = 85)
     private String tokenKey;
 
-    @Column(length = 50, nullable = false)
+    @Column(length = 105, nullable = false)
     private String primaryEmail;
 
     @JsonIgnore
