@@ -55,15 +55,17 @@ public class ArticleServiceImpl implements ArticleService {
 
         utils.isImage(file);
         String base64Image = utils.uploadFile(file, userDto, ARTICLE_IMAGES);
-
         Category categoryNameResponse = getCategory(userDto, categoryName);
+        Set<Tag> tags = new HashSet<>();
+        if (articleDTO.getTags()!= null && articleDTO.getTags().size()> 0){
+            tags = new HashSet<>(articleDTO.getTags().size());
 
-        Set<Tag> tags = new HashSet<>(articleDTO.getTags().size());
-
-        for (String tag: articleDTO.getTags()){
-            Tag tagName = tagService.findOrCreateByName(tag);
-            tags.add(tagName);
+            for (String tag: articleDTO.getTags()){
+                Tag tagName = tagService.findOrCreateByName(tag);
+                tags.add(tagName);
+            }
         }
+        
         articleStatus = statusService.findByStatus(status);
         Article article = modelMapper.map(articleDTO, Article.class);
         article.setEmail(userDto.getEmail());

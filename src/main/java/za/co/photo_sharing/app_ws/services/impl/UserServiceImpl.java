@@ -24,6 +24,7 @@ import za.co.photo_sharing.app_ws.entity.*;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.CategoryRest;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
+import za.co.photo_sharing.app_ws.model.response.ImageUpload;
 import za.co.photo_sharing.app_ws.repo.*;
 import za.co.photo_sharing.app_ws.services.CategoryService;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
@@ -392,20 +393,10 @@ public class UserServiceImpl implements UserService {
         UserProfile userProfile = userRepo.findByEmail(email);
         utils.getUser(userProfile);
         utils.isImage(file);
-        Map<String, String> metadata = utils.extractMetadata(file);
-
-        String path = String.format("%s/%s/%s", BUCKET_NAME,
-                PROFILE_IMAGES, userProfile.getUsername());
-
-        String fileName = String.format("%s-%s", UUID.randomUUID().toString().substring(0, 7), file.getOriginalFilename());
-
-        try {
-            fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
-            userProfile.setUserProfileImageLink(fileName);
-            userRepo.save(userProfile);
-        }catch (IOException e){
-            throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
-        }
+        ImageUpload galleryImage = utils.uploadGalleryImage(file, userProfile, PROFILE_IMAGES);
+        userProfile.setUserProfileImageLink(galleryImage.getFileName());
+        getLog().info("Uploading profileImage for {}, at {} ", userProfile.getEmail(), LocalDateTime.now());
+        userRepo.save(userProfile);
     }
 
     @Override
@@ -413,49 +404,23 @@ public class UserServiceImpl implements UserService {
         UserProfile userProfile = userRepo.findByEmail(email);
         utils.getUser(userProfile);
         utils.isImage(file);
-        long fileSize = file.getSize();
-        getLog().info("File Size {} " , fileSize);
-        String username = userProfile.getUsername();
-        Category categoryNameResponse = categoryService.findByEmailAndCategoryName(email, categoryName);
-        if (Objects.isNull(categoryNameResponse)){
-            throw new UserServiceException(ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
-        }
-        Map<String, String> metadata = utils.extractMetadata(file);
+        Category categoryNameResponse = getCategory(email, categoryName);
+        ImageUpload galleryImage = utils.uploadGalleryImage(file, userProfile, GALLERY_IMAGES);
 
-        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
-                GALLERY_IMAGES, username);
-
-        String fileName = String.format("%s-%s", UUID.randomUUID().toString().substring(0, 7), file.getOriginalFilename());
-
-        try {
-            fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
-            byte[] image = fileStoreService.download(path, fileName);
-            String base64Image  = Base64.getEncoder().encodeToString(image);
-            int fileLength = base64Image.length();
-            getLog().info("base64Image {}, Size {} ", base64Image, fileLength);
-            if (fileLength > 4194304){
-                String objectName = GALLERY_IMAGES + username + fileName;
-                fileStoreService.deleteObject(BUCKET_NAME, objectName);
-                throw new UserServiceException(ErrorMessages.FILE_TOO_LARGE.getErrorMessage());
-            }
-
-                Set<ImageGallery> imageGalleries = new HashSet<>();
+        Set<ImageGallery> imageGalleries = new HashSet<>();
                 ImageGallery imageGallery = new ImageGallery();
                 imageGallery.setCaption(caption);
                 imageGallery.setUserId(userProfile.getUserId());
-                imageGallery.setImageUrl(fileName);
+                imageGallery.setImageUrl(galleryImage.getFileName());
                 imageGallery.setUserDetails(userProfile);
                 imageGallery.setCategory(categoryNameResponse);
-                imageGallery.setBase64StringImage(base64Image);
+                imageGallery.setBase64StringImage(galleryImage.getBase64Image());
                 imageGalleries.add(imageGallery);
                 userProfile.setImageGalleries(imageGalleries);
                 userRepo.save(userProfile);
 
-
-        }catch (IOException e){
-            throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
-        }
     }
+
 
     @Override
     public Set<za.co.photo_sharing.app_ws.model.response.ImageGallery> downloadUserGalleryImages(String email) {
@@ -566,5 +531,13 @@ public class UserServiceImpl implements UserService {
 
     private String getImage(String imageArray) {
         return imageArray;
+    }
+
+    private Category getCategory(String email, String categoryName) {
+        Category categoryNameResponse = categoryService.findByEmailAndCategoryName(email, categoryName);
+        if (Objects.isNull(categoryNameResponse)){
+            throw new UserServiceException(ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
+        }
+        return categoryNameResponse;
     }
 }

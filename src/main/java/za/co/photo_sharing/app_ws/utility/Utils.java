@@ -17,6 +17,7 @@ import za.co.photo_sharing.app_ws.entity.Category;
 import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
+import za.co.photo_sharing.app_ws.model.response.ImageUpload;
 import za.co.photo_sharing.app_ws.services.impl.FileStoreService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
@@ -36,6 +37,7 @@ import static za.co.photo_sharing.app_ws.services.impl.ArticleServiceImpl.ARTICL
 @Component
 public class Utils {
 
+    public static final String PROFILE_IMAGES = "PROFILE_IMAGES";
     private final Random RANDOM = new SecureRandom();
     private final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private final String NUMBERS = "0123456789";
@@ -216,17 +218,19 @@ public class Utils {
                 folder, username);
 
         String fileName = String.format("%s-%s", UUID.randomUUID().toString().substring(0, 7), file.getOriginalFilename());
-        String base64Image;
+        String base64Image = "";
         try {
             fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
-            byte[] image = fileStoreService.download(path, fileName);
-            base64Image = Base64.getEncoder().encodeToString(image);
-            int fileLength = base64Image.length();
-            getLog().info("base64Image {}, Size {} ", base64Image, fileLength);
-            if (fileLength > 4194304){
-                String objectName = folder + username + fileName;
-                fileStoreService.deleteObject(folder, objectName);
-                throw new UserServiceException(ErrorMessages.FILE_TOO_LARGE.getErrorMessage());
+            if (!folder.equalsIgnoreCase(PROFILE_IMAGES)){
+                byte[] image = fileStoreService.download(path, fileName);
+                base64Image = Base64.getEncoder().encodeToString(image);
+                int fileLength = base64Image.length();
+                getLog().info("base64Image {}, Size {} ", base64Image, fileLength);
+                if (fileLength > 4194304){
+                    String objectName = folder + username + fileName;
+                    fileStoreService.deleteObject(folder, objectName);
+                    throw new UserServiceException(ErrorMessages.FILE_TOO_LARGE.getErrorMessage());
+                }
             }
 
         }catch (IOException e){
@@ -234,6 +238,43 @@ public class Utils {
         }
 
         return base64Image;
+    }
+
+    public ImageUpload uploadGalleryImage(MultipartFile file, UserProfile userProfile, String folder){
+        ImageUpload imageUpload = new ImageUpload();
+        long fileSize = file.getSize();
+        getLog().info("File Size {} " , fileSize);
+        String username = userProfile.getUsername();
+
+        Map<String, String> metadata = extractMetadata(file);
+
+        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
+                folder, username);
+
+        String fileName = String.format("%s-%s", UUID.randomUUID().toString().substring(0, 7), file.getOriginalFilename());
+
+        try {
+            fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
+            String base64Image="";
+            if (!folder.equalsIgnoreCase(PROFILE_IMAGES)){
+                byte[] image = fileStoreService.download(path, fileName);
+                 base64Image = Base64.getEncoder().encodeToString(image);
+                int fileLength = base64Image.length();
+                getLog().info("base64Image {}, Size {} ", base64Image, fileLength);
+                if (fileLength > 4194304){
+                    String objectName = folder + username + fileName;
+                    fileStoreService.deleteObject(BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(), objectName);
+                    throw new UserServiceException(ErrorMessages.FILE_TOO_LARGE.getErrorMessage());
+                }
+            }
+            imageUpload.setBase64Image(base64Image);
+            imageUpload.setFileName(fileName);
+        }catch (IOException e){
+            throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
+        }
+
+
+        return imageUpload;
     }
 
     public static Logger getLog() {
