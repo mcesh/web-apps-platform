@@ -79,6 +79,11 @@ public class UserProfile implements Serializable {
     @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<ImageGallery> imageGalleries;
 
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "users_id")
+    private Set<Article> articles;
+
     public UserProfile(Long userId,
                        String username,
                        String firstName,
@@ -97,7 +102,8 @@ public class UserProfile implements Serializable {
                        String userProfileImageLink,
                        AuthorityRoleType roleType,
                        boolean roleUpdated,
-                       Set<ImageGallery> imageGalleries) {
+                       Set<ImageGallery> imageGalleries,
+                       Set<Article> article) {
         this.userId = userId;
         this.username = username;
         this.firstName = firstName;
@@ -117,6 +123,7 @@ public class UserProfile implements Serializable {
         this.roleType = roleType;
         this.roleUpdated = roleUpdated;
         this.imageGalleries = imageGalleries;
+        this.articles = article;
     }
 
     public UserProfile() {
@@ -282,6 +289,14 @@ public class UserProfile implements Serializable {
         this.imageGalleries = imageGalleries;
     }
 
+    public Set<Article> getArticles() {
+        return articles;
+    }
+
+    public void setArticles(Set<Article> articles) {
+        this.articles = articles;
+    }
+
     @Override
     public String toString() {
         return "UserProfile{" +
@@ -304,7 +319,8 @@ public class UserProfile implements Serializable {
                 ", userProfileImageLink='" + userProfileImageLink + '\'' +
                 ", roleType=" + roleType +
                 ", roleUpdated=" + roleUpdated +
-                ", imageGallery=" + imageGalleries +
+                ", imageGalleries=" + imageGalleries +
+                ", articles=" + articles +
                 '}';
     }
 
@@ -332,6 +348,7 @@ public class UserProfile implements Serializable {
                 Objects.equals(getRoleTypeKey(),that.getRoleTypeKey()) &&
                 Objects.equals(getUserProfileImageLink(), that.getUserProfileImageLink()) &&
                 Objects.equals(getImageGalleries(), that.getImageGalleries()) &&
+                Objects.equals(getArticles(), that.getArticles()) &&
                 Objects.equals(getRoleType(),that.getRoleType());
     }
 
@@ -356,6 +373,7 @@ public class UserProfile implements Serializable {
                 getRoleType(),
                 isRoleUpdated(),
                 getUserProfileImageLink(),
-                getImageGalleries());
+                getImageGalleries(),
+                getArticles());
     }
 }

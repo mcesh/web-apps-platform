@@ -23,7 +23,7 @@ public class HibernateConfig {
     public LocalSessionFactoryBean getSessionFactory() {            // creating session factory
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
         sessionFactory.setDataSource(dataSource);
-        sessionFactory.setPackagesToScan(new String[]{"za.co.photo_sharing.app_ws.entity"});
+        sessionFactory.setPackagesToScan("za.co.photo_sharing.app_ws.entity");
         sessionFactory.setHibernateProperties(hibernateProperties());
         return sessionFactory;
     }

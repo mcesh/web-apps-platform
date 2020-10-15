@@ -17,12 +17,15 @@ public class Category implements Serializable {
     private Long id;
     @NotBlank(message = "Category name is required")
     private String name;
-    @Column(nullable = false, length = 105)
+    @Column(nullable = false)
     private String email;
     
     @JsonIgnore
     @OneToMany(mappedBy = "category")
     private Set<ImageGallery> imageGallery;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Article> articles;
 
     public Long getId() {
         return id;
