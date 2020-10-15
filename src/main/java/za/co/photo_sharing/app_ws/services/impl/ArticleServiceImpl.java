@@ -9,21 +9,17 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.constants.ArticleStatusTypeKeys;
-import za.co.photo_sharing.app_ws.constants.BucketName;
 import za.co.photo_sharing.app_ws.entity.*;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
+import za.co.photo_sharing.app_ws.model.response.ImageUpload;
 import za.co.photo_sharing.app_ws.repo.ArticleRepository;
 import za.co.photo_sharing.app_ws.services.*;
 import za.co.photo_sharing.app_ws.shared.dto.ArticleDTO;
-import za.co.photo_sharing.app_ws.shared.dto.TagDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ArticleServiceImpl implements ArticleService {
@@ -54,7 +50,8 @@ public class ArticleServiceImpl implements ArticleService {
                                  String status) {
 
         utils.isImage(file);
-        String base64Image = utils.uploadFile(file, userDto, ARTICLE_IMAGES);
+        UserProfile userProfile = modelMapper.map(userDto, UserProfile.class);
+        ImageUpload imageUpload = utils.uploadImage(file, userProfile, ARTICLE_IMAGES);
         Category categoryNameResponse = getCategory(userDto, categoryName);
         Set<Tag> tags = new HashSet<>();
         if (articleDTO.getTags()!= null && articleDTO.getTags().size()> 0){
@@ -69,7 +66,7 @@ public class ArticleServiceImpl implements ArticleService {
         articleStatus = statusService.findByStatus(status);
         Article article = modelMapper.map(articleDTO, Article.class);
         article.setEmail(userDto.getEmail());
-        article.setBase64StringImage(base64Image);
+        article.setBase64StringImage(imageUpload.getBase64Image());
         article.setStatus(articleStatus.getStatus());
         article.setTags(tags);
         article.setCategory(categoryNameResponse);

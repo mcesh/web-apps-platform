@@ -206,41 +206,7 @@ public class Utils {
         }
     }
 
-    public String uploadFile(MultipartFile file, UserDto userDto, String folder){
-
-        long fileSize = file.getSize();
-        getLog().info("File Size {} " , fileSize);
-        String username = userDto.getUsername();
-
-        Map<String, String> metadata = extractMetadata(file);
-
-        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
-                folder, username);
-
-        String fileName = String.format("%s-%s", UUID.randomUUID().toString().substring(0, 7), file.getOriginalFilename());
-        String base64Image = "";
-        try {
-            fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
-            if (!folder.equalsIgnoreCase(PROFILE_IMAGES)){
-                byte[] image = fileStoreService.download(path, fileName);
-                base64Image = Base64.getEncoder().encodeToString(image);
-                int fileLength = base64Image.length();
-                getLog().info("base64Image {}, Size {} ", base64Image, fileLength);
-                if (fileLength > 4194304){
-                    String objectName = folder + username + fileName;
-                    fileStoreService.deleteObject(folder, objectName);
-                    throw new UserServiceException(ErrorMessages.FILE_TOO_LARGE.getErrorMessage());
-                }
-            }
-
-        }catch (IOException e){
-            throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
-        }
-
-        return base64Image;
-    }
-
-    public ImageUpload uploadGalleryImage(MultipartFile file, UserProfile userProfile, String folder){
+    public ImageUpload uploadImage(MultipartFile file, UserProfile userProfile, String folder){
         ImageUpload imageUpload = new ImageUpload();
         long fileSize = file.getSize();
         getLog().info("File Size {} " , fileSize);

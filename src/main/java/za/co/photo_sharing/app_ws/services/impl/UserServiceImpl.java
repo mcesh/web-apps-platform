@@ -393,7 +393,7 @@ public class UserServiceImpl implements UserService {
         UserProfile userProfile = userRepo.findByEmail(email);
         utils.getUser(userProfile);
         utils.isImage(file);
-        ImageUpload galleryImage = utils.uploadGalleryImage(file, userProfile, PROFILE_IMAGES);
+        ImageUpload galleryImage = utils.uploadImage(file, userProfile, PROFILE_IMAGES);
         userProfile.setUserProfileImageLink(galleryImage.getFileName());
         getLog().info("Uploading profileImage for {}, at {} ", userProfile.getEmail(), LocalDateTime.now());
         userRepo.save(userProfile);
@@ -405,7 +405,7 @@ public class UserServiceImpl implements UserService {
         utils.getUser(userProfile);
         utils.isImage(file);
         Category categoryNameResponse = getCategory(email, categoryName);
-        ImageUpload galleryImage = utils.uploadGalleryImage(file, userProfile, GALLERY_IMAGES);
+        ImageUpload galleryImage = utils.uploadImage(file, userProfile, GALLERY_IMAGES);
 
         Set<ImageGallery> imageGalleries = new HashSet<>();
                 ImageGallery imageGallery = new ImageGallery();
