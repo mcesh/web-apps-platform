@@ -208,16 +208,16 @@ public class Utils {
 
     public ImageUpload uploadImage(MultipartFile file, UserProfile userProfile, String folder){
         ImageUpload imageUpload = new ImageUpload();
+        getLog().info("Uploading image for {} to {} ", userProfile.getEmail(), folder);
         long fileSize = file.getSize();
         getLog().info("File Size {} " , fileSize);
         String username = userProfile.getUsername();
 
         Map<String, String> metadata = extractMetadata(file);
 
-        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
-                folder, username);
+        String path = getFilePath(folder, username);
 
-        String fileName = String.format("%s-%s", UUID.randomUUID().toString().substring(0, 7), file.getOriginalFilename());
+        String fileName = getFileName(file);
 
         try {
             fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
@@ -241,6 +241,15 @@ public class Utils {
 
 
         return imageUpload;
+    }
+
+    private String getFileName(MultipartFile file) {
+        return String.format("%s-%s", UUID.randomUUID().toString().substring(0, 7), file.getOriginalFilename());
+    }
+
+    private String getFilePath(String folder, String username) {
+        return String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
+                    folder, username);
     }
 
     public static Logger getLog() {

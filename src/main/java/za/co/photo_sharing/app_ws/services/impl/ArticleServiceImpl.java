@@ -53,16 +53,8 @@ public class ArticleServiceImpl implements ArticleService {
         UserProfile userProfile = modelMapper.map(userDto, UserProfile.class);
         ImageUpload imageUpload = utils.uploadImage(file, userProfile, ARTICLE_IMAGES);
         Category categoryNameResponse = getCategory(userDto, categoryName);
-        Set<Tag> tags = new HashSet<>();
-        if (articleDTO.getTags()!= null && articleDTO.getTags().size()> 0){
-            tags = new HashSet<>(articleDTO.getTags().size());
+        Set<Tag> tags = getTags(articleDTO);
 
-            for (String tag: articleDTO.getTags()){
-                Tag tagName = tagService.findOrCreateByName(tag);
-                tags.add(tagName);
-            }
-        }
-        
         articleStatus = statusService.findByStatus(status);
         Article article = modelMapper.map(articleDTO, Article.class);
         article.setEmail(userDto.getEmail());
@@ -77,13 +69,7 @@ public class ArticleServiceImpl implements ArticleService {
         Article savedArticle = articleRepository.save(article);
         ArticleDTO returnedArticle = modelMapper.map(savedArticle, ArticleDTO.class);
 
-        Set<String> tagNames = new HashSet<>(savedArticle.getTags().size());
-
-        for (Tag tag : savedArticle.getTags()) {
-            tagNames.add(tag.getName());
-        }
-        returnedArticle.getTags().clear();
-        returnedArticle.setTags(tagNames);
+        mapTagsToString(savedArticle, returnedArticle);
 
         getLog().info("Persisted article.... {} ", returnedArticle);
         return returnedArticle;
@@ -96,6 +82,30 @@ public class ArticleServiceImpl implements ArticleService {
         }
         return categoryNameResponse;
     }
+
+    private Set<Tag> getTags(ArticleDTO articleDTO) {
+        Set<Tag> tags = new HashSet<>();
+        if (articleDTO.getTags()!= null && articleDTO.getTags().size()> 0){
+            tags = new HashSet<>(articleDTO.getTags().size());
+
+            for (String tag: articleDTO.getTags()){
+                Tag tagName = tagService.findOrCreateByName(tag);
+                tags.add(tagName);
+            }
+        }
+        return tags;
+    }
+
+    private void mapTagsToString(Article savedArticle, ArticleDTO returnedArticle) {
+        Set<String> tagNames = new HashSet<>(savedArticle.getTags().size());
+
+        for (Tag tag : savedArticle.getTags()) {
+            tagNames.add(tag.getName());
+        }
+        returnedArticle.getTags().clear();
+        returnedArticle.setTags(tagNames);
+    }
+
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
