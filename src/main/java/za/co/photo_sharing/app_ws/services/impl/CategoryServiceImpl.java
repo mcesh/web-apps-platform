@@ -37,6 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = new Category();
         category.setName(categoryName);
         category.setEmail(userService.findByEmail(email).getEmail());
+        category.setArticleCount(0);
         Category savedCategory = categoryRepository.save(category);
         getLog().info("Category created for {} ", savedCategory.getEmail());
         return savedCategory;
@@ -57,6 +58,11 @@ public class CategoryServiceImpl implements CategoryService {
         return categories;
     }
 
+    @Override
+    public void updateArticleCount(int count,String categoryName, String email) {
+        categoryRepository.updateArticleCount(count,categoryName,email);
+    }
+
     @Transactional
     @Override
     public Category findByEmailAndCategoryName(String email, String name) {
@@ -66,6 +72,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
         return category;
     }
+
 
     public static Logger getLog() {
         return LOGGER;

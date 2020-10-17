@@ -19,6 +19,9 @@ public class Category implements Serializable {
     private String name;
     @Column(nullable = false)
     private String email;
+
+    @Column
+    private int articleCount;
     
     @JsonIgnore
     @OneToMany(mappedBy = "category", fetch = FetchType.EAGER)
@@ -33,6 +36,14 @@ public class Category implements Serializable {
 
     public void setArticles(Set<Article> articles) {
         this.articles = articles;
+    }
+
+    public int getArticleCount() {
+        return articleCount;
+    }
+
+    public void setArticleCount(int articleCount) {
+        this.articleCount = articleCount;
     }
 
     public Long getId() {

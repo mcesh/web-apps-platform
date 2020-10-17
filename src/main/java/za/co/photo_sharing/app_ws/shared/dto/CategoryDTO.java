@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CategoryDTO {
     private String name;
+    private int articleCount;
 }

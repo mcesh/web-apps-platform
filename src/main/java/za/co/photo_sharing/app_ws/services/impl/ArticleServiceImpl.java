@@ -99,6 +99,9 @@ public class ArticleServiceImpl implements ArticleService {
         if (Objects.isNull(categoryNameResponse)){
             throw new UserServiceException(ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }
+        int articleCount = categoryNameResponse.getArticleCount() + 1;
+        categoryService.updateArticleCount(articleCount,categoryName,userDto.getEmail());
+        categoryNameResponse.setArticleCount(articleCount);
         return categoryNameResponse;
     }
 

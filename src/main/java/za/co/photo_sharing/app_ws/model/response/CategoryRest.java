@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CategoryRest {
     private String name;
+    private int articleCount;
 }
