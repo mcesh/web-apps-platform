@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.constants.ArticleStatusTypeKeys;
 import za.co.photo_sharing.app_ws.entity.*;
+import za.co.photo_sharing.app_ws.exceptions.ArticleServiceException;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.model.response.ImageUpload;
@@ -20,6 +21,7 @@ import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class ArticleServiceImpl implements ArticleService {
@@ -73,6 +75,23 @@ public class ArticleServiceImpl implements ArticleService {
 
         getLog().info("Persisted article.... {} ", returnedArticle);
         return returnedArticle;
+    }
+
+    @Override
+    public ArticleDTO findById(Long id) {
+        Optional<Article> article = articleRepository.findById(id);
+        if (!article.isPresent()){
+            throw new ArticleServiceException(ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
+        }
+        AtomicReference<ArticleDTO> articleDTO = new AtomicReference<>();
+        article.map(article1 -> {
+            articleDTO.set(modelMapper.map(article1, ArticleDTO.class));
+            mapTagsToString(article1,articleDTO.get());
+            return articleDTO;
+        });
+        getLog().info("Article found with ID {} ", articleDTO.get().getId());
+        getLog().info("Article: {} ", articleDTO.get());
+        return articleDTO.get();
     }
 
     private Category getCategory(UserDto userDto, String categoryName) {

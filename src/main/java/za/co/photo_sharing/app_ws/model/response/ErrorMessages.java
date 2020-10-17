@@ -30,7 +30,8 @@ public enum ErrorMessages {
     USER_NOT_VERIFIED("user email address not verified"),
     CLIENT_ID_ALREADY_DEFINED("Client ID already exists for this user"),
     CLIENT_INFORMATION_NOT_FOUND("Client information not found"),
-    ARTICLE_STATUS_NOT_FOUND("Article status not found");
+    ARTICLE_STATUS_NOT_FOUND("Article status not found"),
+    ARTICLE_NOT_FOUND("No article found with the specified ID");
 
 
     private String errorMessage;

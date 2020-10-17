@@ -54,4 +54,17 @@ public class ArticleResource {
         getLog().info("articleRest {} ", articleRest);
         return articleRest;
     }
+
+    @ApiOperation(value="Find Article By ID",
+            notes="${userAppRequestResource.ArticleByID.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @GetMapping(value = "/article/{id}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public ArticleRest getArticleById(Long id){
+        ArticleDTO articleDTO = articleService.findById(id);
+       return modelMapper.map(articleDTO,ArticleRest.class);
+    }
 }

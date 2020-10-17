@@ -23,9 +23,10 @@ public class ArticleRest {
     private String caption;
     private int likes;
     private LocalDateTime postedDate;
-    private String base64StringImage;
     private Set<CommentRest> commentList;
-    private String status = ArticlesStatus.DRAFT.getText();
-    private String email;
     private Set<String> tags = new HashSet<>();
+    private String status = ArticlesStatus.DRAFT.getText();
+    private CategoryRest category;
+    private String email;
+    private String base64StringImage;
 }

@@ -21,9 +21,10 @@ public class ArticleDTO {
     private String caption;
     private int likes;
     private LocalDateTime postedDate;
-    private String base64StringImage;
     private Set<CommentDTO> commentList;
     private ArticlesStatus status = ArticlesStatus.DRAFT;
     private String email;
     private Set<String> tags;
+    private CategoryDTO category;
+    private String base64StringImage;
 }

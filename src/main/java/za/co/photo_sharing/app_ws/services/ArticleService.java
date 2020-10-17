@@ -10,4 +10,5 @@ public interface ArticleService extends UserDetailsService {
     ArticleDTO createPost(ArticleDTO articleDTO, UserDto userDto,
                           MultipartFile file, String categoryName,
                           String articleStatus);
+    ArticleDTO findById(Long id);
 }
