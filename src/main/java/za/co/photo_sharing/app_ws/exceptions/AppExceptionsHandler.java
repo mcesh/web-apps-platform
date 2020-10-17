@@ -29,4 +29,12 @@ public class AppExceptionsHandler {
         return new ResponseEntity<>(errorMessage, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(value = ValidationException.class)
+    public ResponseEntity<Object> handleValidationException(ValidationException e, WebRequest request){
+        ErrorMessage errorMessage = new ErrorMessage();
+        errorMessage.setTimestamp(new Date());
+        errorMessage.setMessage(e.getMessage());
+        return new ResponseEntity<>(errorMessage, new HttpHeaders(), e.getStatus());
+    }
+
 }

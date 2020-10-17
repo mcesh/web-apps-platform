@@ -31,7 +31,8 @@ public enum ErrorMessages {
     CLIENT_ID_ALREADY_DEFINED("Client ID already exists for this user"),
     CLIENT_INFORMATION_NOT_FOUND("Client information not found"),
     ARTICLE_STATUS_NOT_FOUND("Article status not found"),
-    ARTICLE_NOT_FOUND("No article found with the specified ID");
+    ARTICLE_NOT_FOUND("No article found with the specified ID"),
+    NO_ARTICES_FOUND_IN_RANGE("No articles found in the rage you provided");
 
 
     private String errorMessage;

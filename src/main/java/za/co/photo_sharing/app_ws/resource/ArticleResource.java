@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import za.co.photo_sharing.app_ws.config.SecurityConstants;
 import za.co.photo_sharing.app_ws.model.request.ArticleDetailsRequestModel;
 import za.co.photo_sharing.app_ws.model.response.ArticleRest;
 import za.co.photo_sharing.app_ws.services.ArticleService;
@@ -18,6 +19,8 @@ import za.co.photo_sharing.app_ws.shared.dto.ArticleDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("article") // http://localhost:8080/article/web-apps-platform
@@ -66,5 +69,28 @@ public class ArticleResource {
     public ArticleRest getArticleById(Long id){
         ArticleDTO articleDTO = articleService.findById(id);
        return modelMapper.map(articleDTO,ArticleRest.class);
+    }
+
+    @ApiOperation(value="Find Articles By Email",
+            notes="${userAppRequestResource.ArticlesByEmail.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @GetMapping(value = "/article/email/{email}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public List<ArticleRest> getArticlesByEmail(
+            @RequestParam(value = "page", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_NUMBER) Integer page,
+            @RequestParam(value = "size", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_SIZE) Integer size,
+            @PathVariable(name = "email") String email){
+        List<ArticleRest> articleRests = new ArrayList<>();
+        getLog().info("Fetching Articles for {} current time is {} ", email, LocalDateTime.now());
+        List<ArticleDTO> articleDTOList = articleService.findByEmail(email, page, size);
+        articleDTOList.forEach(articleDTO -> {
+            ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
+            articleRests.add(articleRest);
+        });
+
+        return articleRests;
     }
 }

@@ -7,6 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import za.co.photo_sharing.app_ws.constants.BucketName;
 import za.co.photo_sharing.app_ws.entity.Category;
 import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
+import za.co.photo_sharing.app_ws.exceptions.ValidationException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.model.response.ImageUpload;
 import za.co.photo_sharing.app_ws.services.impl.FileStoreService;
@@ -250,6 +252,21 @@ public class Utils {
     private String getFilePath(String folder, String username) {
         return String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
                     folder, username);
+    }
+
+    public static void validatePageNumberAndSize(int page, int size) {
+        if (page < 0) {
+            throw new ValidationException(HttpStatus.BAD_REQUEST, "Page number cannot be less than zero.");
+        }
+
+        if (size < 0) {
+            throw new ValidationException(HttpStatus.BAD_REQUEST, "Size number cannot be less than zero.");
+        }
+
+        if (size > SecurityConstants.MAX_PAGE_SIZE) {
+            throw new ValidationException(HttpStatus.BAD_REQUEST, "Page size must not be greater than " +
+                    SecurityConstants.MAX_PAGE_SIZE);
+        }
     }
 
     public static Logger getLog() {

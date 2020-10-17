@@ -19,6 +19,9 @@ public class SecurityConstants {
     public static final String AUTHORITIES_KEY = "scopes";
     public static final String IS_ADMIN = "admin";
     public static final String NAME = "name";
+    public static final String DEFAULT_PAGE_NUMBER = "0";
+    public static final String DEFAULT_PAGE_SIZE = "30";
+    public static final int MAX_PAGE_SIZE = 30;
 
     public static String getTokenSecret()
     {

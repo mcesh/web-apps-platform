@@ -4,9 +4,14 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.constants.ArticleStatusTypeKeys;
 import za.co.photo_sharing.app_ws.entity.*;
@@ -81,6 +86,7 @@ public class ArticleServiceImpl implements ArticleService {
     public ArticleDTO findById(Long id) {
         Optional<Article> article = articleRepository.findById(id);
         if (!article.isPresent()){
+
             throw new ArticleServiceException(ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
         }
         AtomicReference<ArticleDTO> articleDTO = new AtomicReference<>();
@@ -92,6 +98,26 @@ public class ArticleServiceImpl implements ArticleService {
         getLog().info("Article found with ID {} ", articleDTO.get().getId());
         getLog().info("Article: {} ", articleDTO.get());
         return articleDTO.get();
+    }
+
+    @Override
+    public List<ArticleDTO> findByEmail(String email,int page, int size) {
+        Utils.validatePageNumberAndSize(page,size);
+        List<ArticleDTO> articleDTOS = new ArrayList<>();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Article> articles = articleRepository.findByEmail(email,pageable);
+        List<Article> articleList = articles.getContent();
+        if (CollectionUtils.isEmpty(articleList)){
+            throw new ArticleServiceException(ErrorMessages.NO_ARTICES_FOUND_IN_RANGE.getErrorMessage());
+        }
+        getLog().info("Articles size found {} ", articleList.size());
+        articleList.forEach(article -> {
+            ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
+            mapTagsToString(article,articleDTO);
+            articleDTOS.add(articleDTO);
+        });
+
+        return articleDTOS;
     }
 
     private Category getCategory(UserDto userDto, String categoryName) {
