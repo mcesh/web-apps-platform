@@ -1,6 +1,7 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import za.co.photo_sharing.app_ws.entity.Tag;
 import za.co.photo_sharing.app_ws.exceptions.InvalidTagException;
@@ -28,7 +29,7 @@ public class TagServiceImpl implements TagService {
                 tagRepository.save(tag);
             } catch (ConstraintViolationException exception) {
                 ConstraintViolation<?> violation = exception.getConstraintViolations().iterator().next();
-                throw new InvalidTagException(
+                throw new InvalidTagException(HttpStatus.BAD_REQUEST,
                         "Invalid tag " + violation.getPropertyPath() + ": " + violation.getMessage());
             }
         }

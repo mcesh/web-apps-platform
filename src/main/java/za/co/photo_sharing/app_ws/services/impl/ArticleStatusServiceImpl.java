@@ -1,6 +1,7 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import za.co.photo_sharing.app_ws.entity.ArticleStatus;
 import za.co.photo_sharing.app_ws.exceptions.ArticleServiceException;
@@ -20,7 +21,7 @@ public class ArticleStatusServiceImpl implements ArticleStatusService {
     public ArticleStatus findByStatus(String status) {
         ArticleStatus articleStatus = statusRepository.findByStatus(status);
         if (Objects.isNull(articleStatus)){
-            throw new ArticleServiceException(ErrorMessages.ARTICLE_STATUS_NOT_FOUND.getErrorMessage());
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.ARTICLE_STATUS_NOT_FOUND.getErrorMessage());
         }
         return articleStatus;
     }

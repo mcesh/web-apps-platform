@@ -8,33 +8,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.config.SecurityConstants;
 import za.co.photo_sharing.app_ws.constants.BucketName;
-import za.co.photo_sharing.app_ws.entity.Category;
 import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.exceptions.ValidationException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.model.response.ImageUpload;
 import za.co.photo_sharing.app_ws.services.impl.FileStoreService;
-import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static org.apache.http.entity.ContentType.*;
-import static za.co.photo_sharing.app_ws.services.impl.ArticleServiceImpl.ARTICLE_IMAGES;
 
 @Component
 public class Utils {
@@ -191,7 +184,7 @@ public class Utils {
     public void isImage(MultipartFile file) {
         if (!Arrays.asList(IMAGE_JPEG.getMimeType(), IMAGE_GIF.getMimeType(), IMAGE_PNG.getMimeType())
                 .contains(file.getContentType())){
-            throw new UserServiceException(ErrorMessages.INCORRECT_IMAGE_FORMAT.getErrorMessage());
+            throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.INCORRECT_IMAGE_FORMAT.getErrorMessage());
         }
     }
 
@@ -204,7 +197,7 @@ public class Utils {
 
     public void getUser(UserProfile userProfile) {
         if (Objects.isNull(userProfile)){
-            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
     }
 
@@ -232,13 +225,13 @@ public class Utils {
                 if (fileLength > 4194304){
                     String objectName = folder + username + fileName;
                     fileStoreService.deleteObject(BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(), objectName);
-                    throw new UserServiceException(ErrorMessages.FILE_TOO_LARGE.getErrorMessage());
+                    throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.FILE_TOO_LARGE.getErrorMessage());
                 }
             }
             imageUpload.setBase64Image(base64Image);
             imageUpload.setFileName(fileName);
         }catch (IOException e){
-            throw new UserServiceException(ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
+            throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,ErrorMessages.INTERNAL_SERVER_ERROR.getErrorMessage());
         }
 
 

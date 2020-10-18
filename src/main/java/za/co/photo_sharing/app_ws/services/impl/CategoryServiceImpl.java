@@ -3,6 +3,7 @@ package za.co.photo_sharing.app_ws.services.impl;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -32,7 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
     public Category save(String categoryName, String email) {
         Category category_ = categoryRepository.findByEmailAndCategoryName(email, categoryName);
         if (Objects.nonNull(category_)){
-            throw new UserServiceException(ErrorMessages.CATEGORY_ALREADY_EXISTS.getErrorMessage());
+            throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.CATEGORY_ALREADY_EXISTS.getErrorMessage());
         }
         Category category = new Category();
         category.setName(categoryName);
@@ -47,7 +48,7 @@ public class CategoryServiceImpl implements CategoryService {
     public List<Category> findAllCategoriesByEmail(String email) {
         UserDto userServiceByEmail = userService.findByEmail(email);
         if (Objects.isNull(userServiceByEmail)){
-            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
         List<Category> categories = categoryRepository.findAllCategoriesByEmail(email);
         if (!CollectionUtils.isEmpty(categories)){
@@ -68,7 +69,7 @@ public class CategoryServiceImpl implements CategoryService {
     public Category findByEmailAndCategoryName(String email, String name) {
         Category category = categoryRepository.findByEmailAndCategoryName(email, name);
         if (Objects.isNull(category)){
-            throw new UserServiceException(ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }
         return category;
     }

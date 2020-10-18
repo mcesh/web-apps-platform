@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -87,7 +87,7 @@ public class ArticleServiceImpl implements ArticleService {
         Optional<Article> article = articleRepository.findById(id);
         if (!article.isPresent()){
 
-            throw new ArticleServiceException(ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
         }
         AtomicReference<ArticleDTO> articleDTO = new AtomicReference<>();
         article.map(article1 -> {
@@ -108,7 +108,7 @@ public class ArticleServiceImpl implements ArticleService {
         Page<Article> articles = articleRepository.findByEmail(email,pageable);
         List<Article> articleList = articles.getContent();
         if (CollectionUtils.isEmpty(articleList)){
-            throw new ArticleServiceException(ErrorMessages.NO_ARTICES_FOUND_IN_RANGE.getErrorMessage());
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.NO_ARTICES_FOUND_IN_RANGE.getErrorMessage());
         }
         getLog().info("Articles size found {} ", articleList.size());
         articleList.forEach(article -> {
@@ -123,7 +123,7 @@ public class ArticleServiceImpl implements ArticleService {
     private Category getCategory(UserDto userDto, String categoryName) {
         Category categoryNameResponse = categoryService.findByEmailAndCategoryName(userDto.getEmail(), categoryName);
         if (Objects.isNull(categoryNameResponse)){
-            throw new UserServiceException(ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }
         int articleCount = categoryNameResponse.getArticleCount() + 1;
         categoryService.updateArticleCount(articleCount,categoryName,userDto.getEmail());

@@ -1,6 +1,5 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -10,12 +9,11 @@ import com.amazonaws.util.IOUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.rmi.UnknownHostException;
 import java.util.*;
 
 @Service
@@ -40,7 +38,7 @@ public class FileStoreService {
             s3.putObject(path,fileName,inputStream,metadata);
             log.info("File uploaded successfully {} " ,fileName);
         }catch (Exception e){
-            throw new UserServiceException("Failed to store file to DigitalOceans Bucket "
+            throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,"Failed to store file to DigitalOceans Bucket "
                     + e.getMessage());
         }
     }

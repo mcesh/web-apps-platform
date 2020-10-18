@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -99,7 +100,7 @@ public class EmailUtility {
                     message.getAllRecipients());
         }catch (Exception e){
             getLog().info("Email Unsuccessfully sent {}", e.getMessage());
-            throw new UserServiceException(ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
+            throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
         }
     }
 
@@ -131,7 +132,7 @@ public class EmailUtility {
                     message.getAllRecipients());
         }catch (MessagingException e){
             getLog().info("Email Unsuccessfully sent {}", e.getMessage());
-            throw new UserServiceException(ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
+            throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
         }
 
     }
@@ -258,7 +259,7 @@ public class EmailUtility {
 
         }catch (Exception    e){
             getLog().info("Email Unsuccessfully sent {}", e.getMessage());
-            throw new UserServiceException(ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
+            throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
         }
     }
 

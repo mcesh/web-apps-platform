@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -99,11 +100,11 @@ public class UserServiceImpl implements UserService {
     public UserDto createUser(UserDto user, String userAgent, String webUrl) throws IOException, MessagingException {
 
         if (userRepo.findByEmail(user.getEmail()) != null) {
-            throw new UserServiceException(ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
+            throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
         }
         UserProfile username = userRepo.findByUsername(user.getUsername());
         if (username != null) {
-            throw new UserServiceException(ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
+            throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
         }
         Long userId = userIdFactory.buildUserId();
         Long roleKey;
@@ -152,7 +153,7 @@ public class UserServiceImpl implements UserService {
     public UserDto findByUsername(String username) {
         UserProfile userProfile = userRepo.findByUsername(username);
         if (userProfile == null)
-            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         return modelMapper.map(userProfile, UserDto.class);
     }
 
@@ -162,7 +163,7 @@ public class UserServiceImpl implements UserService {
         UserDto userDto = new UserDto();
         UserProfile profile = userRepo.findByFirstNameAndUserId(firstName, userId);
         if (Objects.isNull(profile)) {
-            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
         BeanUtils.copyProperties(profile, userDto);
         return userDto;
@@ -172,7 +173,7 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long userId) {
         UserProfile userByUserId = userRepo.findByUserId(userId);
         if (userByUserId == null)
-            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         userRepo.delete(userByUserId);
     }
 
@@ -180,7 +181,7 @@ public class UserServiceImpl implements UserService {
     public UserDto findByUserId(Long userId) {
         UserProfile userByUserId = userRepo.findByUserId(userId);
         if (userByUserId == null) {
-            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
         ModelMapper modelMapper = new ModelMapper();
         return modelMapper.map(userByUserId, UserDto.class);
@@ -190,7 +191,7 @@ public class UserServiceImpl implements UserService {
     public UserDto updateUser(Long userId, UserDto userDto) {
 
         UserProfile userByUserId = userRepo.findByUserId(userId);
-        if (userByUserId == null) throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        if (userByUserId == null) throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
 
         userByUserId.setFirstName(userDto.getFirstName());
         userByUserId.setLastName(userDto.getLastName());
@@ -208,7 +209,7 @@ public class UserServiceImpl implements UserService {
 
         List<UserProfile> userByFirstName = userRepo.findUserByFirstName(firstName);
         if (CollectionUtils.isEmpty(userByFirstName)) {
-            throw new UserServiceException(ErrorMessages.NO_USERS_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.NO_USERS_FOUND.getErrorMessage());
         }
         userByFirstName.stream()
                 .sorted(Comparator.comparing(UserProfile::getFirstName))
@@ -228,7 +229,7 @@ public class UserServiceImpl implements UserService {
         Page<UserProfile> usersPage = userRepo.findAll(pageableRequest);
         List<UserProfile> users = usersPage.getContent();
         if (CollectionUtils.isEmpty(users)) {
-            throw new UserServiceException(ErrorMessages.NO_USERS_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.NO_USERS_FOUND.getErrorMessage());
         }
 
         users.stream()
@@ -253,7 +254,7 @@ public class UserServiceImpl implements UserService {
                 userRepo.save(userProfile);
                 isVerified = true;
             } else {
-                throw new UserServiceException(ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
+                throw new UserServiceException(HttpStatus.UNAUTHORIZED,ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
             }
         }
         return isVerified;
@@ -265,7 +266,7 @@ public class UserServiceImpl implements UserService {
 
         UserProfile userProfile = userRepo.findByEmail(email);
         Optional<UserProfile> entity = Optional.ofNullable(Optional.ofNullable(userProfile)
-                .orElseThrow(() -> new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage())));
+                .orElseThrow(() -> new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage())));
 
         if (entity.isPresent()) {
             String token = utils.generatePasswordResetToken(userProfile.getUserId().toString());
@@ -292,12 +293,12 @@ public class UserServiceImpl implements UserService {
         boolean hasUpdated = false;
 
         if (Utils.hasTokenExpired(token)) {
-            throw new UserServiceException(ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
+            throw new UserServiceException(HttpStatus.UNAUTHORIZED,ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
         }
         PasswordResetToken passwordResetToken = resetRequestRepository.findByToken(token);
 
         if (passwordResetToken == null) {
-            throw new UserServiceException(ErrorMessages.TOKEN_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.TOKEN_NOT_FOUND.getErrorMessage());
         }
 
         String encodedPassword = bCryptPasswordEncoder.encode(newPassword);
@@ -341,7 +342,7 @@ public class UserServiceImpl implements UserService {
     public UserDto findByEmail(String email) {
         UserProfile userRepoByEmail = userRepo.findByEmail(email);
         if (userRepoByEmail == null) {
-            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
         ModelMapper modelMapper = new ModelMapper();
         return modelMapper.map(userRepoByEmail, UserDto.class);
@@ -351,14 +352,14 @@ public class UserServiceImpl implements UserService {
     public void deleteUserByEmail(String email) {
         UserProfile userProfile = userRepo.findByEmail(email);
         if (userProfile == null)
-            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         userRepo.delete(userProfile);
     }
 
     @Override
     public UserDto addNewUserAddress(Long userId, AddressDTO addressDTO) {
         UserProfile userById = userRepo.findByUserId(userId);
-        if (Objects.isNull(userById)) throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        if (Objects.isNull(userById)) throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         userById.setAddresses(buildAddresses(addressDTO, userById));
         UserProfile storedUserAddress = userRepo.save(userById);
         return modelMapper.map(storedUserAddress,UserDto.class);
@@ -367,12 +368,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUserRoles(String email) {
         UserProfile user = userRepo.findByEmail(email);
-        if (Objects.isNull(user)) throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        if (Objects.isNull(user)) throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         List<UserRole> roles = user.getUserRoles().stream()
                 .filter(userRole -> userRole.getRole().getRoleName().equalsIgnoreCase(UserRoleTypeKeys.ROLE_ADMIN))
                 .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(roles)){
-            throw new UserServiceException(ErrorMessages.AUTHORITY_NOT_APPLICABLE.getErrorMessage());
+            throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.AUTHORITY_NOT_APPLICABLE.getErrorMessage());
         }
 
         user.setRoleUpdated(Boolean.TRUE);
@@ -449,7 +450,7 @@ public class UserServiceImpl implements UserService {
     public String downloadUserProfileImage(String email) {
         UserProfile user = userRepo.findByEmail(email);
         if (Objects.isNull(user)){
-            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
 
         String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
@@ -536,7 +537,7 @@ public class UserServiceImpl implements UserService {
     private Category getCategory(String email, String categoryName) {
         Category categoryNameResponse = categoryService.findByEmailAndCategoryName(email, categoryName);
         if (Objects.isNull(categoryNameResponse)){
-            throw new UserServiceException(ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }
         return categoryNameResponse;
     }
