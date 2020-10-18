@@ -4,6 +4,7 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -53,12 +54,12 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     public UserAppRequestDTO requestAppDevelopment(UserAppRequestDTO user, String userAgent, String webUrl) throws IOException, MessagingException {
 
         if (appReqRepository.findByEmail(user.getEmail()) != null) {
-            throw new UserServiceException(ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
+            throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
         }
 
         if (user.getWebType().equalsIgnoreCase("ORGANIZATION")){
             if (appReqRepository.findByOrganizationUsername(user.getOrganizationUsername()) !=null){
-                throw new UserServiceException(ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
+                throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
             }
             tokenKey = utils.generateAppToken(user.getOrganizationUsername()).toUpperCase();
 
@@ -105,7 +106,7 @@ public class UserAppReqServiceImpl implements UserAppReqService {
                 appReqService.generateUserClient(email);
                 isVerified = true;
             }else {
-                throw new UserServiceException(ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
+                throw new UserServiceException(HttpStatus.UNAUTHORIZED,ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
             }
         }
         return isVerified;
@@ -115,7 +116,7 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     public void deleteAppRequestByEmail(String email) {
         UserAppRequest userAppRequest = appReqRepository.findByEmail(email);
         if (userAppRequest == null)
-            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         appReqRepository.delete(userAppRequest);
     }
 
@@ -124,7 +125,7 @@ public class UserAppReqServiceImpl implements UserAppReqService {
         AppToken byTokenKey = tokenRepository.findByTokenKey(tokenKey);
 
         if (Objects.isNull(byTokenKey)){
-            throw new UserServiceException(ErrorMessages.APP_TOKEN_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.APP_TOKEN_NOT_FOUND.getErrorMessage());
         }
         return modelMapper.map(byTokenKey,AppTokenDTO.class);
     }
@@ -133,7 +134,7 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     public UserAppRequestDTO findByEmail(String email) {
         UserAppRequest userAppRequest = appReqRepository.findByEmail(email);
         if (Objects.isNull(userAppRequest)){
-            throw new UserServiceException(ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
         return modelMapper.map(userAppRequest,UserAppRequestDTO.class);
     }
@@ -142,10 +143,10 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     public UserClientDTO generateUserClient(String email) {
         UserAppRequestDTO appRequestDTO = appReqService.findByEmail(email);
         if (!appRequestDTO.getEmailVerificationStatus()){
-            throw new UserServiceException(ErrorMessages.USER_NOT_VERIFIED.getErrorMessage());
+            throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.USER_NOT_VERIFIED.getErrorMessage());
         }
         if (clientRepository.findByEmail(email) !=null){
-            throw new UserServiceException(ErrorMessages.CLIENT_ID_ALREADY_DEFINED.getErrorMessage());
+            throw new UserServiceException(HttpStatus.ALREADY_REPORTED,ErrorMessages.CLIENT_ID_ALREADY_DEFINED.getErrorMessage());
         }
         String clientID = utils.generateClientID(email);
         UserClient userClient = new UserClient();
@@ -168,7 +169,7 @@ public class UserAppReqServiceImpl implements UserAppReqService {
             appReqService.findByEmail(email);
             UserClient client = clientRepository.findByEmail(email);
             if (Objects.isNull(client)){
-                throw new UserServiceException(ErrorMessages.CLIENT_INFORMATION_NOT_FOUND.getErrorMessage());
+                throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.CLIENT_INFORMATION_NOT_FOUND.getErrorMessage());
             }
             clientDTO = modelMapper.map(client, UserClientDTO.class);
             getLog().info("Client Info {} ", clientDTO);
@@ -176,7 +177,7 @@ public class UserAppReqServiceImpl implements UserAppReqService {
         }
         UserClient userClient = clientRepository.findByClientID(clientID);
         if (Objects.isNull(userClient)) {
-            throw new UserServiceException(ErrorMessages.CLIENT_INFORMATION_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.CLIENT_INFORMATION_NOT_FOUND.getErrorMessage());
         }
 
         clientDTO = modelMapper.map(userClient, UserClientDTO.class);

@@ -2,6 +2,7 @@ package za.co.photo_sharing.app_ws.services.impl;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import za.co.photo_sharing.app_ws.entity.AddressEntity;
 import za.co.photo_sharing.app_ws.entity.UserProfile;
@@ -59,7 +60,7 @@ public class AddressServiceImpl implements AddressService {
     public AddressDTO updateUserAddress(String addressId, AddressDTO addressDTO) {
         AddressEntity byAddressId = addressRepository.findByAddressId(addressId);
         if (Objects.isNull(byAddressId))
-            throw new UserServiceException(ErrorMessages.EMAIL_ADDRESS_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.EMAIL_ADDRESS_NOT_FOUND.getErrorMessage());
         byAddressId.setType(addressDTO.getType());
         byAddressId.setStreetName(addressDTO.getStreetName());
         byAddressId.setPostalCode(addressDTO.getPostalCode());

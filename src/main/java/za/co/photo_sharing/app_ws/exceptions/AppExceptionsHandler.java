@@ -18,7 +18,7 @@ public class AppExceptionsHandler {
         ErrorMessage errorMessage = new ErrorMessage();
         errorMessage.setTimestamp(new Date());
         errorMessage.setMessage(e.getMessage());
-        return new ResponseEntity<>(errorMessage, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorMessage, new HttpHeaders(), e.getStatus());
     }
 
     @ExceptionHandler(value = ArticleServiceException.class)
@@ -26,7 +26,7 @@ public class AppExceptionsHandler {
         ErrorMessage errorMessage = new ErrorMessage();
         errorMessage.setTimestamp(new Date());
         errorMessage.setMessage(e.getMessage());
-        return new ResponseEntity<>(errorMessage, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorMessage, new HttpHeaders(), e.getStatus());
     }
 
     @ExceptionHandler(value = ValidationException.class)
