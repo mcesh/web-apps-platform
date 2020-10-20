@@ -2,6 +2,7 @@ package za.co.photo_sharing.app_ws.model.response;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -13,6 +14,7 @@ import java.util.Date;
 public class CommentRest {
 
     private Long id;
-    private String content;
-    private Date postedDate;
+    private String comment;
+    private LocalDateTime postedDate;
+    private String username;
 }
