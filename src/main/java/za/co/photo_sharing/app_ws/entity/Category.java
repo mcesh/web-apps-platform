@@ -24,9 +24,10 @@ public class Category implements Serializable {
     private int articleCount;
     
     @JsonIgnore
-    @OneToMany(mappedBy = "category", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "category",cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private Set<ImageGallery> imageGallery;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Article> articles;
 
@@ -76,5 +77,17 @@ public class Category implements Serializable {
 
     public void setImageGallery(Set<ImageGallery> imageGallery) {
         this.imageGallery = imageGallery;
+    }
+
+    @Override
+    public String toString() {
+        return "Category{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", articleCount=" + articleCount +
+                ", imageGallery=" + imageGallery +
+                ", articles=" + articles +
+                '}';
     }
 }

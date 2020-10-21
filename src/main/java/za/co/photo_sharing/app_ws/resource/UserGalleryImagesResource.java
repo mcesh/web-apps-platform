@@ -28,8 +28,6 @@ public class UserGalleryImagesResource {
     @Autowired
     private  UserService userService;
     @Autowired
-    private  CategoryService categoryService;
-    @Autowired
     private UserAppReqService appReqService;
 
     private ModelMapper modelMapper = new ModelMapper();
@@ -70,37 +68,6 @@ public class UserGalleryImagesResource {
         Set<ImageGallery> galleryImages = userService.downloadUserGalleryImages(clientDTO.getEmail());
         getLog().info("Images retrieved {} ", galleryImages.size());
         return galleryImages;
-
-    }
-
-    @ApiOperation(value="The Created Category Endpoint",
-            notes="${userResource.CreateCategory.ApiOperation.Notes}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}",
-                    paramType="header")
-    })
-    @PostMapping(path = "category/new-category/{categoryName}/{email}",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public Category createCategory(@PathVariable String categoryName, String email){
-
-        getLog().info("Adding new category....");
-        Category category = categoryService.save(categoryName, email);
-        getLog().info("Category created  {} ", category.getName());
-        return category;
-
-    }
-
-
-    @ApiOperation(value="Get Categories Endpoint",
-            notes="${userResource.GetCategories.ApiOperation.Notes}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}",
-                    paramType="header")
-    })
-    @GetMapping(path = "categories/{email}",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public List<Category> getCategories(@PathVariable String email){
-        return categoryService.findAllCategoriesByEmail(email);
 
     }
 
