@@ -10,4 +10,7 @@ public interface CategoryService {
     Category save(String category, String username);
     List<Category> findAllCategoriesByEmail(String email);
     void updateArticleCount(int count,String categoryName, String email);
+    Category updateCategory(Long id,String categoryName);
+    Category findById(Long id);
+    void deleteCategoryById(Long id);
 }

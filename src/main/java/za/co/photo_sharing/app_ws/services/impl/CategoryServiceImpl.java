@@ -1,6 +1,7 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import za.co.photo_sharing.app_ws.utility.Utils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -64,6 +66,37 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.updateArticleCount(count,categoryName,email);
     }
 
+    @Override
+    public Category updateCategory(Long id, String categoryName) {
+        Optional<Category> category = getCategory(id);
+        category.get().setName(categoryName);
+        getLog().info("Category {} ", category);
+        categoryRepository.save(category.get());
+        return category.get();
+    }
+
+    @Override
+    public Category findById(Long id) {
+        Optional<Category> category = getCategory(id);
+        getLog().info("Category by id{} ", category);
+        return category.get();
+    }
+
+    private Optional<Category> getCategory(Long id) {
+        Optional<Category> category = categoryRepository.findById(id);
+        if (!category.isPresent()){
+            throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
+        }
+        return category;
+    }
+
+    @Override
+    public void deleteCategoryById(Long id) {
+        Optional<Category> category = getCategory(id);
+        getLog().info("Deleting category with name {} ", category.get().getName());
+        categoryRepository.delete(category.get());
+    }
+
     @Transactional
     @Override
     public Category findByEmailAndCategoryName(String email, String name) {
@@ -71,6 +104,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (Objects.isNull(category)){
             throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }
+        getLog().info("Category Found {} ", category);
         return category;
     }
 
