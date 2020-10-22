@@ -4,10 +4,13 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import za.co.photo_sharing.app_ws.entity.Article;
 import za.co.photo_sharing.app_ws.entity.Comment;
 import za.co.photo_sharing.app_ws.entity.UserProfile;
+import za.co.photo_sharing.app_ws.exceptions.ArticleServiceException;
+import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.ArticleRepository;
 import za.co.photo_sharing.app_ws.repo.CommentRepository;
 import za.co.photo_sharing.app_ws.services.ArticleService;
@@ -18,6 +21,7 @@ import za.co.photo_sharing.app_ws.shared.dto.CommentDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -53,5 +57,16 @@ public class CommentServiceImpl implements CommentService {
         CommentDTO dto = modelMapper.map(savedComment, CommentDTO.class);
         getLog().info("Persisted comment for {} ", username);
         return dto;
+    }
+
+    @Override
+    public CommentDTO updateComment(CommentDTO commentDTO, Long commentId) {
+        Optional<Comment> comment = commentRepository.findById(commentId);
+        if (!comment.isPresent()) {
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.COMMENT_NOT_FOUND.getErrorMessage());
+        }
+        comment.get().setComment(commentDTO.getComment());
+        Comment updatedComment = commentRepository.save(comment.get());
+        return modelMapper.map(updatedComment, CommentDTO.class);
     }
 }

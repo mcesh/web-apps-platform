@@ -56,16 +56,22 @@ public class ArticleServiceImpl implements ArticleService {
                                  MultipartFile file, String categoryName,
                                  String status) {
 
-        utils.isImage(file);
+
         UserProfile userProfile = modelMapper.map(userDto, UserProfile.class);
-        ImageUpload imageUpload = utils.uploadImage(file, userProfile, ARTICLE_IMAGES);
+        String base64Image = "";
+        if (file !=null){
+            utils.isImage(file);
+            ImageUpload imageUpload = utils.uploadImage(file, userProfile, ARTICLE_IMAGES);
+            base64Image = imageUpload.getBase64Image();
+        }
+
         Category categoryNameResponse = getCategory(userDto, categoryName);
         Set<Tag> tags = getTags(articleDTO);
 
         articleStatus = statusService.findByStatus(status);
         Article article = modelMapper.map(articleDTO, Article.class);
         article.setEmail(userDto.getEmail());
-        article.setBase64StringImage(imageUpload.getBase64Image());
+        article.setBase64StringImage(base64Image);
         article.setStatus(articleStatus.getStatus());
         article.setTags(tags);
         article.setCategory(categoryNameResponse);
@@ -108,7 +114,7 @@ public class ArticleServiceImpl implements ArticleService {
         Page<Article> articles = articleRepository.findByEmail(email,pageable);
         List<Article> articleList = articles.getContent();
         if (CollectionUtils.isEmpty(articleList)){
-            throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.NO_ARTICES_FOUND_IN_RANGE.getErrorMessage());
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.NO_ARTICLES_FOUND_IN_RANGE.getErrorMessage());
         }
         getLog().info("Articles size found {} ", articleList.size());
         articleList.forEach(article -> {

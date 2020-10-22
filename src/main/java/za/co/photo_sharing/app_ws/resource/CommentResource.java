@@ -49,4 +49,20 @@ public class CommentResource {
         getLog().info("Comment details {} ", commentRest);
         return commentRest;
     }
+
+    @ApiOperation(value="Update Comment Endpoint",
+            notes="${userResource.UpdateComment.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @PutMapping(path = "{id}",
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public CommentRest updateComment(@PathVariable("id") Long id,
+                                     @RequestBody CommentRequestModel comment){
+        getLog().info("Updating comment with id: {} ", id);
+        CommentDTO commentDTO = modelMapper.map(comment, CommentDTO.class);
+        CommentDTO updateComment = commentService.updateComment(commentDTO, id);
+        return modelMapper.map(updateComment, CommentRest.class);
+    }
 }
