@@ -69,4 +69,19 @@ public class CommentServiceImpl implements CommentService {
         Comment updatedComment = commentRepository.save(comment.get());
         return modelMapper.map(updatedComment, CommentDTO.class);
     }
+
+    @Override
+    public CommentDTO getCommentById(Long id) {
+
+        return null;
+    }
+
+    @Override
+    public void deleteCommentById(Long id) {
+        Optional<Comment> comment = commentRepository.findById(id);
+        if (!comment.isPresent()) {
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.COMMENT_NOT_FOUND.getErrorMessage());
+        }
+        commentRepository.delete(comment.get());
+    }
 }

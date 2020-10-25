@@ -65,4 +65,15 @@ public class CommentResource {
         CommentDTO updateComment = commentService.updateComment(commentDTO, id);
         return modelMapper.map(updateComment, CommentRest.class);
     }
+
+    @ApiOperation(value="The Delete Comment By Id Endpoint",
+            notes="${userResource.DeleteCommentById.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @DeleteMapping(path = "/{id}",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public void deleteComment(@PathVariable("id") Long id){
+        commentService.deleteCommentById(id);
+    }
 }

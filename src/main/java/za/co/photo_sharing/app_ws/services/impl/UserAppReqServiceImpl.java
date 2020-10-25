@@ -56,6 +56,7 @@ public class UserAppReqServiceImpl implements UserAppReqService {
         if (appReqRepository.findByEmail(user.getEmail()) != null) {
             throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
         }
+        getLog().info("Request application Development... {}", LocalDateTime.now());
 
         if (user.getWebType().equalsIgnoreCase("ORGANIZATION")){
             if (appReqRepository.findByOrganizationUsername(user.getOrganizationUsername()) !=null){

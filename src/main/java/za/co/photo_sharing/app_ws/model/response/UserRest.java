@@ -1,9 +1,6 @@
 package za.co.photo_sharing.app_ws.model.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,6 +10,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class UserRest {
 
     private Long userId;
@@ -24,7 +22,7 @@ public class UserRest {
     private LocalDateTime registrationDate;
     private Set<UserRolesRest> userRoles;
     private boolean roleUpdated = false;
-    private Set<AddressesRest> addresses;
+    private AddressesRest address;
     private CompanyRest company;
     private Boolean emailVerificationStatus;
     private String userProfileImageLink;

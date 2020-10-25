@@ -14,11 +14,6 @@ import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.CompanyDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -51,13 +46,13 @@ public class UserResourceTest {
         assertNotNull(userRest);
         assertEquals(userId, userRest.getUserId().longValue());
         assertEquals(userDto.getFirstName(), userRest.getFirstName());
-        assertEquals(userDto.getAddresses().size(), userRest.getAddresses().size());
+        //assertEquals(userDto.getAddresses(), userRest.getAddress());
 
     }
 
     private UserDto buildUserDto() {
         return UserDto.builder()
-                .addresses(buildUserAddressesDto())
+                .address(buildUserAddressesDto())
                 .cellNumber(27856324587L)
                 .company(buildCompanyDTO())
                 .email("nxuseka@outlook.com")
@@ -79,9 +74,8 @@ public class UserResourceTest {
                 .build();
     }
 
-    private Set<AddressDTO> buildUserAddressesDto() {
-        Set<AddressDTO> addressDTOS = new HashSet<>();
-        AddressDTO addressDTO = AddressDTO.builder()
+    private AddressDTO buildUserAddressesDto() {
+        return AddressDTO.builder()
                 .addressId(addressId)
                 .city("Johannesburg")
                 .country("South Africa")
@@ -89,7 +83,5 @@ public class UserResourceTest {
                 .streetName("Harry Galuan Dr")
                 .type("Shipping")
                 .build();
-        addressDTOS.add(addressDTO);
-        return addressDTOS;
     }
 }

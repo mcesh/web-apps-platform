@@ -1,12 +1,9 @@
 package za.co.photo_sharing.app_ws.model.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
-
+@ToString
 public class AddressesRest {
 
     private String addressId;

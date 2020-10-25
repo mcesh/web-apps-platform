@@ -37,9 +37,9 @@ public class AddressEntity implements Serializable {
     private String type;
 
     @JsonIgnore
-    @ManyToOne(cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumns({
-            @JoinColumn(name="users_id")
+            @JoinColumn(name="users_id", nullable = false)
     })
     private UserProfile userDetails;
 

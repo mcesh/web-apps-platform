@@ -14,4 +14,5 @@ public interface ArticleService extends UserDetailsService {
                           String articleStatus);
     ArticleDTO findById(Long id);
     List<ArticleDTO> findByEmail(String email,int page, int size);
+    void deleteArticleById(Long id);
 }

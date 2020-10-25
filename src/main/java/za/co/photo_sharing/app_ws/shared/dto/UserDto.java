@@ -28,7 +28,7 @@ public class UserDto implements Serializable {
     private String emailVerificationToken;
     private String appToken;
     private Boolean emailVerificationStatus = false;
-    private Set<AddressDTO> addresses;
+    private AddressDTO address;
     private CompanyDTO company;
     private LocalDateTime registrationDate;
     private boolean roleUpdated = false;

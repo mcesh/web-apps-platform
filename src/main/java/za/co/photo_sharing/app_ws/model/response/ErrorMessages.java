@@ -33,7 +33,8 @@ public enum ErrorMessages {
     ARTICLE_STATUS_NOT_FOUND("Article status not found"),
     ARTICLE_NOT_FOUND("No article found with the specified ID"),
     NO_ARTICLES_FOUND_IN_RANGE("No articles found in the rage you provided"),
-    COMMENT_NOT_FOUND("Comment not found");
+    COMMENT_NOT_FOUND("Comment not found"),
+    ADDRESS_NOT_FOUND("No address found with the specified addressId");
 
 
     private String errorMessage;
