@@ -28,7 +28,7 @@ public class Category implements Serializable {
     private Set<ImageGallery> imageGallery;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "category", fetch = FetchType.EAGER)
     private Set<Article> articles;
 
     public Set<Article> getArticles() {

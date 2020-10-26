@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.config.SecurityConstants;
@@ -92,5 +93,18 @@ public class ArticleResource {
         });
 
         return articleRests;
+    }
+
+    @Secured("ROLE_ADMIN")
+    @ApiOperation(value="Delete Article By Id Endpoint",
+            notes="${userResource.DeleteArticleById.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @DeleteMapping(path = "/{id}",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public void deleteArticleById(@PathVariable("id") Long id){
+        getLog().info("Deleting Article with ID {} ", id);
+        articleService.deleteArticleById(id);
     }
 }

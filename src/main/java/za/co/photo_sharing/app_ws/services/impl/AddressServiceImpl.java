@@ -13,8 +13,10 @@ import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.AddressService;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
+import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
+import javax.transaction.Transactional;
 import java.util.*;
 
 @Service
@@ -31,17 +33,12 @@ public class AddressServiceImpl implements AddressService {
     private ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public Set<AddressDTO> getAddresses(Long userId) {
-        Set<AddressDTO> addressDTOS = new HashSet<>();
-
-        UserProfile userProfile = userRepo.findByUserId(userId);
-        if (userProfile == null) return addressDTOS;
-
-        Iterable<AddressEntity> addresses = addressRepository.findAllByUserDetails(userProfile);
-
-        addresses.forEach(addressEntity -> addressDTOS.add(modelMapper.map(addressEntity, AddressDTO.class)));
-
-        return addressDTOS;
+    public UserDto addNewUserAddress(Long userId, AddressDTO addressDTO) {
+        UserProfile userById = userRepo.findByUserId(userId);
+        if (Objects.isNull(userById)) throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        userById.setAddress(buildAddresses(addressDTO, userById));
+        UserProfile storedUserAddress = userRepo.save(userById);
+        return modelMapper.map(storedUserAddress,UserDto.class);
     }
 
     @Override
@@ -56,6 +53,7 @@ public class AddressServiceImpl implements AddressService {
         return returnValue;
     }
 
+    @Transactional
     @Override
     public AddressDTO updateUserAddress(String addressId, AddressDTO addressDTO) {
         AddressEntity byAddressId = addressRepository.findByAddressId(addressId);
@@ -69,5 +67,27 @@ public class AddressServiceImpl implements AddressService {
         byAddressId.setAddressId(addressId);
         AddressEntity storedAddress = addressRepository.save(byAddressId);
         return modelMapper.map(storedAddress, AddressDTO.class);
+    }
+
+    @Override
+    public void deleteAddressByAddressId(String addressId) {
+        AddressEntity addressEntity = addressRepository.findByAddressId(addressId);
+        if (Objects.isNull(addressEntity)){
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.ADDRESS_NOT_FOUND.getErrorMessage());
+        }
+        addressRepository.delete(addressEntity);
+    }
+
+    private AddressEntity buildAddresses(AddressDTO addressDTO, UserProfile user) {
+        AddressEntity address = new AddressEntity();
+        address.setAddressId(utils.generateAddressId(30));
+        address.setCity(addressDTO.getCity());
+        address.setCountry(addressDTO.getCountry());
+        address.setPostalCode(addressDTO.getPostalCode());
+        address.setStreetName(addressDTO.getStreetName());
+        address.setType(addressDTO.getType());
+        address.setUserId(user.getUserId());
+        address.setUserDetails(user);
+        return address;
     }
 }

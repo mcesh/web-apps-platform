@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import za.co.photo_sharing.app_ws.entity.*;
@@ -25,7 +24,6 @@ import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -95,7 +93,7 @@ public class UserServiceImplTest {
         UserDto storedUserDetails = userServiceImpl.createUser(buildUserDto(),"Apache-HttpClient", webUrl);
         assertNotNull(storedUserDetails);
         assertEquals(userProfile.getFirstName(), storedUserDetails.getFirstName());
-        assertEquals(userProfile.getAddresses().size(), storedUserDetails.getAddresses().size());
+        //assertEquals(userProfile.getAddress(), storedUserDetails.getAddress());
         verify(userIdFactory, times(1)).buildUserId();
         verify(bCryptPasswordEncoder, times(1)).encode(anyString());
         verify(userRepository,times(1)).save(anyObject());
@@ -171,7 +169,6 @@ public class UserServiceImplTest {
         UserDto userDto = userServiceImpl.getUser("test9@gamil.com");
         assertNotNull(userDto);
         assertEquals(firstName, userDto.getFirstName());
-        assertTrue(userDto.getAddresses().stream().map(AddressDTO::getPostalCode).anyMatch(id -> Objects.equals(postalCode, id)));
     }
 
     @Test
@@ -275,17 +272,14 @@ public class UserServiceImplTest {
         userProfile.setUserId(userId);
         userProfile.setEncryptedPassword(encryptedPassword);
         userProfile.setCompany(buildCompany());
-        userProfile.setAddresses(buildUserAddresses());
+        userProfile.setAddress(buildUserAddresses());
         return userProfile;
     }
 
-    private Set<AddressEntity> buildUserAddresses() {
+    private AddressEntity buildUserAddresses() {
 
-        Set<AddressDTO> addressDTOS = buildUserAddressesDto();
-
-        Type addressEntity = new TypeToken<Set<AddressEntity>>() {
-        }.getType();
-        return new ModelMapper().map(addressDTOS, addressEntity);
+        ModelMapper modelMapper = new ModelMapper();
+       return modelMapper.map(buildUserAddressesDto(), AddressEntity.class);
     }
 
     private CompanyEntity buildCompany() {
@@ -295,7 +289,7 @@ public class UserServiceImplTest {
 
     private UserDto buildUserDto() {
         return UserDto.builder()
-                .addresses(buildUserAddressesDto())
+                .address(buildUserAddressesDto())
                 .cellNumber(27856324587L)
                 .company(buildCompanyDTO())
                 .email("nxuseka@outlook.com")
@@ -317,9 +311,8 @@ public class UserServiceImplTest {
                 .build();
     }
 
-    private Set<AddressDTO> buildUserAddressesDto() {
-        Set<AddressDTO> addressDTOS = new HashSet<>();
-        AddressDTO addressDTO = AddressDTO.builder()
+    private AddressDTO buildUserAddressesDto() {
+        return AddressDTO.builder()
                 .addressId(addressId)
                 .city("Johannesburg")
                 .country("South Africa")
@@ -327,7 +320,5 @@ public class UserServiceImplTest {
                 .streetName("Harry Galuan Dr")
                 .type("Shipping")
                 .build();
-        addressDTOS.add(addressDTO);
-        return addressDTOS;
     }
 }

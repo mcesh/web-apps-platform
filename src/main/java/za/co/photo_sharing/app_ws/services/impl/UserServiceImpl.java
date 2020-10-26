@@ -107,7 +107,6 @@ public class UserServiceImpl implements UserService {
             throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
         }
         Long userId = userIdFactory.buildUserId();
-        Long roleKey;
         String appTokeKey;
         UserAppRequest userAppRequest = appReqRepository.findByEmail(user.getEmail());
         if (Objects.isNull(userAppRequest)){
@@ -135,6 +134,7 @@ public class UserServiceImpl implements UserService {
             userRoles.add(new UserRole(userProfile, userService.findUserRoleByName(UserRoleTypeKeys.ROLE_ADMIN)));
             userProfile.setUserRoles(userRoles);
         }
+        getLog().info("User Type Key {} ", user.getRoleTypeKey());
 
         UserProfile storedUserDetails = userRepo.save(userProfile);
         UserDto userDto = modelMapper.map(storedUserDetails, UserDto.class);
@@ -357,15 +357,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto addNewUserAddress(Long userId, AddressDTO addressDTO) {
-        UserProfile userById = userRepo.findByUserId(userId);
-        if (Objects.isNull(userById)) throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
-        userById.setAddresses(buildAddresses(addressDTO, userById));
-        UserProfile storedUserAddress = userRepo.save(userById);
-        return modelMapper.map(storedUserAddress,UserDto.class);
-    }
-
-    @Override
     public UserDto updateUserRoles(String email) {
         UserProfile user = userRepo.findByEmail(email);
         if (Objects.isNull(user)) throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
@@ -466,21 +457,6 @@ public class UserServiceImpl implements UserService {
                DEFAULT_PROFILE_FOLDER);
         byte[] defaultProfilePic = fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
         return Base64.getEncoder().encodeToString(defaultProfilePic);
-    }
-
-    private Set<AddressEntity> buildAddresses(AddressDTO addressDTO, UserProfile user) {
-        Set<AddressEntity> addresses = new HashSet<>();
-        AddressEntity address = new AddressEntity();
-        address.setAddressId(utils.generateAddressId(30));
-        address.setCity(addressDTO.getCity());
-        address.setCountry(addressDTO.getCountry());
-        address.setPostalCode(addressDTO.getPostalCode());
-        address.setStreetName(addressDTO.getStreetName());
-        address.setType(addressDTO.getType());
-        address.setUserId(user.getUserId());
-        address.setUserDetails(user);
-        addresses.add(address);
-        return addresses;
     }
 
     @Override

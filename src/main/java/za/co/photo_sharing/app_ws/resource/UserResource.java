@@ -10,51 +10,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
-import za.co.photo_sharing.app_ws.model.request.AddressRequestModel;
 import za.co.photo_sharing.app_ws.model.request.PasswordResetModel;
 import za.co.photo_sharing.app_ws.model.request.PasswordResetRequestModel;
 import za.co.photo_sharing.app_ws.model.request.UserDetailsRequestModel;
-import za.co.photo_sharing.app_ws.model.response.*;
+import za.co.photo_sharing.app_ws.model.response.OperationStatusModel;
+import za.co.photo_sharing.app_ws.model.response.RequestOperationName;
+import za.co.photo_sharing.app_ws.model.response.RequestOperationStatus;
+import za.co.photo_sharing.app_ws.model.response.UserRest;
 import za.co.photo_sharing.app_ws.services.AddressService;
 import za.co.photo_sharing.app_ws.services.UserService;
-import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
-import za.co.photo_sharing.app_ws.utility.EmailUtility;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("users") // http://localhost:8080/users/web-apps-platform
 public class UserResource {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(EmailUtility.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(UserResource.class);
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private AddressService addressService;
     private ModelMapper modelMapper = new ModelMapper();
 
     public static Logger getLog() {
         return LOGGER;
     }
 
-    @ApiOperation(value="The Get User By UserId Endpoint",
-            notes="${userResource.GetUserByUserId.ApiOperation.Notes}")
+    @ApiOperation(value = "The Get User By UserId Endpoint",
+            notes = "${userResource.GetUserByUserId.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUserByUserId(@PathVariable String id) {
@@ -65,19 +64,22 @@ public class UserResource {
         return modelMapper.map(userByUserId, UserRest.class);
     }
 
-    @ApiOperation(value="The Get User By Username Endpoint",
-            notes="${userResource.Username.ApiOperation.Notes}")
+    @ApiOperation(value = "The Get User By Username Endpoint",
+            notes = "${userResource.Username.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @GetMapping(path = "username/{username}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUserByUsername(@PathVariable String username) {
+        getLog().info("Fetching UserDetails for {} ", username);
         UserDto byUsername = userService.findByUsername(username);
-        return modelMapper.map(byUsername, UserRest.class);
+        UserRest userRest = modelMapper.map(byUsername, UserRest.class);
+        getLog().info("UserDetails Found {} ", userRest);
+        return userRest;
     }
 
-    @ApiOperation(value="The Create User Endpoint",
-            notes="${userResource.CreateUser.ApiOperation.Notes}")
+    @ApiOperation(value = "The Create User Endpoint",
+            notes = "${userResource.CreateUser.ApiOperation.Notes}")
     @PostMapping(value = "/create",
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -86,38 +88,41 @@ public class UserResource {
 
         String userAgent = request.getHeader("User-Agent");
         String webUrl = "";
-        if (userAgent != null){
+        if (userAgent != null) {
             getLog().info("User-Agent {}", userAgent);
             StringBuffer requestURL = request.getRequestURL();
             String host = request.getHeader("Host");
             String serverName = request.getServerName();
             String requestScheme = request.getScheme();
 
-            getLog().info("App Url, {}",requestURL);
+            getLog().info("App Url, {}", requestURL);
             getLog().info("Scheme name: {}", requestScheme);
             getLog().info("Host Name: {}", host);
             getLog().info("Server name {}", serverName);
-            webUrl = requestScheme +"://" + host + "/";
+            webUrl = requestScheme + "://" + host + "/";
         }
         UserRest userRest = new UserRest();
 
         ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = modelMapper.map(userDetails, UserDto.class);
-        UserDto user = userService.createUser(userDto, userAgent,webUrl);
+        getLog().info("Registering a new user {} ", userDetails);
+        UserDto user = userService.createUser(userDto, userAgent, webUrl);
         userRest = modelMapper.map(user, UserRest.class);
+        getLog().info("New User {} ", userRest);
         return userRest;
     }
 
-    @ApiOperation(value="The Update User Details Endpoint",
-            notes="${userResource.UpdateUsersDetails.ApiOperation.Notes}")
+    @ApiOperation(value = "The Update User Details Endpoint",
+            notes = "${userResource.UpdateUsersDetails.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @PutMapping(path = "{id}",
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest updateUserDetails(@RequestBody UserDetailsRequestModel userDetails, @PathVariable String id) {
         Long userId = Long.parseLong(id);
+        getLog().info("Updating User Details for {} ", userId);
         UserRest userRest = new UserRest();
 
         UserDto userDto = modelMapper.map(userDetails, UserDto.class);
@@ -125,10 +130,10 @@ public class UserResource {
         return modelMapper.map(user, UserRest.class);
     }
 
-    @ApiOperation(value="The Get Users By First Name Endpoint",
-            notes="${userResource.FirstName.ApiOperation.Notes}")
+    @ApiOperation(value = "The Get Users By First Name Endpoint",
+            notes = "${userResource.FirstName.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @GetMapping(path = "firstName/{firstName}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<UserRest> getUsersByFirstName(@PathVariable String firstName) {
@@ -142,17 +147,18 @@ public class UserResource {
         return userRests;
     }
 
-   // @PreAuthorize("hasRole(ROLE_ADMIN) or #id == principal.userId")
-     @Secured("ROLE_ADMIN")
-    @ApiOperation(value="The Delete User By UserId Endpoint",
-            notes="${userResource.DeleteUserById.ApiOperation.Notes}")
+    // @PreAuthorize("hasRole(ROLE_ADMIN) or #id == principal.userId")
+    @Secured("ROLE_ADMIN")
+    @ApiOperation(value = "The Delete User By UserId Endpoint",
+            notes = "${userResource.DeleteUserById.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @DeleteMapping(path = "userId/{id}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public OperationStatusModel deleteUser(@PathVariable String id) {
         long userId = Long.parseLong(id);
+        getLog().info("Deleting user with ID {} ", userId);
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.DELETE.name());
         userService.deleteUser(userId);
@@ -161,10 +167,10 @@ public class UserResource {
         return statusModel;
     }
 
-    @ApiOperation(value="The Get All Users Endpoint",
-            notes="${userResource.GetUsers.ApiOperation.Notes}")
+    @ApiOperation(value = "The Get All Users Endpoint",
+            notes = "${userResource.GetUsers.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<UserRest> getUsers(@RequestParam(value = "page", defaultValue = "1") int page,
@@ -179,45 +185,8 @@ public class UserResource {
         return returnRests;
     }
 
-    @ApiOperation(value="The Get User Addresses By UserId Endpoint",
-            notes="${userResource.GetUserAddressesByUserId.ApiOperation.Notes}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
-    })
-    @GetMapping(path = "/{user_id}/addresses", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public Set<AddressesRest> getUserAddresses(@PathVariable String user_id) {
-
-        Set<AddressesRest> addressesRests = new HashSet<>();
-        Long userId = Long.parseLong(user_id);
-        Set<AddressDTO> addressesDTO = addressService.getAddresses(userId);
-
-        if (addressesDTO != null && !CollectionUtils.isEmpty(addressesDTO)) {
-            addressesDTO.forEach(addressDTO -> {
-                AddressesRest addressesRest = modelMapper.map(addressDTO, AddressesRest.class);
-                addressesRests.add(addressesRest);
-            });
-        }
-        return addressesRests;
-    }
-
-    @ApiOperation(value="The Get User Address By UserId And AddressId Endpoint",
-            notes="${userResource.GetUserAddress.ApiOperation.Notes}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
-    })
-    @GetMapping(path = "/{userId}/addresses/{addressId}", produces = {MediaType.APPLICATION_JSON_VALUE,
-            MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
-    public AddressesRest getUserAddress(@PathVariable String userId, @PathVariable String addressId) {
-
-        AddressDTO addressesDto = addressService.getAddress(addressId);
-
-        ModelMapper modelMapper = new ModelMapper();
-
-        return modelMapper.map(addressesDto, AddressesRest.class);
-    }
-
-    @ApiOperation(value="The Email Verification Endpoint",
-            notes="${userResource.EmailVerification.ApiOperation.Notes}")
+    @ApiOperation(value = "The Email Verification Endpoint",
+            notes = "${userResource.EmailVerification.ApiOperation.Notes}")
     @GetMapping(path = "/email-verification",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
@@ -227,6 +196,7 @@ public class UserResource {
         Optional.ofNullable(userAgent).ifPresent(agent -> {
             getLog().info("User-Agent {}", agent);
         });
+        getLog().info("Verifying Email at {} ", LocalDateTime.now());
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.VERIFY_EMAIL.name());
 
@@ -243,15 +213,15 @@ public class UserResource {
         return modelAndView;
     }
 
-    @ApiOperation(value="The Password Reset Request Endpoint",
-            notes="${userResource.PasswordResetRequest.ApiOperation.Notes}")
+    @ApiOperation(value = "The Password Reset Request Endpoint",
+            notes = "${userResource.PasswordResetRequest.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @PostMapping(path = "/password-reset-request",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
-    public OperationStatusModel requestReset(@RequestBody PasswordResetRequestModel resetRequestModel,HttpServletRequest request) {
+    public OperationStatusModel requestReset(@RequestBody PasswordResetRequestModel resetRequestModel, HttpServletRequest request) {
 
         String userAgent = request.getHeader("User-Agent");
 
@@ -267,10 +237,10 @@ public class UserResource {
         return statusModel;
     }
 
-    @ApiOperation(value="The Password Reset Endpoint",
-            notes="${userResource.PasswordReset.ApiOperation.Notes}")
+    @ApiOperation(value = "The Password Reset Endpoint",
+            notes = "${userResource.PasswordReset.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @PostMapping(path = "/password-reset",
             produces = {MediaType.APPLICATION_JSON_VALUE,
@@ -305,16 +275,17 @@ public class UserResource {
         return statusModel;
     }
 
-    @ApiOperation(value="The Get Confirmed Emails Endpoint",
-            notes="${userResource.GetUser.ApiOperation.Notes}")
+    @ApiOperation(value = "The Get Confirmed Emails Endpoint",
+            notes = "${userResource.GetUser.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @GetMapping(path = "/confirmed_emails",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
     public List<UserRest> confirmedEmails(@RequestParam(value = "page", defaultValue = "0") int page,
                                           @RequestParam(value = "limit", defaultValue = "2") int limit) {
+        getLog().info("Fetching Confirmed Emails");
         List<UserRest> userRests = new ArrayList<>();
         List<UserDto> confirmedEmailAddress = userService.findAllUsersWithConfirmedEmailAddress(page, limit);
         confirmedEmailAddress.forEach(userDto -> {
@@ -333,18 +304,23 @@ public class UserResource {
     })
     @GetMapping(path = "email/{email}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUserByEmailAddress(@PathVariable String email) {
+        getLog().info("Fetching User By Email {} ", email);
         UserDto byUsername = userService.findByEmail(email);
-        return modelMapper.map(byUsername, UserRest.class);
+        UserRest userRest = modelMapper.map(byUsername, UserRest.class);
+        getLog().info("User Returned {} ", userRest);
+        return userRest;
     }
+
     @Secured("ROLE_ADMIN")
-    @ApiOperation(value="The Delete User By Email Address Endpoint",
-            notes="${userResource.DeleteUserById.ApiOperation.Notes}")
+    @ApiOperation(value = "The Delete User By Email Address Endpoint",
+            notes = "${userResource.DeleteUserById.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @DeleteMapping(path = "email/{email}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public OperationStatusModel deleteUserByEmail(@PathVariable String email) {
+        getLog().info("Deleting User By Email...");
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.DELETE.name());
         userService.deleteUserByEmail(email);
@@ -353,73 +329,49 @@ public class UserResource {
         return statusModel;
     }
 
-    @ApiOperation(value="The Update User Address By AddressId Endpoint",
-            notes="${userResource.UpdateUserAddress.ApiOperation.Notes}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
-    })
-    @PutMapping(path = "/{userId}/addresses/{addressId}", produces = {MediaType.APPLICATION_JSON_VALUE,
-            MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
-    public AddressesRest updateUserAddress(@RequestBody AddressRequestModel address, @PathVariable String addressId) {
-        AddressDTO addressDTO = modelMapper.map(address, AddressDTO.class);
-        AddressDTO addressesDto = addressService.updateUserAddress(addressId,addressDTO);
-        return modelMapper.map(addressesDto, AddressesRest.class);
-    }
-
-    @ApiOperation(value="The Add new User Address Endpoint",
-            notes="${userResource.AddNewUserAddress.ApiOperation.Notes}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
-    })
-    @PostMapping(path = "/{userId}/new-address/", produces = {MediaType.APPLICATION_JSON_VALUE,
-            MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
-    public UserRest addNewUserAddress(@RequestBody AddressRequestModel address, @PathVariable Long userId) {
-        AddressDTO addressDTO = modelMapper.map(address, AddressDTO.class);
-        UserDto addressesDto = userService.addNewUserAddress(userId,addressDTO);
-        return modelMapper.map(addressesDto, UserRest.class);
-    }
-
     @Secured("ROLE_ADMIN")
-    @ApiOperation(value="The Update User Roles Endpoint",
-            notes="${userResource.UpdateUsersRoles.ApiOperation.Notes}")
+    @ApiOperation(value = "The Update User Roles Endpoint",
+            notes = "${userResource.UpdateUsersRoles.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
-    @PutMapping(path = "updateRoles/{email}",produces = {MediaType.APPLICATION_JSON_VALUE,
+    @PutMapping(path = "updateRoles/{email}", produces = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
     public UserRest updateUserRoles(@PathVariable String email) {
+        getLog().info("Updating User Roles for  {} ", email);
         UserDto user = userService.updateUserRoles(email);
         return modelMapper.map(user, UserRest.class);
     }
 
-    @ApiOperation(value="The Upload User Profile Image Endpoint",
-            notes="${userResource.UploadImage.ApiOperation.Notes}")
+    @ApiOperation(value = "The Upload User Profile Image Endpoint",
+            notes = "${userResource.UploadImage.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @PostMapping(path = "upload/profile-image/{email}",
             produces = {MediaType.MULTIPART_FORM_DATA_VALUE,
                     MediaType.APPLICATION_JSON_VALUE})
     public OperationStatusModel uploadImage(@PathVariable String email,
-                                            @RequestParam("file") MultipartFile file){
+                                            @RequestParam("file") MultipartFile file) {
+        getLog().info("Uploading Profile Pic for {} ", email);
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.IMAGE_UPLOAD.name());
         statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
-        userService.uploadUserProfileImage(email,file);
+        userService.uploadUserProfileImage(email, file);
         statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
 
         return statusModel;
     }
 
-    @ApiOperation(value="The Download User Profile Image Endpoint",
-            notes="${userResource.DownImage.ApiOperation.Notes}")
+    @ApiOperation(value = "The Download User Profile Image Endpoint",
+            notes = "${userResource.DownImage.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @GetMapping(path = "download/profile-image/{email}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public String downloadProfileImage(@PathVariable String email){
-        getLog().info("Getting Profile Picture for {} " , email);
+    public String downloadProfileImage(@PathVariable String email) {
+        getLog().info("Getting Profile Picture for {} ", email);
         String profileImage = userService.downloadUserProfileImage(email);
         getLog().info("Profile Picture: {} ", profileImage);
         return profileImage;

@@ -35,7 +35,7 @@ public class CategoryResource {
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public Category createCategory(@PathVariable String categoryName, String email) {
 
-        getLog().info("Adding new category....");
+        getLog().info("Adding new category for.... {} ", email);
         Category category = categoryService.save(categoryName, email);
         getLog().info("Category created  {} ", category.getName());
         return category;

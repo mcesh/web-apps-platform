@@ -20,6 +20,7 @@ import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.model.response.ImageUpload;
 import za.co.photo_sharing.app_ws.repo.ArticleRepository;
+import za.co.photo_sharing.app_ws.repo.CategoryRepository;
 import za.co.photo_sharing.app_ws.services.*;
 import za.co.photo_sharing.app_ws.shared.dto.ArticleDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
@@ -43,6 +44,8 @@ public class ArticleServiceImpl implements ArticleService {
     private TagService tagService;
     @Autowired
     private ArticleRepository articleRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
     @Autowired
     private ArticleStatusService statusService;
 
@@ -124,6 +127,20 @@ public class ArticleServiceImpl implements ArticleService {
         });
 
         return articleDTOS;
+    }
+
+    @Override
+    public void deleteArticleById(Long id) {
+        Optional<Article> article = articleRepository.findById(id);
+        if (!article.isPresent()){
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
+        }
+        Category category = article.get().getCategory();
+        int articleCount = category.getArticleCount() -1;
+        category.setArticleCount(articleCount);
+        getLog().info("Updating article count {} ", category.getArticleCount());
+        categoryRepository.save(category);
+        articleRepository.delete(article.get());
     }
 
     private Category getCategory(UserDto userDto, String categoryName) {

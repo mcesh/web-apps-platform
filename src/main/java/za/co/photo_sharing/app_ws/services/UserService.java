@@ -29,7 +29,6 @@ public interface UserService extends UserDetailsService {
     List<UserDto> findAllUsersWithConfirmedEmailAddress(int page, int limit);
     UserDto findByEmail(String email);
     void deleteUserByEmail(String email);
-    UserDto addNewUserAddress(Long userId, AddressDTO addressDTO);
     UserDto updateUserRoles(String email);
     Role findUserRoleByName(String name);
     void uploadUserProfileImage(String email, MultipartFile file);

@@ -50,8 +50,9 @@ public class UserProfile implements Serializable {
     private LocalDateTime registrationDate;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<AddressEntity> addresses;
+    @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    private AddressEntity address;
 
     @JsonIgnore
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -98,7 +99,7 @@ public class UserProfile implements Serializable {
                        Boolean emailVerificationStatus,
                        Long cellNumber,
                        LocalDateTime registrationDate,
-                       Set<AddressEntity> addresses,
+                       AddressEntity address,
                        CompanyEntity company,
                        PasswordResetToken resetToken,
                        Set<UserRole> userRoles,
@@ -119,7 +120,7 @@ public class UserProfile implements Serializable {
         this.emailVerificationStatus = emailVerificationStatus;
         this.cellNumber = cellNumber;
         this.registrationDate = registrationDate;
-        this.addresses = addresses;
+        this.address = address;
         this.company = company;
         this.resetToken = resetToken;
         this.userRoles = userRoles;
@@ -239,12 +240,12 @@ public class UserProfile implements Serializable {
         this.emailVerificationStatus = emailVerificationStatus;
     }
 
-    public Set<AddressEntity> getAddresses() {
-        return addresses;
+    public AddressEntity getAddress() {
+        return address;
     }
 
-    public void setAddresses(Set<AddressEntity> addresses) {
-        this.addresses = addresses;
+    public void setAddress(AddressEntity address) {
+        this.address = address;
     }
 
     public Long getCellNumber() {
@@ -325,7 +326,7 @@ public class UserProfile implements Serializable {
                 ", emailVerificationStatus=" + emailVerificationStatus +
                 ", cellNumber=" + cellNumber +
                 ", registrationDate=" + registrationDate +
-                ", addresses=" + addresses +
+                ", addresses=" + address +
                 ", company=" + company +
                 ", resetToken=" + resetToken +
                 ", userRoles=" + userRoles +
@@ -356,7 +357,7 @@ public class UserProfile implements Serializable {
                 Objects.equals(getEmailVerificationStatus(),that.getEmailVerificationStatus()) &&
                 Objects.equals(getCellNumber(),that.getCellNumber()) &&
                 Objects.equals(getRegistrationDate(),that.getRegistrationDate()) &&
-                Objects.equals(getAddresses(),that.getAddresses()) &&
+                Objects.equals(getAddress(),that.getAddress()) &&
                 Objects.equals(getCompany(),that.getCompany()) &&
                 Objects.equals(getResetToken(),that.getResetToken()) &&
                 Objects.equals(getUserRoles(),that.getUserRoles()) &&
@@ -381,7 +382,7 @@ public class UserProfile implements Serializable {
                 getEmailVerificationStatus(),
                 getCellNumber(),
                 getRegistrationDate(),
-                getAddresses(),
+                getAddress(),
                 getCompany(),
                 getResetToken(),
                 getUserRoles(),

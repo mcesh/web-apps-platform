@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
+import za.co.photo_sharing.app_ws.entity.AddressEntity;
 import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.utility.Utils;
@@ -74,7 +75,7 @@ public class UserRepositoryIntegrationTests {
         userProfile.setUserId(userId);
         userProfile.setFirstName("Siyabonga");
         userProfile.setEmail(emailAddr);
-        userProfile.setAddresses(new HashSet<>());
+        userProfile.setAddress(new AddressEntity());
         userProfile.setLastName("Nxuseka");
         userProfile.setEncryptedPassword(encoder.encode("Password"));
         userProfile.setEmailVerificationStatus(Boolean.FALSE);
