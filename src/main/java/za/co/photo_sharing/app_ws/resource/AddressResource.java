@@ -67,12 +67,12 @@ public class AddressResource {
         return modelMapper.map(addressesDto, AddressesRest.class);
     }
 
-    @ApiOperation(value="The Get User Address By UserId And AddressId Endpoint",
+    @ApiOperation(value="Get User Address By UserId And AddressId Endpoint",
             notes="${userResource.GetUserAddress.ApiOperation.Notes}")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
     })
-    @GetMapping(path = "/{userId}/addresses/{addressId}", produces = {MediaType.APPLICATION_JSON_VALUE,
+    @GetMapping(path = "/{addressId}", produces = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
     public AddressesRest getUserAddress(@PathVariable String addressId) {
 

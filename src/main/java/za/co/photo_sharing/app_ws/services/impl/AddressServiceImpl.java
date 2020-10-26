@@ -41,6 +41,7 @@ public class AddressServiceImpl implements AddressService {
         return modelMapper.map(storedUserAddress,UserDto.class);
     }
 
+    @Transactional
     @Override
     public AddressDTO getAddress(String addressId) {
         AddressDTO returnValue = new AddressDTO();
