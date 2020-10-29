@@ -118,30 +118,6 @@ public class UserAppRequestResource {
         return modelMapper.map(appRequestDTO, UserAppReqRest.class);
     }
 
-    @ApiOperation(value="Generate client ID Endpoint",
-            notes="${userResource.ClientID.ApiOperation.Notes}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
-    })
-    @PostMapping(path = "client/id/{email}",
-            produces = {MediaType.APPLICATION_JSON_VALUE})
-    public UserClientDTO generateUserClientID(@PathVariable String email){
-        getLog().info("Generating Client ID for {} " , email);
-        return appReqService.generateUserClient(email);
-    }
-
-    @ApiOperation(value="Get Client Info By ClientID Endpoint",
-            notes="${userAppRequestResource.ClientInfoByClientID.ApiOperation.Notes}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}",
-                    paramType="header")
-    })
-    @GetMapping(path = "client_id/{clientID}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public UserClientDTO getClientInfoByClientID(@PathVariable String clientID) {
-        getLog().info("Getting Client Info for {} " , clientID);
-        return appReqService.findByClientID(clientID);
-    }
-
     public static Logger getLog() {
         return LOGGER;
     }
