@@ -36,6 +36,7 @@ import za.co.photo_sharing.app_ws.utility.UserIdFactory;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.mail.MessagingException;
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -389,8 +390,10 @@ public class UserServiceImpl implements UserService {
         userProfile.setUserProfileImageLink(galleryImage.getFileName());
         getLog().info("Uploading profileImage for {}, at {} ", userProfile.getEmail(), LocalDateTime.now());
         userRepo.save(userProfile);
+        getLog().info("Profile Picture Successfully Uploaded");
     }
 
+    @Transactional
     @Override
     public void uploadUserGalleryImages(String email, MultipartFile file, String caption, String categoryName) {
         UserProfile userProfile = userRepo.findByEmail(email);

@@ -31,8 +31,7 @@ public class CategoryResource {
             @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}",
                     paramType = "header")
     })
-    @PostMapping(path = "/new-category/{categoryName}/{email}",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PostMapping("/user")
     public Category createCategory(@PathVariable String categoryName, String email) {
 
         getLog().info("Adding new category for.... {} ", email);
