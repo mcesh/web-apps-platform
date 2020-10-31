@@ -3,6 +3,8 @@ package za.co.photo_sharing.app_ws.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -11,6 +13,7 @@ import java.util.*;
 
 @Entity
 @Table(name = "users")
+@Audited
 public class UserProfile implements Serializable {
 
     private static final long serialVersionUID = 5313493413859894403L;
@@ -19,41 +22,53 @@ public class UserProfile implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
+    @Audited
     @Column(nullable = false, length = 50, unique = true)
     private Long userId;
 
+    @Audited
     @Column(nullable = false)
     private String username;
 
+    @Audited
     @Column(nullable = false, length = 50)
     private String firstName;
 
+    @Audited
     @Column(nullable = false, length = 50)
     private String lastName;
 
+    @Audited
     @Column(nullable = false, length = 120)
     private String email;
 
+    @NotAudited
     @Column(nullable = false)
     private String encryptedPassword;
 
+    @NotAudited
     private String emailVerificationToken;
 
+    @NotAudited
     @Column(nullable = false)
     private Boolean emailVerificationStatus = false;
 
+    @Audited
     @Column(nullable = false, length = 45)
     private Long cellNumber;
 
+    @Audited
     @CreationTimestamp
     @Column(nullable = false, length = 30)
     private LocalDateTime registrationDate;
 
+    @Audited
     @JsonIgnore
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private AddressEntity address;
 
+    @Audited
     @JsonIgnore
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private CompanyEntity company;
@@ -65,26 +80,33 @@ public class UserProfile implements Serializable {
     @JsonIgnore
     @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<UserRole> userRoles = new HashSet<>();
+    @Audited
     @Column(nullable = false, length = 15)
     private Long roleTypeKey;
+    @Audited
     @Column(length = 120)
     private String userProfileImageLink;
 
+    @Audited
     @JsonIgnore
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private AuthorityRoleType roleType;
+    @Audited
     @Column(nullable = false)
     private boolean roleUpdated = false;// TODO find a permanent solution
 
+    @Audited
     @JsonIgnore
     @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<ImageGallery> imageGalleries;
 
+    @Audited
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "users_id")
     private Set<Article> articles;
 
+    @NotAudited
     @JsonIgnore
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL)
     private List<Comment> comments;

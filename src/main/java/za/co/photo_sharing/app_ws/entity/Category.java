@@ -1,6 +1,7 @@
 package za.co.photo_sharing.app_ws.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -9,24 +10,31 @@ import java.util.Set;
 
 @Entity
 @Table(name = "category")
+@Audited
 public class Category implements Serializable {
 
     private static final long serialVersionUID = 1452879653252265411L;
+    @Audited
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Audited
     @NotBlank(message = "Category name is required")
     private String name;
+    @Audited
     @Column(nullable = false)
     private String email;
 
+    @Audited
     @Column
     private int articleCount;
-    
+
+    @Audited
     @JsonIgnore
     @OneToMany(mappedBy = "category",cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private Set<ImageGallery> imageGallery;
 
+    @Audited
     @JsonIgnore
     @OneToMany(mappedBy = "category", fetch = FetchType.EAGER)
     private Set<Article> articles;

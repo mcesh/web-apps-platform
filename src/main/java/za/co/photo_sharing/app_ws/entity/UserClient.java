@@ -1,6 +1,7 @@
 package za.co.photo_sharing.app_ws.entity;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_client")
+@Audited
 public class UserClient implements Serializable {
 
     private static final long serialVersionUID = 8123695741255521695L;
@@ -16,12 +18,15 @@ public class UserClient implements Serializable {
     @GeneratedValue(strategy = GenerationType.TABLE)
     private long id;
 
+    @Audited
     @Column(nullable = false,length = 105)
     private String email;
 
+    @Audited
     @CreationTimestamp
     @Column(nullable = false, length = 30)
     private LocalDateTime creationTime;
+    @Audited
     @Column(nullable = false, length = 125)
     private String clientID;
 

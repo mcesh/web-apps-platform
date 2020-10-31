@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "user_gallery_images")
+@Audited
 public class ImageGallery implements Serializable {
 
     private static final long serialVersionUID = 5547123658924545125L;
@@ -20,19 +22,24 @@ public class ImageGallery implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
+    @Audited
     @Column(nullable = false, length = 85)
     private String caption;
 
+    @Audited
     @Column(nullable = false, length = 75)
     private Long userId;
 
+    @Audited
     @Column(nullable = false)
     private String imageUrl;
 
+    @Audited
     @Lob
     @NotNull
     private String base64StringImage;
 
+    @Audited
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumns({
@@ -40,6 +47,7 @@ public class ImageGallery implements Serializable {
     })
     private UserProfile userDetails;
 
+    @Audited
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumns({

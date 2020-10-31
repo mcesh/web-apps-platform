@@ -1,6 +1,7 @@
 package za.co.photo_sharing.app_ws.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_app_request")
+@Audited
 public class UserAppRequest implements Serializable {
 
     private static final long serialVersionUID = 5312541478569852554L;
@@ -16,18 +18,24 @@ public class UserAppRequest implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
+    @Audited
     @Column(nullable = false)
     private String firstName;
+    @Audited
     @Column(nullable = false)
     private String lastName;
+    @Audited
     @Column(nullable = false, length = 105, unique = true)
     private String email;
+    @Audited
     @Column(nullable = false)
     private String webType;
    // @Column(columnDefinition = "text",nullable = false)
+    @Audited
     @Lob
     @Column(name="CONTENT", length=512)
     private String description ="";
+    @Audited
     @Column(nullable = false)
     private LocalDateTime requestDate;
     private String emailVerificationToken;

@@ -31,8 +31,8 @@ public class CategoryResource {
             @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}",
                     paramType = "header")
     })
-    @PostMapping("/user")
-    public Category createCategory(@PathVariable String categoryName, String email) {
+    @PostMapping("/create/{categoryName}/{email}")
+    public Category createCategory(@PathVariable String categoryName, @PathVariable String email) {
 
         getLog().info("Adding new category for.... {} ", email);
         Category category = categoryService.save(categoryName, email);

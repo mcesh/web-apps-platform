@@ -3,6 +3,7 @@ package za.co.photo_sharing.app_ws.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.envers.Audited;
 
 import java.io.Serializable;
 
@@ -10,32 +11,41 @@ import javax.persistence.*;
 
 
 @Entity(name="addresses")
+@Audited
 public class AddressEntity implements Serializable {
 
     private static final long serialVersionUID = 7809200551672852690L;
 
+    @Audited
     @Id
     @GeneratedValue
     private long id;
 
+    @Audited
     @Column(length=30, nullable=false)
     private String addressId;
 
+    @Audited
     @Column(length=65, nullable=false)
     private String city;
 
+    @Audited
     @Column(length=65, nullable=false)
     private String country;
 
+    @Audited
     @Column(length=100, nullable=false)
     private String streetName;
 
+    @Audited
     @Column(length=15, nullable=false)
     private String postalCode;
 
+    @Audited
     @Column(length=45, nullable=false)
     private String type;
 
+    @Audited
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumns({
@@ -43,6 +53,7 @@ public class AddressEntity implements Serializable {
     })
     private UserProfile userDetails;
 
+    @Audited
     @Column(length=15, nullable=false)
     private Long userId;
 

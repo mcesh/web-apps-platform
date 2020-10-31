@@ -1,26 +1,32 @@
 package za.co.photo_sharing.app_ws.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "company")
+@Audited
 public class CompanyEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Audited
     @Column(nullable = false, length = 105)
     private String companyName;
 
+    @Audited
     @Column(nullable = false, length = 95)
     private String companyType;
 
+    @Audited
     @Column(nullable = false, length = 50)
     private String cellNumber;
 
+    @Audited
     @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumns({

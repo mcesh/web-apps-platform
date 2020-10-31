@@ -2,6 +2,7 @@ package za.co.photo_sharing.app_ws.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -16,6 +17,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Table(name = "tags")
+@Audited
 public class Tag implements Serializable {
 
     private static final long serialVersionUID = -5298707266367331514L;

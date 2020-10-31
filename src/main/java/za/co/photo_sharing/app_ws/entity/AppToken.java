@@ -1,12 +1,14 @@
 package za.co.photo_sharing.app_ws.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
 @Table(name = "user_app_token")
+@Audited
 public class AppToken implements Serializable {
 
     private static final long serialVersionUID = 531312003366589524L;

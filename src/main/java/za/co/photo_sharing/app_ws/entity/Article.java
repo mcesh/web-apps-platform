@@ -3,6 +3,8 @@ package za.co.photo_sharing.app_ws.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 import za.co.photo_sharing.app_ws.constants.ArticleStatusTypeKeys;
 import za.co.photo_sharing.app_ws.constants.ArticlesStatus;
@@ -18,46 +20,58 @@ import java.util.Set;
 
 @Entity
 @Table(name = "article")
+@Audited
 public class Article implements Serializable {
 
     private static final long serialVersionUID = 2569854524458252525L;
 
+    @Audited
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
+    @Audited
     @Column(nullable = false, length = 150)
     private String title;
 
+    @Audited
     @Lob
     @NotNull
     private String caption;
 
+    @Audited
     private int likes;
 
+    @Audited
     @CreationTimestamp
     @Column(nullable = false, length = 30)
     private LocalDateTime postedDate;
 
+    @Audited
     @Lob
     @NotNull
     private String base64StringImage;
 
+    @NotAudited
     @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "article_id")
     private List<Comment> commentList;
 
+    @Audited
     @Column(nullable = false, length = 150)
     private String email;
 
+    @Audited
     private String status;
 
+    @Audited
     @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name = "post_tag", joinColumns = @JoinColumn(name = "post_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"))
     private Set<Tag> tags;
 
+    @Audited
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "category_id")
     private Category category;
