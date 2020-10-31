@@ -33,7 +33,7 @@ public class HibernateConfig {
         properties.put("hibernate.show_sql", environment.getRequiredProperty("spring.jpa.show-sql"));
         properties.put("hibernate.format_sql", environment.getRequiredProperty("spring.jpa.properties.hibernate.format_sql"));
         properties.put("spring.jpa.properties.org.hibernate.envers.store_data_at_delete", Boolean.TRUE);
-        properties.put("hibernate.hbm2ddl.auto", "create");
+        properties.put("hibernate.hbm2ddl.auto", "update");
         return properties;
     }
     @Autowired

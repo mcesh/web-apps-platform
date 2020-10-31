@@ -77,6 +77,7 @@ public class UserProfile implements Serializable {
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private PasswordResetToken resetToken;
 
+    @NotAudited
     @JsonIgnore
     @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<UserRole> userRoles = new HashSet<>();
