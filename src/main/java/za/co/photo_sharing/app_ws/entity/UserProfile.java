@@ -3,14 +3,26 @@ package za.co.photo_sharing.app_ws.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
+@Audited
+@EntityListeners(AuditingEntityListener.class)
 public class UserProfile implements Serializable {
 
     private static final long serialVersionUID = 5313493413859894403L;
@@ -19,41 +31,53 @@ public class UserProfile implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
+    @Audited
     @Column(nullable = false, length = 50, unique = true)
     private Long userId;
 
+    @Audited
     @Column(nullable = false)
     private String username;
 
+    @Audited
     @Column(nullable = false, length = 50)
     private String firstName;
 
+    @Audited
     @Column(nullable = false, length = 50)
     private String lastName;
 
+    @Audited
     @Column(nullable = false, length = 120)
     private String email;
 
+    @NotAudited
     @Column(nullable = false)
     private String encryptedPassword;
 
+    @NotAudited
     private String emailVerificationToken;
 
+    @NotAudited
     @Column(nullable = false)
     private Boolean emailVerificationStatus = false;
 
+    @Audited
     @Column(nullable = false, length = 45)
     private Long cellNumber;
 
+    @Audited
     @CreationTimestamp
     @Column(nullable = false, length = 30)
     private LocalDateTime registrationDate;
 
+    @Audited
     @JsonIgnore
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private AddressEntity address;
 
+    @Audited
     @JsonIgnore
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private CompanyEntity company;
@@ -62,32 +86,54 @@ public class UserProfile implements Serializable {
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private PasswordResetToken resetToken;
 
+    @NotAudited
     @JsonIgnore
     @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<UserRole> userRoles = new HashSet<>();
+    @Audited
     @Column(nullable = false, length = 15)
     private Long roleTypeKey;
+    @Audited
     @Column(length = 120)
     private String userProfileImageLink;
 
+    @Audited
     @JsonIgnore
     @OneToOne(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private AuthorityRoleType roleType;
+    @Audited
     @Column(nullable = false)
     private boolean roleUpdated = false;// TODO find a permanent solution
 
+    @Audited
     @JsonIgnore
     @OneToMany(mappedBy = "userDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<ImageGallery> imageGalleries;
 
+    @Audited
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "users_id")
     private Set<Article> articles;
 
+    @NotAudited
     @JsonIgnore
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL)
     private List<Comment> comments;
+
+    @CreatedBy
+    private String createdBy;
+
+    @CreatedDate
+    @CreationTimestamp
+    private LocalDateTime creationDate;
+
+    @LastModifiedBy
+    private String lastModifiedBy;
+
+    @LastModifiedDate
+    @CreationTimestamp
+    private LocalDateTime lastModifiedDate;
 
     public UserProfile(Long userId,
                        String username,
@@ -312,6 +358,38 @@ public class UserProfile implements Serializable {
         this.comments = comments;
     }
 
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public LocalDateTime getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
+    }
+
     @Override
     public String toString() {
         return "UserProfile{" +
@@ -347,26 +425,26 @@ public class UserProfile implements Serializable {
         UserProfile that = (UserProfile) obj;
         return getId() == that.getId() &&
                 isRoleUpdated() == that.isRoleUpdated() &&
-                Objects.equals(getUserId(),that.getUserId()) &&
-                Objects.equals(getUsername(),that.getUsername()) &&
-                Objects.equals(getFirstName(),that.getFirstName()) &&
-                Objects.equals(getLastName(),that.getLastName()) &&
-                Objects.equals(getEmail(),that.getEmail()) &&
-                Objects.equals(getEncryptedPassword(),that.getEncryptedPassword()) &&
-                Objects.equals(getEmailVerificationToken(),that.getEmailVerificationToken()) &&
-                Objects.equals(getEmailVerificationStatus(),that.getEmailVerificationStatus()) &&
-                Objects.equals(getCellNumber(),that.getCellNumber()) &&
-                Objects.equals(getRegistrationDate(),that.getRegistrationDate()) &&
-                Objects.equals(getAddress(),that.getAddress()) &&
-                Objects.equals(getCompany(),that.getCompany()) &&
-                Objects.equals(getResetToken(),that.getResetToken()) &&
-                Objects.equals(getUserRoles(),that.getUserRoles()) &&
-                Objects.equals(getRoleTypeKey(),that.getRoleTypeKey()) &&
+                Objects.equals(getUserId(), that.getUserId()) &&
+                Objects.equals(getUsername(), that.getUsername()) &&
+                Objects.equals(getFirstName(), that.getFirstName()) &&
+                Objects.equals(getLastName(), that.getLastName()) &&
+                Objects.equals(getEmail(), that.getEmail()) &&
+                Objects.equals(getEncryptedPassword(), that.getEncryptedPassword()) &&
+                Objects.equals(getEmailVerificationToken(), that.getEmailVerificationToken()) &&
+                Objects.equals(getEmailVerificationStatus(), that.getEmailVerificationStatus()) &&
+                Objects.equals(getCellNumber(), that.getCellNumber()) &&
+                Objects.equals(getRegistrationDate(), that.getRegistrationDate()) &&
+                Objects.equals(getAddress(), that.getAddress()) &&
+                Objects.equals(getCompany(), that.getCompany()) &&
+                Objects.equals(getResetToken(), that.getResetToken()) &&
+                Objects.equals(getUserRoles(), that.getUserRoles()) &&
+                Objects.equals(getRoleTypeKey(), that.getRoleTypeKey()) &&
                 Objects.equals(getUserProfileImageLink(), that.getUserProfileImageLink()) &&
                 Objects.equals(getImageGalleries(), that.getImageGalleries()) &&
                 Objects.equals(getArticles(), that.getArticles()) &&
-                Objects.equals(getComments(),that.getComments()) &&
-                Objects.equals(getRoleType(),that.getRoleType());
+                Objects.equals(getComments(), that.getComments()) &&
+                Objects.equals(getRoleType(), that.getRoleType());
     }
 
     @Override

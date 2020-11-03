@@ -1,6 +1,7 @@
 package za.co.photo_sharing.app_ws.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "authority_role")
+@Audited
 public class AuthorityRoleType implements Serializable {
 
     private static final long serialVersionUID = 537452278236582145L;
