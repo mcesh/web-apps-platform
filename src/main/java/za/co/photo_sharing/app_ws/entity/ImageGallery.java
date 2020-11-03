@@ -1,19 +1,23 @@
 package za.co.photo_sharing.app_ws.entity;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.envers.Audited;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_gallery_images")
 @Audited
+@EntityListeners(AuditingEntityListener.class)
 public class ImageGallery implements Serializable {
 
     private static final long serialVersionUID = 5547123658924545125L;
@@ -43,7 +47,7 @@ public class ImageGallery implements Serializable {
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumns({
-            @JoinColumn(name="users_id")
+            @JoinColumn(name = "users_id")
     })
     private UserProfile userDetails;
 
@@ -51,9 +55,24 @@ public class ImageGallery implements Serializable {
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumns({
-            @JoinColumn(name="category_id")
+            @JoinColumn(name = "category_id")
     })
     private Category category;
+
+    @CreatedBy
+    private String createdBy;
+
+    @CreatedDate
+    @CreationTimestamp
+    private LocalDateTime creationDate;
+
+    @LastModifiedBy
+    private String lastModifiedBy;
+
+    @LastModifiedDate
+    @CreationTimestamp
+    private LocalDateTime lastModifiedDate;
+
 
     public String getBase64StringImage() {
         return base64StringImage;
@@ -111,4 +130,35 @@ public class ImageGallery implements Serializable {
         this.userDetails = userDetails;
     }
 
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public LocalDateTime getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
+    }
 }

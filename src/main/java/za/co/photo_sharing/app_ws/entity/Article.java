@@ -1,26 +1,26 @@
 package za.co.photo_sharing.app_ws.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDate;
-import za.co.photo_sharing.app_ws.constants.ArticleStatusTypeKeys;
-import za.co.photo_sharing.app_ws.constants.ArticlesStatus;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Entity
 @Table(name = "article")
 @Audited
+@EntityListeners(AuditingEntityListener.class)
 public class Article implements Serializable {
 
     private static final long serialVersionUID = 2569854524458252525L;
@@ -75,6 +75,20 @@ public class Article implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @CreatedBy
+    private String createdBy;
+
+    @CreatedDate
+    @CreationTimestamp
+    private LocalDateTime creationDate;
+
+    @LastModifiedBy
+    private String lastModifiedBy;
+
+    @LastModifiedDate
+    @CreationTimestamp
+    private LocalDateTime lastModifiedDate;
 
     public long getId() {
         return id;
@@ -168,5 +182,37 @@ public class Article implements Serializable {
         if (postedDate == null) {
             postedDate = LocalDateTime.now();
         }
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public LocalDateTime getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
     }
 }
