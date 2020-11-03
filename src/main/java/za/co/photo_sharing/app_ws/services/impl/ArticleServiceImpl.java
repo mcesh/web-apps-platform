@@ -139,7 +139,9 @@ public class ArticleServiceImpl implements ArticleService {
         int articleCount = category.getArticleCount() -1;
         category.setArticleCount(articleCount);
         getLog().info("Updating article count {} ", category.getArticleCount());
+        article.get().setStatus(statusService.findByStatus(ArticleStatusTypeKeys.DELETED).getStatus());
         categoryRepository.save(category);
+        articleRepository.saveAndFlush(article.get());
         articleRepository.delete(article.get());
     }
 

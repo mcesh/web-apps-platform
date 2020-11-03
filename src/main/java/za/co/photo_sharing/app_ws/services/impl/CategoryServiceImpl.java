@@ -94,6 +94,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategoryById(Long id) {
         Optional<Category> category = getCategory(id);
         getLog().info("Deleting category with name {} ", category.get().getName());
+        categoryRepository.flush();
         categoryRepository.delete(category.get());
     }
 
