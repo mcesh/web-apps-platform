@@ -145,6 +145,57 @@ public class ArticleServiceImpl implements ArticleService {
         articleRepository.delete(article.get());
     }
 
+    @Override
+    public List<ArticleDTO> findArticlesByStatus(String status, String email, int page, int size) {
+        Utils.validatePageNumberAndSize(page,size);
+        List<ArticleDTO> articleDTOS = new ArrayList<>();
+        statusService.findByStatus(status);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Article> articlePage = articleRepository.findByStatus(status,pageable);
+        List<Article> articles = articlePage.getContent();
+        if (CollectionUtils.isEmpty(articles)){
+            return articleDTOS;
+        }
+        articles.stream()
+                .filter(article -> article.getEmail().equalsIgnoreCase(email))
+                .forEach(article -> {
+                    ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
+                    mapTagsToString(article,articleDTO);
+                    articleDTOS.add(articleDTO);
+                });
+        return articleDTOS;
+    }
+
+    @Override
+    public ArticleDTO updateById(Long id, String username,ArticleDTO articleDTO, String category, String status) {
+        UserDto userDto = userService.findByUsername(username);
+        Optional<Article> article = articleRepository.findById(id);
+        if (!article.isPresent()){
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
+        }
+
+        if (!article.get().getCategory().getName().equalsIgnoreCase(category)){
+            Category categoryName = categoryService.findByEmailAndCategoryName(userDto.getEmail(), category);
+            article.get().setCategory(categoryName);
+            int articleCount = categoryName.getArticleCount() - 1;
+            categoryName.setArticleCount(articleCount);
+            categoryRepository.save(categoryName);
+        }
+
+        if (!article.get().getStatus().equalsIgnoreCase(status)){
+            ArticleStatus articleStatus = statusService.findByStatus(status);
+            article.get().setStatus(articleStatus.getStatus());
+        }
+        Set<Tag> tags = getTags(articleDTO);
+        article.get().setTitle(articleDTO.getTitle());
+        article.get().setTags(tags);
+        article.get().setCaption(articleDTO.getCaption());
+        Article updatedArticle = articleRepository.save(article.get());
+        ArticleDTO dto = modelMapper.map(updatedArticle, ArticleDTO.class);
+        mapTagsToString(updatedArticle,dto);
+        return dto;
+    }
+
     private Category getCategory(UserDto userDto, String categoryName) {
         Category categoryNameResponse = categoryService.findByEmailAndCategoryName(userDto.getEmail(), categoryName);
         if (Objects.isNull(categoryNameResponse)){

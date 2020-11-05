@@ -15,8 +15,10 @@ import za.co.photo_sharing.app_ws.config.SecurityConstants;
 import za.co.photo_sharing.app_ws.model.request.ArticleDetailsRequestModel;
 import za.co.photo_sharing.app_ws.model.response.ArticleRest;
 import za.co.photo_sharing.app_ws.services.ArticleService;
+import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.ArticleDTO;
+import za.co.photo_sharing.app_ws.shared.dto.UserClientDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import java.time.LocalDateTime;
@@ -32,6 +34,8 @@ public class ArticleResource {
     private UserService userService;
     @Autowired
     private ArticleService articleService;
+    @Autowired
+    private UserAppReqService appReqService;
     private ModelMapper modelMapper = new ModelMapper();
 
     public static Logger getLog() {
@@ -64,7 +68,7 @@ public class ArticleResource {
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
     })
-    @GetMapping(value = "/article/{id}",
+    @GetMapping(value = "/{id}",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
     public ArticleRest getArticleById(Long id){
@@ -77,7 +81,7 @@ public class ArticleResource {
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
     })
-    @GetMapping(value = "/article/email/{email}",
+    @GetMapping(value = "/email/{email}",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
     public List<ArticleRest> getArticlesByEmail(
@@ -93,6 +97,55 @@ public class ArticleResource {
         });
 
         return articleRests;
+    }
+
+    @ApiOperation(value="Find Articles By Status",
+            notes="${userAppRequestResource.ArticlesByStatus.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @GetMapping(value = "/byStatus/{clientID}/{status}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public List<ArticleRest> getArticlesByStatus(
+            @RequestParam(value = "page", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_NUMBER) Integer page,
+            @RequestParam(value = "size", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_SIZE) Integer size,
+            @PathVariable(name = "status") String status,
+            @PathVariable(name = "clientID") String clientID){
+        UserClientDTO clientDTO = appReqService.findByClientID(clientID);
+        List<ArticleRest> articleRests = new ArrayList<>();
+        getLog().info("Fetching {} articles for {} current time is {} ", status, clientDTO.getEmail(), LocalDateTime.now());
+        List<ArticleDTO> articleDTOList = articleService.findArticlesByStatus(status,clientDTO.getEmail(),page,size);
+        articleDTOList.forEach(articleDTO -> {
+            ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
+            articleRests.add(articleRest);
+        });
+        getLog().info("Articles found: {} ", articleRests.size());
+
+        return articleRests;
+    }
+
+    @Secured("ROLE_ADMIN")
+    @ApiOperation(value="Update Article By ID",
+            notes="${userAppRequestResource.UpdateArticleByID.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @PutMapping(value = "/{id}/{username}/{status}/{category}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public ArticleRest updateArticleById(
+            @PathVariable(name = "id") Long id,
+            @PathVariable(name = "username") String username,
+            @PathVariable(name = "status") String status,
+            @PathVariable(name = "category") String category,
+            @RequestBody ArticleDetailsRequestModel detailsRequestModel){
+        ArticleDTO articleDTO = modelMapper.map(detailsRequestModel, ArticleDTO.class);
+        ArticleDTO updateById = articleService.updateById(id, username, articleDTO, category, status);
+        ArticleRest articleRest = modelMapper.map(updateById, ArticleRest.class);
+        getLog().info("Updated article with ID: {} ", articleRest.getId());
+        getLog().info("Updated article: {} ", articleRest);
+        return articleRest;
     }
 
     @Secured("ROLE_ADMIN")
