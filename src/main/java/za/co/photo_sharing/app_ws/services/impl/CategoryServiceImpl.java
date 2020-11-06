@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +20,7 @@ import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -96,6 +100,19 @@ public class CategoryServiceImpl implements CategoryService {
         getLog().info("Deleting category with name {} ", category.get().getName());
         categoryRepository.flush();
         categoryRepository.delete(category.get());
+    }
+
+    @Override
+    public List<Category> findAllCategories(int page, int size) {
+        Utils.validatePageNumberAndSize(page,size);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Category> categoryPage = categoryRepository.findAll(pageable);
+        List<Category> categories = categoryPage.getContent();
+        getLog().info("Categories Found in DB: {} ", categories.size());
+        if (CollectionUtils.isEmpty(categories)){
+            return new ArrayList<>();
+        }
+        return categories;
     }
 
     @Transactional
