@@ -183,4 +183,26 @@ public class ArticleResource {
         getLog().info("Articles found : {} ", articleRests.size());
         return articleRests;
     }
+
+    @ApiOperation(value="Find All Articles By Email",
+            notes="${userAppRequestResource.FindAllArticles.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @GetMapping(value = "/all",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public List<ArticleRest> findAllArticles(
+            @RequestParam(value = "page", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_NUMBER) Integer page,
+            @RequestParam(value = "size", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_SIZE) Integer size){
+        List<ArticleRest> articleRests = new ArrayList<>();
+        getLog().info("Fetching Articles current time is {} ", LocalDateTime.now());
+        List<ArticleDTO> articleDTOList = articleService.findAllArticles(page, size);
+        articleDTOList.forEach(articleDTO -> {
+            ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
+            articleRests.add(articleRest);
+        });
+        getLog().info("List of Articles Found : {} ", articleRests.size());
+        return articleRests;
+    }
 }

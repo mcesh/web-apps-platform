@@ -18,4 +18,5 @@ public interface ArticleService extends UserDetailsService {
     List<ArticleDTO> findArticlesByStatus(String status, String email,int page, int size);
     ArticleDTO updateById(Long id, String username,ArticleDTO articleDTO, String category, String status);
     List<ArticleDTO> findAllArticlesByEmail(String email,int page, int size);
+    List<ArticleDTO> findAllArticles(int page, int size);
 }

@@ -221,6 +221,25 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDTOS;
     }
 
+    @Override
+    public List<ArticleDTO> findAllArticles(int page, int size) {
+        Utils.validatePageNumberAndSize(page,size);
+        Pageable pageable = PageRequest.of(page, size);
+        List<ArticleDTO> articleDTOS = new ArrayList<>();
+        Page<Article> articles = articleRepository.findAll(pageable);
+        List<Article> articleList = articles.getContent();
+        if (CollectionUtils.isEmpty(articleList)){
+            return articleDTOS;
+        }
+        articleList.forEach(article -> {
+            ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
+            mapTagsToString(article, articleDTO);
+            articleDTOS.add(articleDTO);
+        });
+
+        return articleDTOS;
+    }
+
     private Category getCategory(UserDto userDto, String categoryName) {
         Category categoryNameResponse = categoryService.findByEmailAndCategoryName(userDto.getEmail(), categoryName);
         if (Objects.isNull(categoryNameResponse)){
