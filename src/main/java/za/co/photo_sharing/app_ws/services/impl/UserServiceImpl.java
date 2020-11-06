@@ -222,15 +222,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getUsers(int page, int limit) {
+    public List<UserDto> getUsers(int page, int size) {
         List<UserDto> returnValue = new ArrayList<>();
+        Utils.validatePageNumberAndSize(page,size);
+        Pageable pageable = PageRequest.of(page, size);
 
-        Pageable pageableRequest = PageRequest.of(page, limit);
-
-        Page<UserProfile> usersPage = userRepo.findAll(pageableRequest);
+        Page<UserProfile> usersPage = userRepo.findAll(pageable);
         List<UserProfile> users = usersPage.getContent();
         if (CollectionUtils.isEmpty(users)) {
-            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.NO_USERS_FOUND.getErrorMessage());
+            return returnValue;
         }
 
         users.stream()

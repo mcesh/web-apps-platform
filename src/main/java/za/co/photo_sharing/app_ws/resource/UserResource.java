@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+import za.co.photo_sharing.app_ws.config.SecurityConstants;
 import za.co.photo_sharing.app_ws.model.request.PasswordResetModel;
 import za.co.photo_sharing.app_ws.model.request.PasswordResetRequestModel;
 import za.co.photo_sharing.app_ws.model.request.UserDetailsRequestModel;
@@ -173,15 +174,16 @@ public class UserResource {
             @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public List<UserRest> getUsers(@RequestParam(value = "page", defaultValue = "1") int page,
-                                   @RequestParam(value = "page", defaultValue = "900") int limit) {
+    public List<UserRest> getUsers(@RequestParam(value = "page", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_NUMBER) Integer page,
+                                   @RequestParam(value = "size", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_SIZE) Integer size) {
         List<UserRest> returnRests = new ArrayList<>();
-        List<UserDto> users = userService.getUsers(page, limit);
+        getLog().info("Fetching All Users in the DB");
+        List<UserDto> users = userService.getUsers(page, size);
         users.forEach(userDto -> {
             UserRest userRest = modelMapper.map(userDto, UserRest.class);
             returnRests.add(userRest);
         });
-
+        getLog().info("Users found: {} ", returnRests.size());
         return returnRests;
     }
 
