@@ -95,7 +95,7 @@ public class ArticleResource {
             ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
             articleRests.add(articleRest);
         });
-
+        getLog().info("Published articles: {} ", articleRests.size());
         return articleRests;
     }
 
@@ -159,5 +159,28 @@ public class ArticleResource {
     public void deleteArticleById(@PathVariable("id") Long id){
         getLog().info("Deleting Article with ID {} ", id);
         articleService.deleteArticleById(id);
+    }
+
+    @ApiOperation(value="Find All Articles By Email",
+            notes="${userAppRequestResource.AllByArticlesByEmail.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @GetMapping(value = "/all/email/{email}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public List<ArticleRest> getAllArticlesByEmail(
+            @RequestParam(value = "page", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_NUMBER) Integer page,
+            @RequestParam(value = "size", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_SIZE) Integer size,
+            @PathVariable(name = "email") String email){
+        List<ArticleRest> articleRests = new ArrayList<>();
+        getLog().info("Fetching Articles for {} current time is {} ", email, LocalDateTime.now());
+        List<ArticleDTO> articleDTOList = articleService.findAllArticlesByEmail(email, page, size);
+        articleDTOList.forEach(articleDTO -> {
+            ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
+            articleRests.add(articleRest);
+        });
+        getLog().info("Articles found : {} ", articleRests.size());
+        return articleRests;
     }
 }

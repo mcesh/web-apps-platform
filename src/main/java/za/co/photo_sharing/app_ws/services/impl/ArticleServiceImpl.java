@@ -95,7 +95,6 @@ public class ArticleServiceImpl implements ArticleService {
     public ArticleDTO findById(Long id) {
         Optional<Article> article = articleRepository.findById(id);
         if (!article.isPresent()){
-
             throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
         }
         AtomicReference<ArticleDTO> articleDTO = new AtomicReference<>();
@@ -116,11 +115,14 @@ public class ArticleServiceImpl implements ArticleService {
         Pageable pageable = PageRequest.of(page, size);
         Page<Article> articles = articleRepository.findByEmail(email,pageable);
         List<Article> articleList = articles.getContent();
+        getLog().info("Articles found from DB {} ", articleList.size());
         if (CollectionUtils.isEmpty(articleList)){
-            throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.NO_ARTICLES_FOUND_IN_RANGE.getErrorMessage());
+            return articleDTOS;
         }
-        getLog().info("Articles size found {} ", articleList.size());
-        articleList.forEach(article -> {
+        articleList
+                .stream()
+                .filter(article -> article.getStatus().equalsIgnoreCase(ArticleStatusTypeKeys.PUBLISHED)).
+                forEach(article -> {
             ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
             mapTagsToString(article,articleDTO);
             articleDTOS.add(articleDTO);
@@ -175,9 +177,13 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         if (!article.get().getCategory().getName().equalsIgnoreCase(category)){
+            if (article.get().getCategory().getArticleCount() > 0){
+                article.get().getCategory().setArticleCount(article.get().getCategory().getArticleCount() -1);
+                categoryRepository.save(article.get().getCategory());
+            }
             Category categoryName = categoryService.findByEmailAndCategoryName(userDto.getEmail(), category);
             article.get().setCategory(categoryName);
-            int articleCount = categoryName.getArticleCount() - 1;
+            int articleCount = categoryName.getArticleCount() + 1;
             categoryName.setArticleCount(articleCount);
             categoryRepository.save(categoryName);
         }
@@ -194,6 +200,25 @@ public class ArticleServiceImpl implements ArticleService {
         ArticleDTO dto = modelMapper.map(updatedArticle, ArticleDTO.class);
         mapTagsToString(updatedArticle,dto);
         return dto;
+    }
+
+    @Override
+    public List<ArticleDTO> findAllArticlesByEmail(String email, int page, int size) {
+        Utils.validatePageNumberAndSize(page,size);
+        List<ArticleDTO> articleDTOS = new ArrayList<>();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Article> articles = articleRepository.findByEmail(email,pageable);
+        List<Article> articleList = articles.getContent();
+        if (CollectionUtils.isEmpty(articleList)){
+            return articleDTOS;
+        }
+        articleList.forEach(article -> {
+                    ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
+                    mapTagsToString(article,articleDTO);
+                    articleDTOS.add(articleDTO);
+                });
+
+        return articleDTOS;
     }
 
     private Category getCategory(UserDto userDto, String categoryName) {

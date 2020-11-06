@@ -38,7 +38,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.CATEGORY_ALREADY_EXISTS.getErrorMessage());
         }
         Category category = new Category();
-        category.setName(categoryName);
+        category.setName(categoryName.trim());
         category.setEmail(userService.findByEmail(email).getEmail());
         category.setArticleCount(0);
         Category savedCategory = categoryRepository.save(category);
