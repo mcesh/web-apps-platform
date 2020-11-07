@@ -67,11 +67,10 @@ public class ArticleServiceImpl implements ArticleService {
             ImageUpload imageUpload = utils.uploadImage(file, userProfile, ARTICLE_IMAGES);
             base64Image = imageUpload.getBase64Image();
         }
-
-        Category categoryNameResponse = getCategory(userDto, categoryName);
         Set<Tag> tags = getTags(articleDTO);
 
         articleStatus = statusService.findByStatus(status);
+        Category categoryNameResponse = getCategory(userDto, categoryName);
         Article article = modelMapper.map(articleDTO, Article.class);
         article.setEmail(userDto.getEmail());
         article.setBase64StringImage(base64Image);
