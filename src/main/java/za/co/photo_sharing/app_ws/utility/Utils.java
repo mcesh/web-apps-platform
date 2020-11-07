@@ -58,7 +58,7 @@ public class Utils {
 
         String emailToken = email.split("@")[0];
 
-        String randomString = generateRandomString(13);
+        String randomString = generateRandomString(35);
 
         return emailToken + randomString;
     }
