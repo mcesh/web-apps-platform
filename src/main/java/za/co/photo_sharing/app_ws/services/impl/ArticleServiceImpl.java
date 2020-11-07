@@ -26,6 +26,7 @@ import za.co.photo_sharing.app_ws.shared.dto.ArticleDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -86,7 +87,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         mapTagsToString(savedArticle, returnedArticle);
 
-        getLog().info("Persisted article.... {} ", returnedArticle);
+        getLog().info("Article Persisted Successfully at {} ", LocalDateTime.now());
         return returnedArticle;
     }
 
@@ -103,7 +104,6 @@ public class ArticleServiceImpl implements ArticleService {
             return articleDTO;
         });
         getLog().info("Article found with ID {} ", articleDTO.get().getId());
-        getLog().info("Article: {} ", articleDTO.get());
         return articleDTO.get();
     }
 

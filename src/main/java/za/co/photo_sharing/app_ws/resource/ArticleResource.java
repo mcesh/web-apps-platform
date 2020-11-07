@@ -58,9 +58,7 @@ public class ArticleResource {
         ArticleDTO articleDTO = modelMapper.map(detailsRequestModel, ArticleDTO.class);
         getLog().info("Creating article for {} current time is {} ", userDto.getEmail(), LocalDateTime.now());
         ArticleDTO article = articleService.createPost(articleDTO, userDto, file, category, status);
-        ArticleRest articleRest = modelMapper.map(article, ArticleRest.class);
-        getLog().info("articleRest {} ", articleRest);
-        return articleRest;
+        return modelMapper.map(article, ArticleRest.class);
     }
 
     @ApiOperation(value="Find Article By ID",
@@ -144,7 +142,6 @@ public class ArticleResource {
         ArticleDTO updateById = articleService.updateById(id, username, articleDTO, category, status);
         ArticleRest articleRest = modelMapper.map(updateById, ArticleRest.class);
         getLog().info("Updated article with ID: {} ", articleRest.getId());
-        getLog().info("Updated article: {} ", articleRest);
         return articleRest;
     }
 
