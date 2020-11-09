@@ -22,13 +22,13 @@ import za.co.photo_sharing.app_ws.config.AppProperties;
 @EnableAutoConfiguration(exclude = HibernateJpaAutoConfiguration.class)
 @Slf4j
 @EnableAsync
-public class PhotoSharingApplication extends SpringBootServletInitializer {
+public class WebAppPlatform extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PhotoSharingApplication.class, args);
+		SpringApplication.run(WebAppPlatform.class, args);
 	}
 
-	private static Logger LOGGER = LoggerFactory.getLogger(PhotoSharingApplication.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(WebAppPlatform.class);
 
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder(){
@@ -46,7 +46,7 @@ public class PhotoSharingApplication extends SpringBootServletInitializer {
 
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(PhotoSharingApplication.class);
+		return application.sources(WebAppPlatform.class);
 	}
 
 	@Bean
