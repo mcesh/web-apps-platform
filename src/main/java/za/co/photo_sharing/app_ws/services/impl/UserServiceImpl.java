@@ -316,13 +316,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> findAllUsersWithConfirmedEmailAddress(int page, int limit) {
+    public List<UserDto> findAllUsersWithConfirmedEmailAddress(int page, int size) {
 
         List<UserDto> userDtos = new ArrayList<>();
 
-        Pageable pageableRequest = PageRequest.of(page, limit);
+        Utils.validatePageNumberAndSize(page,size);
+        Pageable pageable = PageRequest.of(page, size);
 
-        Page<UserProfile> usersPage = userRepo.findAllUsersWithConfirmedEmailAddress(pageableRequest);
+        Page<UserProfile> usersPage = userRepo.findAllUsersWithConfirmedEmailAddress(pageable);
 
         List<UserProfile> users = usersPage.getContent();
 

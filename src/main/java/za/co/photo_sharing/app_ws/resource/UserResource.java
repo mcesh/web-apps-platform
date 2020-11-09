@@ -285,17 +285,17 @@ public class UserResource {
     @GetMapping(path = "/confirmed_emails",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
-    public List<UserRest> confirmedEmails(@RequestParam(value = "page", defaultValue = "0") int page,
-                                          @RequestParam(value = "limit", defaultValue = "2") int limit) {
+    public List<UserRest> confirmedEmails(@RequestParam(value = "page", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_NUMBER) Integer page,
+                                          @RequestParam(value = "size", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_SIZE) Integer size) {
         getLog().info("Fetching Confirmed Emails");
         List<UserRest> userRests = new ArrayList<>();
-        List<UserDto> confirmedEmailAddress = userService.findAllUsersWithConfirmedEmailAddress(page, limit);
+        List<UserDto> confirmedEmailAddress = userService.findAllUsersWithConfirmedEmailAddress(page, size);
         confirmedEmailAddress.forEach(userDto -> {
             UserRest userRest = new UserRest();
             modelMapper.map(userDto, userRest);
             userRests.add(userRest);
         });
-
+        getLog().info("Confirmed emails found: {} ", userRests.size());
         return userRests;
     }
 
