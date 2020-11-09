@@ -181,7 +181,7 @@ public class ArticleResource {
         return articleRests;
     }
 
-    @ApiOperation(value="Find All Articles By Email",
+    @ApiOperation(value="Find All Articles in the DB",
             notes="${userAppRequestResource.FindAllArticles.ApiOperation.Notes}")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
@@ -201,5 +201,38 @@ public class ArticleResource {
         });
         getLog().info("List of Articles Found : {} ", articleRests.size());
         return articleRests;
+    }
+
+
+    @ApiOperation(value="Like Article",
+            notes="${userAppRequestResource.LikeArticle.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @PostMapping(value = "/{id}/{username}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public ArticleRest likeArticle(
+            @PathVariable(name = "id") Long id,
+            @PathVariable(name = "username") String username){
+        getLog().info(username  +  " likes this articles");
+        ArticleDTO articleDTO = articleService.likeArticle(id, username);
+       return modelMapper.map(articleDTO, ArticleRest.class);
+    }
+
+    @ApiOperation(value="DisLike Article",
+            notes="${userAppRequestResource.DisLikeArticle.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @PostMapping(value = "dislike/{id}/{username}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public ArticleRest dislikeArticle(
+            @PathVariable(name = "id") Long id,
+            @PathVariable(name = "username") String username){
+        getLog().info(username  +  " dislikes this articles");
+        ArticleDTO articleDTO = articleService.dislikeArticle(id, username);
+        return modelMapper.map(articleDTO, ArticleRest.class);
     }
 }

@@ -93,10 +93,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public ArticleDTO findById(Long id) {
-        Optional<Article> article = articleRepository.findById(id);
-        if (!article.isPresent()){
-            throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
-        }
+        Optional<Article> article = getArticle(id);
         AtomicReference<ArticleDTO> articleDTO = new AtomicReference<>();
         article.map(article1 -> {
             articleDTO.set(modelMapper.map(article1, ArticleDTO.class));
@@ -120,8 +117,9 @@ public class ArticleServiceImpl implements ArticleService {
         }
         articleList
                 .stream()
-                .filter(article -> article.getStatus().equalsIgnoreCase(ArticleStatusTypeKeys.PUBLISHED)).
-                forEach(article -> {
+                .filter(article -> article.getStatus().equalsIgnoreCase(ArticleStatusTypeKeys.PUBLISHED))
+                .sorted(Comparator.comparing(Article::getPostedDate).reversed())
+                .forEach(article -> {
             ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
             mapTagsToString(article,articleDTO);
             articleDTOS.add(articleDTO);
@@ -132,10 +130,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public void deleteArticleById(Long id) {
-        Optional<Article> article = articleRepository.findById(id);
-        if (!article.isPresent()){
-            throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
-        }
+        Optional<Article> article = getArticle(id);
         Category category = article.get().getCategory();
         int articleCount = category.getArticleCount() -1;
         category.setArticleCount(articleCount);
@@ -170,10 +165,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public ArticleDTO updateById(Long id, String username,ArticleDTO articleDTO, String category, String status) {
         UserDto userDto = userService.findByUsername(username);
-        Optional<Article> article = articleRepository.findById(id);
-        if (!article.isPresent()){
-            throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
-        }
+        Optional<Article> article = getArticle(id);
 
         if (!article.get().getCategory().getName().equalsIgnoreCase(category)){
             if (article.get().getCategory().getArticleCount() > 0){
@@ -230,13 +222,61 @@ public class ArticleServiceImpl implements ArticleService {
         if (CollectionUtils.isEmpty(articleList)){
             return articleDTOS;
         }
-        articleList.forEach(article -> {
+        articleList
+                .stream()
+                .sorted(Comparator.comparing(Article::getPostedDate).reversed())
+                .forEach(article -> {
             ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
             mapTagsToString(article, articleDTO);
             articleDTOS.add(articleDTO);
         });
 
         return articleDTOS;
+    }
+
+    @Override
+    public ArticleDTO likeArticle(Long postId, String username) {
+        userService.findByUsername(username);
+        Optional<Article> article1 = getArticle(postId);
+        AtomicReference<ArticleDTO> articleDTO = new AtomicReference<>();
+        article1.map(article -> {
+            int articleLikes = article.getLikes() + 1;
+            article.setLikes(articleLikes);
+            Article savedArticle = articleRepository.save(article);
+            articleDTO.set(modelMapper.map(savedArticle, ArticleDTO.class));
+            mapTagsToString(savedArticle, articleDTO.get());
+            return articleDTO.get();
+        });
+        return articleDTO.get();
+    }
+
+    @Override
+    public ArticleDTO dislikeArticle(Long postId, String username) {
+        userService.findByUsername(username);
+        Optional<Article> article1 = getArticle(postId);
+        AtomicReference<ArticleDTO> articleDTO = new AtomicReference<>();
+        article1.map(article -> {
+            if (article.getLikes() > 0){
+                int articleLikes = article.getLikes() - 1;
+                article.setLikes(articleLikes);
+                Article savedArticle = articleRepository.save(article);
+                articleDTO.set(modelMapper.map(savedArticle, ArticleDTO.class));
+                mapTagsToString(savedArticle, articleDTO.get());
+                return articleDTO.get();
+            }
+            articleDTO.set(modelMapper.map(article, ArticleDTO.class));
+            mapTagsToString(article, articleDTO.get());
+            return articleDTO.get();
+        });
+        return articleDTO.get();
+    }
+
+    private Optional<Article> getArticle(Long postId) {
+        Optional<Article> article = articleRepository.findById(postId);
+        if (!article.isPresent()){
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
+        }
+        return article;
     }
 
     private Category getCategory(UserDto userDto, String categoryName) {
