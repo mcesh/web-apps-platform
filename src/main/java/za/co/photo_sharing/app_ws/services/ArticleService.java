@@ -21,4 +21,5 @@ public interface ArticleService extends UserDetailsService {
     List<ArticleDTO> findAllArticles(int page, int size);
     ArticleDTO likeArticle(Long postId, String username);
     ArticleDTO dislikeArticle(Long postId, String username);
+    List<ArticleDTO> findByTitleContaining(String title, String email);
 }
