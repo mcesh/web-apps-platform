@@ -235,4 +235,26 @@ public class ArticleResource {
         ArticleDTO articleDTO = articleService.dislikeArticle(id, username);
         return modelMapper.map(articleDTO, ArticleRest.class);
     }
+
+    @ApiOperation(value="Search Articles By Keyword",
+            notes="${userAppRequestResource.ArticlesByKeyword.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+    })
+    @GetMapping(value = "/{title}/{email}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public List<ArticleRest> searchArticlesByKeyword(
+            @PathVariable(name = "email") String email,
+            @PathVariable(name = "title") String title){
+        List<ArticleRest> articleRests = new ArrayList<>();
+        getLog().info("Fetching Articles for {} current time is {} ", email, LocalDateTime.now());
+        List<ArticleDTO> articleDTOList = articleService.findByTitleContaining(title,email);
+        articleDTOList.forEach(articleDTO -> {
+            ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
+            articleRests.add(articleRest);
+        });
+        getLog().info("Found Articles based on keyword : {} ", articleRests.size());
+        return articleRests;
+    }
 }

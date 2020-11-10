@@ -19,4 +19,5 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     Page<Article> findByStatus(String status, Pageable pageable);
     @Query(value = "select status from Article status where status.status = status and status.email = email")
     Page<Article> findArticlesByStatus(@Param("email") String email, @Param("status") String status, Pageable pageableRequest);
+    List<Article> findByTitleContaining(String title);
 }

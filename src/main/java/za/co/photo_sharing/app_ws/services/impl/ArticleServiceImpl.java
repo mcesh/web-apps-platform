@@ -271,6 +271,27 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDTO.get();
     }
 
+    @Override
+    public List<ArticleDTO> findByTitleContaining(String title, String email) {
+
+        List<ArticleDTO> articleDTOS = new ArrayList<>();
+        List<Article> articles = articleRepository.findByTitleContaining(title);
+        if (CollectionUtils.isEmpty(articles)){
+            return articleDTOS;
+        }
+        articles
+                .stream()
+                .sorted(Comparator.comparing(Article::getPostedDate))
+                .filter(article -> article.getEmail().equalsIgnoreCase(email))
+                .filter(article -> article.getStatus().equalsIgnoreCase(ArticleStatusTypeKeys.PUBLISHED))
+                .forEach(article -> {
+                    ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
+                    mapTagsToString(article, articleDTO);
+                    articleDTOS.add(articleDTO);
+                });
+        return articleDTOS;
+    }
+
     private Optional<Article> getArticle(Long postId) {
         Optional<Article> article = articleRepository.findById(postId);
         if (!article.isPresent()){
