@@ -1,0 +1,18 @@
+package za.co.photo_sharing.app_ws.model.response;
+
+import lombok.*;
+
+import java.util.Set;
+
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+public class AboutRest {
+
+    private String description;
+    private Set<SkillSetRest> skillSets;
+    private String base64StringImage;
+}

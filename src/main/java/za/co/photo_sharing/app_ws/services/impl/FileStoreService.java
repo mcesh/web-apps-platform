@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -36,7 +37,7 @@ public class FileStoreService {
             });
             log.info("Uploading image with fileName {} ", fileName);
             s3.putObject(path,fileName,inputStream,metadata);
-            log.info("File uploaded successfully {} " ,fileName);
+            log.info("File uploaded successfully {} " , LocalDateTime.now());
         }catch (Exception e){
             throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,"Failed to store file to DigitalOceans Bucket "
                     + e.getMessage());
