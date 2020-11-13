@@ -71,6 +71,23 @@ public class UserGalleryImagesResource {
 
     }
 
+    @ApiOperation(value="Fetch User Gallery Images Endpoint",
+            notes="${userResource.FetchGalleryImages.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}",
+                    paramType="header")
+    })
+    @GetMapping(path = "fetch/{clientID}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,})
+    public Set<ImageGallery> fetchImages(@PathVariable String clientID){
+        UserClientDTO clientDTO = appReqService.findByClientID(clientID);
+        getLog().info("Fetching a list of images... {} ", clientDTO.getEmail());
+        Set<ImageGallery> galleryImages = userService.fetchGalleryImages(clientDTO.getEmail());
+        getLog().info("Images retrieved {} ", galleryImages.size());
+        return galleryImages;
+
+    }
+
     public static Logger getLog() {
         return LOGGER;
     }

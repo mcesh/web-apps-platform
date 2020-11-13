@@ -448,7 +448,7 @@ public class UserServiceImpl implements UserService {
             throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
 
-        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
+        String path = String.format("%s/%s/%s", BUCKET_NAME,
                 PROFILE_IMAGES,
                 user.getUsername());
        if (!StringUtils.isEmpty(user.getUserProfileImageLink())){
@@ -461,6 +461,42 @@ public class UserServiceImpl implements UserService {
                DEFAULT_PROFILE_FOLDER);
         byte[] defaultProfilePic = fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
         return Base64.getEncoder().encodeToString(defaultProfilePic);
+    }
+
+    @Override
+    public String downloadProfile(String email) {
+        UserProfile user = userRepo.findByEmail(email);
+        if (Objects.isNull(user)){
+            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        }
+        String key = user.getUserProfileImageLink();
+        String objectKey = PROFILE_IMAGES + "/" + user.getUsername() + "/" + key;
+        return fileStoreService.generatePreSignedURL(BUCKET_NAME, objectKey);
+    }
+
+    @Override
+    public Set<za.co.photo_sharing.app_ws.model.response.ImageGallery> fetchGalleryImages(String email) {
+        UserProfile userProfile = userRepo.findByEmail(email);
+        utils.getUser(userProfile);
+        Set<za.co.photo_sharing.app_ws.model.response.ImageGallery>  imageGalleries = new HashSet<>();
+        if (userProfile.getImageGalleries().size() > 0){
+            userProfile.getImageGalleries().forEach(imageGallery -> {
+                za.co.photo_sharing.app_ws.model.response.ImageGallery gallery = new za.co.photo_sharing.app_ws.model.response.ImageGallery();
+                CategoryRest categoryRest = new CategoryRest();
+                String categoryName = imageGallery.getCategory().getName();
+                categoryRest.setName(categoryName);
+                String key = imageGallery.getImageUrl();
+                String objectKey = GALLERY_IMAGES + "/" + userProfile.getUsername() + "/" + key;
+                String preSignedURL = fileStoreService.generatePreSignedURL(BUCKET_NAME, objectKey);
+                gallery.setCaption(imageGallery.getCaption());
+                gallery.setId(imageGallery.getId());
+                gallery.setImage(preSignedURL);
+                gallery.setCategory(categoryRest);
+                imageGalleries.add(gallery);
+
+            });
+        }
+        return imageGalleries;
     }
 
     @Override

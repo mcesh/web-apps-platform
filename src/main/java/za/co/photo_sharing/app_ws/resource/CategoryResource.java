@@ -51,6 +51,7 @@ public class CategoryResource {
     @GetMapping(path = "list/{email}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<Category> getCategoriesByEmail(@PathVariable String email){
+        getLog().info("Getting categories for: {} time: {}", email, LocalDateTime.now());
         return categoryService.findAllCategoriesByEmail(email);
 
     }

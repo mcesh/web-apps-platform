@@ -5,11 +5,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.entity.Role;
 import za.co.photo_sharing.app_ws.model.response.ImageGallery;
-import za.co.photo_sharing.app_ws.shared.dto.AddressDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
@@ -35,4 +35,6 @@ public interface UserService extends UserDetailsService {
     void uploadUserGalleryImages(String email, MultipartFile file,String caption, String categoryName);
     Set<ImageGallery> downloadUserGalleryImages(String email);
     String downloadUserProfileImage(String email);
+    String downloadProfile(String email);
+    Set<ImageGallery> fetchGalleryImages(String email);
 }

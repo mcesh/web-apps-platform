@@ -9,4 +9,5 @@ public interface AboutService {
     AboutDTO addImage(Long id, String email, MultipartFile file);
     AboutDTO findByEmail(String email);
     AboutDTO findById(Long id);
+    String downloadAboutPageImage(String email);
 }

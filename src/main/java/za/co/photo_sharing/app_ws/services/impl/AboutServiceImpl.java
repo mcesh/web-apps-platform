@@ -6,7 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import za.co.photo_sharing.app_ws.constants.BucketName;
 import za.co.photo_sharing.app_ws.entity.About;
 import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.exceptions.ArticleServiceException;
@@ -22,7 +24,11 @@ import za.co.photo_sharing.app_ws.utility.Utils;
 import javax.transaction.Transactional;
 
 import java.text.DecimalFormat;
+import java.util.Base64;
+import java.util.Objects;
 import java.util.Optional;
+
+import static za.co.photo_sharing.app_ws.services.impl.UserServiceImpl.*;
 
 @Service
 public class AboutServiceImpl implements AboutService {
@@ -36,6 +42,8 @@ public class AboutServiceImpl implements AboutService {
     private UserService userService;
     @Autowired
     private Utils utils;
+    @Autowired
+    private FileStoreService fileStoreService;
     private ModelMapper modelMapper = new ModelMapper();
 
     public static Logger getLog() {
@@ -45,9 +53,7 @@ public class AboutServiceImpl implements AboutService {
     @Override
     public AboutDTO addAboutPage(AboutDTO aboutDTO, String email) {
         UserDto userDto = userService.findByEmail(email);
-        if (aboutRepository.findByEmail(email) != null){
-            throw new ArticleServiceException(HttpStatus.BAD_REQUEST, ErrorMessages.RECORD_ALREADY_EXISTS.getErrorMessage());
-        }
+        verifyIfPageExists(email);
         if (aboutDTO.getSkillSets().size() > 0) {
             aboutDTO.getSkillSets().forEach(skillSet -> {
                 double ratingPercent = calculateRatingPercent(skillSet.getRating());
@@ -60,6 +66,12 @@ public class AboutServiceImpl implements AboutService {
         AboutDTO dto = modelMapper.map(savedBio, AboutDTO.class);
         getLog().info("Bio persisted successfully: {} ", dto);
         return dto;
+    }
+
+    private void verifyIfPageExists(String email) {
+        if (aboutRepository.findByEmail(email) != null){
+            throw new ArticleServiceException(HttpStatus.BAD_REQUEST, ErrorMessages.RECORD_ALREADY_EXISTS.getErrorMessage());
+        }
     }
 
     @Transactional
@@ -89,14 +101,39 @@ public class AboutServiceImpl implements AboutService {
         return about;
     }
 
+    @Transactional
     @Override
     public AboutDTO findByEmail(String email) {
-        return null;
+        About aboutPageDetails = aboutRepository.findByEmail(email);
+        if (Objects.isNull(aboutPageDetails)){
+            return new AboutDTO();
+        }
+        return modelMapper.map(aboutPageDetails, AboutDTO.class);
     }
 
     @Override
     public AboutDTO findById(Long id) {
         return null;
+    }
+
+    @Override
+    public String downloadAboutPageImage(String email) {
+        UserDto userDto = userService.findByEmail(email);
+        About aboutPageDetails = aboutRepository.findByEmail(email);
+        String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
+                ABOUT_PAGE,
+                userDto.getUsername());
+
+        if (!StringUtils.isEmpty(aboutPageDetails.getBase64StringImage())){
+            String key = aboutPageDetails.getBase64StringImage();
+            byte[] profilePic = fileStoreService.download(path, key);
+            return Base64.getEncoder().encodeToString(profilePic);
+        }
+        // default-profile-picture
+        String defaultPicturePath = String.format("%s/%s", BUCKET_NAME,
+                DEFAULT_PROFILE_FOLDER);
+        byte[] defaultProfilePic = fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
+        return Base64.getEncoder().encodeToString(defaultProfilePic);
     }
 
     private double calculateRatingPercent(double rating) {

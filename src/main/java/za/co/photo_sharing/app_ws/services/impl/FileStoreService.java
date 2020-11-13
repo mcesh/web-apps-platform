@@ -1,10 +1,9 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -70,6 +70,27 @@ public class FileStoreService {
                     });
         }
         return images;
+    }
+
+    public String generatePreSignedURL(String bucketName, String key){
+
+        URL url;
+        try {
+            Date expirationDate = new Date();
+            long expTimeMillis  = expirationDate.getTime();
+            expTimeMillis += 604800 * 1000; //7 days
+            expirationDate.setTime(expTimeMillis);
+
+            GeneratePresignedUrlRequest presagedUrlRequest = new GeneratePresignedUrlRequest(bucketName,key)
+                    .withMethod(HttpMethod.GET)
+                    .withExpiration(expirationDate);
+            url = s3.generatePresignedUrl(presagedUrlRequest);
+
+        }catch (AmazonServiceException e){
+            throw new IllegalStateException("Failed to download file to s3", e);
+        }
+
+        return url.toString();
     }
 
 

@@ -32,6 +32,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -374,7 +375,7 @@ public class UserResource {
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public String downloadProfileImage(@PathVariable String email) {
         getLog().info("Getting Profile Picture for {} ", email);
-        String profileImage = userService.downloadUserProfileImage(email);
+        String profileImage = userService.downloadProfile(email);
         getLog().info("Profile Picture: {} ", profileImage);
         return profileImage;
     }

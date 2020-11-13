@@ -15,8 +15,10 @@ import za.co.photo_sharing.app_ws.model.response.AboutRest;
 import za.co.photo_sharing.app_ws.services.AboutService;
 import za.co.photo_sharing.app_ws.shared.dto.AboutDTO;
 
+import java.time.LocalDateTime;
+
 @RestController
-@RequestMapping("article") // http://localhost:8080/article/web-apps-platform
+@RequestMapping("about") // http://localhost:8080/about/web-apps-platform
 public class AboutResource {
 
     @Autowired
@@ -24,6 +26,9 @@ public class AboutResource {
 
     private static Logger LOGGER = LoggerFactory.getLogger(AboutResource.class);
     private ModelMapper modelMapper = new ModelMapper();
+    public static Logger getLog() {
+        return LOGGER;
+    }
 
     @ApiOperation(value = "Add About Page Endpoint",
             notes = "${userResource.AddAboutPage.ApiOperation.Notes}")
@@ -52,4 +57,30 @@ public class AboutResource {
         AboutDTO aboutPage = aboutService.addImage(id, email, image);
         return modelMapper.map(aboutPage, AboutRest.class);
     }
+
+    @ApiOperation(value = "Get About Page Details Endpoint",
+            notes = "${userResource.GetAboutPageDetails.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @GetMapping(path = "/{email}",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public AboutRest getAboutPageDetails(@PathVariable("email") String email){
+        AboutDTO aboutDTO = aboutService.findByEmail(email);
+        AboutRest aboutRest = modelMapper.map(aboutDTO, AboutRest.class);
+        getLog().info("About Page Details: {} ", aboutRest);
+        return aboutRest;
+    }
+
+    @ApiOperation(value = "Download About Page Image Endpoint",
+            notes = "${userResource.AboutPageImage.ApiOperation.Notes}")
+    @GetMapping(path = "download/about-page/{email}",
+            produces = {MediaType.TEXT_PLAIN_VALUE})
+    public String downloadAboutPageImage(@PathVariable String email) {
+        getLog().info("Getting About Page Image for {} ", email);
+        String profileImage = aboutService.downloadAboutPageImage(email);
+        getLog().info("Image Downloaded Successfully at: {} ", LocalDateTime.now());
+        return profileImage;
+    }
+
 }

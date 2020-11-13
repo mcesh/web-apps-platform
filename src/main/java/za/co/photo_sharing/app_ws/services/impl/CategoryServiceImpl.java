@@ -62,6 +62,7 @@ public class CategoryServiceImpl implements CategoryService {
                 getLog().info("Category Found {} ", category.getName());
             });
         }
+        getLog().info("Categories found: {} ", categories.size());
         return categories;
     }
 
