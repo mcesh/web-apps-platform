@@ -271,6 +271,13 @@ public class Utils {
         }
     }
 
+    public double calculateRatingPercent(double rating) {
+        validateRatingNumber(rating);
+        double ratingPercentage = (rating / 10) * 100;
+        getLog().info("Calculated percentage: {} ", ratingPercentage);
+        return ratingPercentage;
+    }
+
     public static Logger getLog() {
         return LOGGER;
     }

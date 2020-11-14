@@ -10,6 +10,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.constants.BucketName;
 import za.co.photo_sharing.app_ws.entity.About;
+import za.co.photo_sharing.app_ws.entity.SkillSet;
 import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.exceptions.ArticleServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessage;
@@ -24,9 +25,8 @@ import za.co.photo_sharing.app_ws.utility.Utils;
 import javax.transaction.Transactional;
 
 import java.text.DecimalFormat;
-import java.util.Base64;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static za.co.photo_sharing.app_ws.services.impl.UserServiceImpl.*;
 
@@ -56,7 +56,7 @@ public class AboutServiceImpl implements AboutService {
         verifyIfPageExists(email);
         if (aboutDTO.getSkillSets().size() > 0) {
             aboutDTO.getSkillSets().forEach(skillSet -> {
-                double ratingPercent = calculateRatingPercent(skillSet.getRating());
+                double ratingPercent = utils.calculateRatingPercent(skillSet.getRating());
                 skillSet.setRatingCalc(ratingPercent);
             });
         }
@@ -108,6 +108,7 @@ public class AboutServiceImpl implements AboutService {
         if (Objects.isNull(aboutPageDetails)){
             return new AboutDTO();
         }
+        List<SkillSet> skillSets = aboutPageDetails.getSkillSets().stream().sorted(Comparator.comparing(SkillSet::getRating)).collect(Collectors.toList());
         return modelMapper.map(aboutPageDetails, AboutDTO.class);
     }
 
@@ -136,10 +137,4 @@ public class AboutServiceImpl implements AboutService {
         return Base64.getEncoder().encodeToString(defaultProfilePic);
     }
 
-    private double calculateRatingPercent(double rating) {
-        utils.validateRatingNumber(rating);
-        double ratingPercentage = (rating / 10) * 100;
-        getLog().info("Calculated percentage: {} ", ratingPercentage);
-        return ratingPercentage;
-    }
 }
