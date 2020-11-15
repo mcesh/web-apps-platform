@@ -30,7 +30,7 @@ public class SkillSet implements Serializable {
     @ManyToOne
     @JoinColumn(name = "about_id")
     @JsonIgnore
-    private About about;
+    private AboutPage aboutPage;
 
 
     public long getId() {
@@ -57,12 +57,12 @@ public class SkillSet implements Serializable {
         this.rating = rating;
     }
 
-    public About getAbout() {
-        return about;
+    public AboutPage getAboutPage() {
+        return aboutPage;
     }
 
-    public void setAbout(About about) {
-        this.about = about;
+    public void setAboutPage(AboutPage aboutPage) {
+        this.aboutPage = aboutPage;
     }
 
     public double getRatingCalc() {

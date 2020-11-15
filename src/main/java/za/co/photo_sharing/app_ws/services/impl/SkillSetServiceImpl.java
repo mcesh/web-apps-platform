@@ -2,8 +2,12 @@ package za.co.photo_sharing.app_ws.services.impl;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import za.co.photo_sharing.app_ws.entity.SkillSet;
 import za.co.photo_sharing.app_ws.exceptions.ArticleServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
@@ -12,6 +16,9 @@ import za.co.photo_sharing.app_ws.services.SkillSetService;
 import za.co.photo_sharing.app_ws.shared.dto.SkillSetDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,7 +37,7 @@ public class SkillSetServiceImpl implements SkillSetService {
         Optional<SkillSet> skillSet = getSkillSet(id);
         skillSet.map(skill -> {
             skillSetDto[0] = (modelMapper.map(skill, SkillSetDto.class));
-            return skillSetDto[0];
+            return true;
         });
         return skillSetDto[0];
     }
@@ -47,10 +54,39 @@ public class SkillSetServiceImpl implements SkillSetService {
             skillSet1.setRatingCalc(ratingPercent);
             SkillSet returnValue = skillSetRepository.save(skillSet1);
             setDto.set(modelMapper.map(returnValue, SkillSetDto.class));
-            return setDto;
+            return true;
         });
 
         return setDto.get();
+    }
+
+    @Override
+    public List<SkillSetDto> findAllSkillSets(int page, int size) {
+        Utils.validatePageNumberAndSize(page,size);
+        Pageable pageable = PageRequest.of(page, size);
+        List<SkillSetDto> skillSetDtos = new ArrayList<>();
+        Page<SkillSet> skillSetPage = skillSetRepository.findAll(pageable);
+        List<SkillSet> skillSets = skillSetPage.getContent();
+        if (CollectionUtils.isEmpty(skillSets)){
+            return skillSetDtos;
+        }
+        skillSets.stream()
+                .sorted(Comparator.comparing(SkillSet::getRatingCalc))
+                .forEach(skillSet -> {
+                    SkillSetDto skillSetDto = modelMapper.map(skillSet, SkillSetDto.class);
+                    skillSetDtos.add(skillSetDto);
+                });
+        return skillSetDtos;
+    }
+
+    @Override
+    public void deleteSkillSetById(Long id) {
+        Optional<SkillSet> skillSet = getSkillSet(id);
+        skillSet.map(skillSet1 -> {
+           skillSetRepository.delete(skillSet1);
+           return true;
+        });
+
     }
 
     private Optional<SkillSet> getSkillSet(Long id) {

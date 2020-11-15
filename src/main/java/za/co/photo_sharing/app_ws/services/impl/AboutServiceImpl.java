@@ -9,11 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.constants.BucketName;
-import za.co.photo_sharing.app_ws.entity.About;
+import za.co.photo_sharing.app_ws.entity.AboutPage;
 import za.co.photo_sharing.app_ws.entity.SkillSet;
 import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.exceptions.ArticleServiceException;
-import za.co.photo_sharing.app_ws.model.response.ErrorMessage;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.model.response.ImageUpload;
 import za.co.photo_sharing.app_ws.repo.AboutRepository;
@@ -24,7 +23,6 @@ import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 import javax.transaction.Transactional;
 
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,9 +58,9 @@ public class AboutServiceImpl implements AboutService {
                 skillSet.setRatingCalc(ratingPercent);
             });
         }
-        About about = modelMapper.map(aboutDTO, About.class);
-        about.setEmail(userDto.getEmail());
-        About savedBio = aboutRepository.save(about);
+        AboutPage aboutPage = modelMapper.map(aboutDTO, AboutPage.class);
+        aboutPage.setEmail(userDto.getEmail());
+        AboutPage savedBio = aboutRepository.save(aboutPage);
         AboutDTO dto = modelMapper.map(savedBio, AboutDTO.class);
         getLog().info("Bio persisted successfully: {} ", dto);
         return dto;
@@ -80,11 +78,11 @@ public class AboutServiceImpl implements AboutService {
         UserDto userDto = userService.findByEmail(email);
         UserProfile userProfile = modelMapper.map(userDto, UserProfile.class);
         final AboutDTO[] aboutDTO = new AboutDTO[1];
-        Optional<About> about = getById(id);
-        about.map(about1 -> {
+        Optional<AboutPage> about = getById(id);
+        about.map(aboutPage1 -> {
             ImageUpload imageUpload = utils.uploadImage(file, userProfile, ABOUT_PAGE);
-            about1.setBase64StringImage(imageUpload.getFileName());
-            About returnValue = aboutRepository.save(about1);
+            aboutPage1.setBase64StringImage(imageUpload.getFileName());
+            AboutPage returnValue = aboutRepository.save(aboutPage1);
             aboutDTO[0] = modelMapper.map(returnValue, AboutDTO.class);
             return aboutDTO[0];
         });
@@ -92,9 +90,9 @@ public class AboutServiceImpl implements AboutService {
         return aboutDTO[0];
     }
 
-    private Optional<About> getById(Long id) {
+    private Optional<AboutPage> getById(Long id) {
         getLog().info("Getting image by ID: {} ", id);
-        Optional<About> about = aboutRepository.findById(id);
+        Optional<AboutPage> about = aboutRepository.findById(id);
         if (!about.isPresent()){
             throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ABOUT_PAGE_NOT_FOUND.getErrorMessage());
         }
@@ -104,12 +102,12 @@ public class AboutServiceImpl implements AboutService {
     @Transactional
     @Override
     public AboutDTO findByEmail(String email) {
-        About aboutPageDetails = aboutRepository.findByEmail(email);
-        if (Objects.isNull(aboutPageDetails)){
+        AboutPage aboutPagePageDetails = aboutRepository.findByEmail(email);
+        if (Objects.isNull(aboutPagePageDetails)){
             return new AboutDTO();
         }
-        List<SkillSet> skillSets = aboutPageDetails.getSkillSets().stream().sorted(Comparator.comparing(SkillSet::getRating)).collect(Collectors.toList());
-        return modelMapper.map(aboutPageDetails, AboutDTO.class);
+        List<SkillSet> skillSets = aboutPagePageDetails.getSkillSets().stream().sorted(Comparator.comparing(SkillSet::getRating)).collect(Collectors.toList());
+        return modelMapper.map(aboutPagePageDetails, AboutDTO.class);
     }
 
     @Override
@@ -120,13 +118,13 @@ public class AboutServiceImpl implements AboutService {
     @Override
     public String downloadAboutPageImage(String email) {
         UserDto userDto = userService.findByEmail(email);
-        About aboutPageDetails = aboutRepository.findByEmail(email);
+        AboutPage aboutPagePageDetails = aboutRepository.findByEmail(email);
         String path = String.format("%s/%s/%s", BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(),
                 ABOUT_PAGE,
                 userDto.getUsername());
 
-        if (!StringUtils.isEmpty(aboutPageDetails.getBase64StringImage())){
-            String key = aboutPageDetails.getBase64StringImage();
+        if (!StringUtils.isEmpty(aboutPagePageDetails.getBase64StringImage())){
+            String key = aboutPagePageDetails.getBase64StringImage();
             byte[] profilePic = fileStoreService.download(path, key);
             return Base64.getEncoder().encodeToString(profilePic);
         }
@@ -135,6 +133,18 @@ public class AboutServiceImpl implements AboutService {
                 DEFAULT_PROFILE_FOLDER);
         byte[] defaultProfilePic = fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
         return Base64.getEncoder().encodeToString(defaultProfilePic);
+    }
+
+    @Override
+    public void deleteAboutPageById(Long id) {
+        Optional<AboutPage> aboutPage = aboutRepository.findById(id);
+        if (!aboutPage.isPresent()){
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ABOUT_PAGE_NOT_FOUND.getErrorMessage());
+        }
+        aboutPage.map(aboutPage1 -> {
+            aboutRepository.delete(aboutPage1);
+            return true;
+        });
     }
 
 }

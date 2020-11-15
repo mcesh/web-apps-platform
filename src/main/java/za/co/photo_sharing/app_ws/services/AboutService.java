@@ -10,4 +10,5 @@ public interface AboutService {
     AboutDTO findByEmail(String email);
     AboutDTO findById(Long id);
     String downloadAboutPageImage(String email);
+    void deleteAboutPageById(Long id);
 }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import za.co.photo_sharing.app_ws.config.SecurityConstants;
 import za.co.photo_sharing.app_ws.entity.SkillSet;
 import za.co.photo_sharing.app_ws.model.request.AboutDetailsRequestModel;
 import za.co.photo_sharing.app_ws.model.request.SkillSetRequestModel;
@@ -21,6 +22,8 @@ import za.co.photo_sharing.app_ws.shared.dto.AboutDTO;
 import za.co.photo_sharing.app_ws.shared.dto.SkillSetDto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("about") // http://localhost:8080/about/web-apps-platform
@@ -118,6 +121,52 @@ public class AboutResource {
         SkillSetRest skillSetRest = modelMapper.map(skillSetDto, SkillSetRest.class);
         getLog().info("SkillSet Details: {} ", skillSetRest);
         return skillSetRest;
+    }
+
+    @ApiOperation(value = "Delete Skill Set Endpoint",
+            notes = "${userResource.DeleteSkillSet.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @DeleteMapping(path = "delete/{id}",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void deleteSkillSet(@PathVariable("id") Long id){
+        getLog().info("Deleting skill set with ID: {} ", id);
+        setService.deleteSkillSetById(id);
+        getLog().info("SkillSet successfully deleted at {} ", LocalDateTime.now());
+    }
+
+    @ApiOperation(value = "Get List of Skill Set Details Endpoint",
+            notes = "${userResource.ListOfSkillSetDetails.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @GetMapping(path = "/list",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public List<SkillSetRest> getAllSkillSets(@RequestParam(value = "page", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_NUMBER) Integer page,
+                                              @RequestParam(value = "size", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_SIZE) Integer size){
+        List<SkillSetRest> skillSetRests = new ArrayList<>();
+        List<SkillSetDto> skillSetDto = setService.findAllSkillSets(page,size);
+        skillSetDto.forEach(skillSetDto1 -> {
+            SkillSetRest skillSet = modelMapper.map(skillSetDto1, SkillSetRest.class);
+            skillSetRests.add(skillSet);
+        });
+
+        getLog().info("SkillSet Details Found: {} ", skillSetRests.size());
+        return skillSetRests;
+    }
+
+    @ApiOperation(value = "Delete About Page Endpoint",
+            notes = "${userResource.DeleteAboutPage.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @DeleteMapping(path = "purge-page/{id}",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void deleteAboutPageDetails(@PathVariable("id") Long id){
+        getLog().info("Deleting About Page with ID: {} ", id);
+        aboutService.deleteAboutPageById(id);
+        getLog().info("About Page successfully deleted at {} ", LocalDateTime.now());
     }
 
 }

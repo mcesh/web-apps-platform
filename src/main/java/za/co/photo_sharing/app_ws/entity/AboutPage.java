@@ -12,7 +12,7 @@ import java.util.Set;
 @Table(name = "about")
 @Audited
 @EntityListeners(AuditingEntityListener.class)
-public class About implements Serializable {
+public class AboutPage implements Serializable {
 
     private static final long serialVersionUID = 8795225445225522524L;
 
