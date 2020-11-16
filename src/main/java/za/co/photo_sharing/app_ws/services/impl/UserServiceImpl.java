@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     public static final String DEFAULT_PROFILE_FOLDER = "default-profile-picture";
@@ -282,7 +284,9 @@ public class UserServiceImpl implements UserService {
                 utils.generateFilePath.accept(savePath);
                 utils.generateFile.accept(savePath + "/passwordResetToken.txt", token);
             }
-            returnValue = emailUtility.sendPasswordResetReq.apply(userProfile, token);
+            boolean requestRest = emailUtility.passwordRequestRest(userProfile, token);
+            log.info("Execution status: {} ", requestRest);
+            return requestRest;
         }
 
 

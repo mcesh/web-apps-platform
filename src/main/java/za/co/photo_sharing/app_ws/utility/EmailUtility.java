@@ -9,6 +9,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
@@ -71,6 +72,7 @@ public class EmailUtility {
 
 
 
+    @Async
     public void sendAppReqVerificationMail(UserAppRequestDTO appRequestDTO, String userAgent, String webUrl) {
 
         try {
@@ -171,6 +173,57 @@ public class EmailUtility {
         }
         return returnValue;
     };
+
+    public boolean passwordRequestRest(UserProfile userProfile, String token){
+
+        boolean returnValue = false;
+        final String PASSWORD_RESET_HTMLBODY = "Hi, " +
+                userProfile.getUsername() +
+                newLine() +
+                newLine() +
+                "You has requested to reset your password with our project. If it were not you, please ignore it." +
+                " otherwise please click on the link below to set a new password: " +
+                newLine() +
+                "<a href='http://178.128.244.72:8080/verification-service/password-reset.html?token=" +
+                token +
+                "'" +
+                " Click this link to Reset Password" +
+                newLine() +
+                newLine() +
+                "Thank you!";
+
+        try {
+            Optional.of(userProfile).ifPresent(mimeMessage -> {
+                getLog().info("Sending email to {} ", userProfile.getEmail());
+            });
+            MimeMessage message = emailSender.createMimeMessage();
+
+            MimeMessageHelper helper = new MimeMessageHelper(message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name());
+            helper.setTo(Objects.requireNonNull(userProfile).getEmail());
+            helper.setText(PASSWORD_RESET_HTMLBODY);
+            helper.setFrom(FROM);
+            helper.setSubject(PASSWORD_RESET_SUBJECT);
+            helper.setSentDate(new Date());
+            emailSender.send(message);
+
+            if (emailSender != null) {
+                returnValue = true;
+            }
+
+            getLog().info("Email sent successfully with the following details {}, {}, and {}",
+                    message.getSubject(), message.getSentDate(),
+                    message.getAllRecipients());
+
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Error sending email: {} " + e.getMessage());
+        }
+        return returnValue;
+
+    }
+
     public BiFunction<UserProfile, String, Boolean> sendPasswordResetReq = ((userEntity, token) -> {
 
         boolean returnValue = false;
@@ -228,6 +281,7 @@ public class EmailUtility {
         return LOGGER;
     }
 
+    @Async
     public void sendVerificationMail(UserDto userDto, String userAgent, String webUrl) {
 
         try {
@@ -259,7 +313,7 @@ public class EmailUtility {
 
         }catch (Exception    e){
             getLog().info("Email Unsuccessfully sent {}", e.getMessage());
-            throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
+            throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,e.getMessage());
         }
     }
 
