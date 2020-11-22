@@ -1,8 +1,7 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import za.co.photo_sharing.app_ws.exceptions.ArticleServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.ArticleRepository;
 import za.co.photo_sharing.app_ws.repo.CommentRepository;
+import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.ArticleService;
 import za.co.photo_sharing.app_ws.services.CommentService;
 import za.co.photo_sharing.app_ws.services.UserService;
@@ -24,9 +24,9 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class CommentServiceImpl implements CommentService {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(CommentServiceImpl.class);
     @Autowired
     private ArticleService articleService;
     @Autowired
@@ -35,14 +35,13 @@ public class CommentServiceImpl implements CommentService {
     private UserService userService;
     @Autowired
     private CommentRepository commentRepository;
+    @Autowired
+    private UserRepo userRepo;
     private ModelMapper modelMapper = new ModelMapper();
-
-    public static Logger getLog() {
-        return LOGGER;
-    }
 
     @Override
     public CommentDTO addComment(CommentDTO commentDTO, Long articleId, String username) {
+        UserProfile userProfile = userRepo.findByUsername(username);
         ArticleDTO articleDTO = articleService.findById(articleId);
         UserDto userDto = userService.findByUsername(username);
         Comment comment = modelMapper.map(commentDTO, Comment.class);
@@ -52,10 +51,10 @@ public class CommentServiceImpl implements CommentService {
         comment.setUsername(userDto.getUsername());
         comment.setFirstName(userDto.getFirstName());
         comment.setLastName(userDto.getLastName());
-        comment.setUserProfile(modelMapper.map(userDto, UserProfile.class));
+        comment.setUserProfile(userProfile);
         Comment savedComment = commentRepository.save(comment);
         CommentDTO dto = modelMapper.map(savedComment, CommentDTO.class);
-        getLog().info("Persisted comment for {} ", username);
+        log.info("Persisted comment for {} ", username);
         return dto;
     }
 

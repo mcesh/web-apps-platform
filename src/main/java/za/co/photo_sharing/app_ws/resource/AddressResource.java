@@ -3,9 +3,8 @@ package za.co.photo_sharing.app_ws.resource;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
@@ -20,20 +19,14 @@ import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 @RestController
 @RequestMapping("address") // http://localhost:8080/article/web-apps-platform
+@Slf4j
 public class AddressResource {
-
-    private static Logger LOGGER = LoggerFactory.getLogger(UserResource.class);
 
     @Autowired
     private AddressService addressService;
     @Autowired
     private UserService userService;
     private ModelMapper modelMapper = new ModelMapper();
-
-    public static Logger getLog() {
-        return LOGGER;
-    }
-
 
     @ApiOperation(value = "The Add new User Address Endpoint",
             notes = "${userResource.AddNewUserAddress.ApiOperation.Notes}")
@@ -43,7 +36,7 @@ public class AddressResource {
     @PostMapping(path = "/{userId}/new-address/", produces = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
     public UserRest addNewUserAddress(@RequestBody AddressRequestModel address, @PathVariable Long userId) {
-        getLog().info("Adding new Addresses for {} ", userId);
+        log.info("Adding new Addresses for {} ", userId);
         AddressDTO addressDTO = modelMapper.map(address, AddressDTO.class);
         UserDto addressesDto = addressService.addNewUserAddress(userId, addressDTO);
         return modelMapper.map(addressesDto, UserRest.class);
@@ -57,7 +50,7 @@ public class AddressResource {
     @PutMapping(path = "/{addressId}", produces = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
     public AddressesRest updateUserAddress(@RequestBody AddressRequestModel address, @PathVariable String addressId) {
-        getLog().info("Updating User Address For with ID {} ", addressId);
+        log.info("Updating User Address For with ID {} ", addressId);
         AddressDTO addressDTO = modelMapper.map(address, AddressDTO.class);
         AddressDTO addressesDto = addressService.updateUserAddress(addressId, addressDTO);
         return modelMapper.map(addressesDto, AddressesRest.class);
@@ -72,13 +65,13 @@ public class AddressResource {
             MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
     public AddressesRest getUserAddress(@PathVariable String addressId) {
 
-        getLog().info("Getting User Address with ID {} ", addressId);
+        log.info("Getting User Address with ID {} ", addressId);
         AddressDTO addressesDto = addressService.getAddress(addressId);
 
         ModelMapper modelMapper = new ModelMapper();
 
         AddressesRest addressesRest = modelMapper.map(addressesDto, AddressesRest.class);
-        getLog().info("Address DTO {} ", addressesRest);
+        log.info("Address DTO {} ", addressesRest);
         return addressesRest;
     }
 
@@ -91,7 +84,7 @@ public class AddressResource {
     @DeleteMapping(path = "/{addressId}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public void deleteAddressById(@PathVariable("addressId") String addressId) {
-        getLog().info("Deleting Address with Address ID {} ", addressId);
+        log.info("Deleting Address with Address ID {} ", addressId);
         addressService.deleteAddressByAddressId(addressId);
     }
 }

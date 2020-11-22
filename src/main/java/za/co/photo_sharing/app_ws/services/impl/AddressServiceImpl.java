@@ -17,7 +17,7 @@ import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Objects;
 
 @Service
 public class AddressServiceImpl implements AddressService {
@@ -35,10 +35,11 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public UserDto addNewUserAddress(Long userId, AddressDTO addressDTO) {
         UserProfile userById = userRepo.findByUserId(userId);
-        if (Objects.isNull(userById)) throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        if (Objects.isNull(userById))
+            throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         userById.setAddress(buildAddresses(addressDTO, userById));
         UserProfile storedUserAddress = userRepo.save(userById);
-        return modelMapper.map(storedUserAddress,UserDto.class);
+        return modelMapper.map(storedUserAddress, UserDto.class);
     }
 
     @Transactional
@@ -59,7 +60,7 @@ public class AddressServiceImpl implements AddressService {
     public AddressDTO updateUserAddress(String addressId, AddressDTO addressDTO) {
         AddressEntity byAddressId = addressRepository.findByAddressId(addressId);
         if (Objects.isNull(byAddressId))
-            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.EMAIL_ADDRESS_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.EMAIL_ADDRESS_NOT_FOUND.getErrorMessage());
         byAddressId.setType(addressDTO.getType());
         byAddressId.setStreetName(addressDTO.getStreetName());
         byAddressId.setPostalCode(addressDTO.getPostalCode());
@@ -73,8 +74,8 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public void deleteAddressByAddressId(String addressId) {
         AddressEntity addressEntity = addressRepository.findByAddressId(addressId);
-        if (Objects.isNull(addressEntity)){
-            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.ADDRESS_NOT_FOUND.getErrorMessage());
+        if (Objects.isNull(addressEntity)) {
+            throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ADDRESS_NOT_FOUND.getErrorMessage());
         }
         addressRepository.delete(addressEntity);
     }

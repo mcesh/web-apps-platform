@@ -1,8 +1,7 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,17 +20,18 @@ import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.AboutDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
-import javax.transaction.Transactional;
 
+import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static za.co.photo_sharing.app_ws.services.impl.UserServiceImpl.*;
 
 @Service
+@Slf4j
 public class AboutServiceImpl implements AboutService {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(AboutServiceImpl.class);
+
     public static final String ABOUT_PAGE = "ABOUT_PAGE";
 
     @Autowired
@@ -43,10 +43,6 @@ public class AboutServiceImpl implements AboutService {
     @Autowired
     private FileStoreService fileStoreService;
     private ModelMapper modelMapper = new ModelMapper();
-
-    public static Logger getLog() {
-        return LOGGER;
-    }
 
     @Override
     public AboutDTO addAboutPage(AboutDTO aboutDTO, String email) {
@@ -62,12 +58,12 @@ public class AboutServiceImpl implements AboutService {
         aboutPage.setEmail(userDto.getEmail());
         AboutPage savedBio = aboutRepository.save(aboutPage);
         AboutDTO dto = modelMapper.map(savedBio, AboutDTO.class);
-        getLog().info("Bio persisted successfully: {} ", dto);
+        log.info("Bio persisted successfully: {} ", dto);
         return dto;
     }
 
     private void verifyIfPageExists(String email) {
-        if (aboutRepository.findByEmail(email) != null){
+        if (aboutRepository.findByEmail(email) != null) {
             throw new ArticleServiceException(HttpStatus.BAD_REQUEST, ErrorMessages.RECORD_ALREADY_EXISTS.getErrorMessage());
         }
     }
@@ -91,9 +87,9 @@ public class AboutServiceImpl implements AboutService {
     }
 
     private Optional<AboutPage> getById(Long id) {
-        getLog().info("Getting image by ID: {} ", id);
+        log.info("Getting image by ID: {} ", id);
         Optional<AboutPage> about = aboutRepository.findById(id);
-        if (!about.isPresent()){
+        if (!about.isPresent()) {
             throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ABOUT_PAGE_NOT_FOUND.getErrorMessage());
         }
         return about;
@@ -103,7 +99,7 @@ public class AboutServiceImpl implements AboutService {
     @Override
     public AboutDTO findByEmail(String email) {
         AboutPage aboutPagePageDetails = aboutRepository.findByEmail(email);
-        if (Objects.isNull(aboutPagePageDetails)){
+        if (Objects.isNull(aboutPagePageDetails)) {
             return new AboutDTO();
         }
         List<SkillSet> skillSets = aboutPagePageDetails.getSkillSets().stream().sorted(Comparator.comparing(SkillSet::getRating)).collect(Collectors.toList());
@@ -123,7 +119,7 @@ public class AboutServiceImpl implements AboutService {
                 ABOUT_PAGE,
                 userDto.getUsername());
 
-        if (!StringUtils.isEmpty(aboutPagePageDetails.getBase64StringImage())){
+        if (!StringUtils.isEmpty(aboutPagePageDetails.getBase64StringImage())) {
             String key = aboutPagePageDetails.getBase64StringImage();
             byte[] profilePic = fileStoreService.download(path, key);
             return Base64.getEncoder().encodeToString(profilePic);
@@ -138,7 +134,7 @@ public class AboutServiceImpl implements AboutService {
     @Override
     public void deleteAboutPageById(Long id) {
         Optional<AboutPage> aboutPage = aboutRepository.findById(id);
-        if (!aboutPage.isPresent()){
+        if (!aboutPage.isPresent()) {
             throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ABOUT_PAGE_NOT_FOUND.getErrorMessage());
         }
         aboutPage.map(aboutPage1 -> {
