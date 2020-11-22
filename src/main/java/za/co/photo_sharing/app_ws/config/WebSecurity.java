@@ -49,6 +49,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter{
                 .permitAll()
                 .antMatchers(HttpMethod.GET, SecurityConstants.LOG_OUT_URL)
                 .permitAll()
+                .antMatchers(HttpMethod.GET, SecurityConstants.ABOUT_PAGE_IMAGE)
+                .permitAll()
                 .antMatchers(HttpMethod.POST, SecurityConstants.PASSWORD_RESET_URL)
                 .permitAll()
                 .antMatchers(SecurityConstants.H2_CONSOLE)

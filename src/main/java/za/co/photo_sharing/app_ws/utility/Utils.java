@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -33,6 +34,7 @@ import static org.apache.http.entity.ContentType.*;
 public class Utils {
 
     public static final String PROFILE_IMAGES = "PROFILE_IMAGES";
+    public static final String ABOUT_PAGE = "ABOUT_PAGE";
     private final Random RANDOM = new SecureRandom();
     private final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private final String NUMBERS = "0123456789";
@@ -217,16 +219,16 @@ public class Utils {
         try {
             fileStoreService.saveImage(path,fileName, Optional.of(metadata), file.getInputStream());
             String base64Image="";
-            if (!folder.equalsIgnoreCase(PROFILE_IMAGES)){
+            if (!folder.equalsIgnoreCase(PROFILE_IMAGES) && !folder.equalsIgnoreCase(ABOUT_PAGE)){
                 byte[] image = fileStoreService.download(path, fileName);
                  base64Image = Base64.getEncoder().encodeToString(image);
                 int fileLength = base64Image.length();
-                getLog().info("base64Image {}, Size {} ", base64Image, fileLength);
                 if (fileLength > 4194304){
                     String objectName = folder + username + fileName;
                     fileStoreService.deleteObject(BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName(), objectName);
                     throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.FILE_TOO_LARGE.getErrorMessage());
                 }
+                getLog().info("file downloaded successfully at: {} ", LocalDateTime.now());
             }
             imageUpload.setBase64Image(base64Image);
             imageUpload.setFileName(fileName);
@@ -260,6 +262,20 @@ public class Utils {
             throw new ValidationException(HttpStatus.BAD_REQUEST, "Page size must not be greater than " +
                     SecurityConstants.MAX_PAGE_SIZE);
         }
+    }
+
+    public void validateRatingNumber(double rating){
+
+        if (rating <= 0 || rating > 10.0){
+            throw new ValidationException(HttpStatus.BAD_REQUEST, "rating must be between 1 to 10");
+        }
+    }
+
+    public double calculateRatingPercent(double rating) {
+        validateRatingNumber(rating);
+        double ratingPercentage = (rating / 10) * 100;
+        getLog().info("Calculated percentage: {} ", ratingPercentage);
+        return ratingPercentage;
     }
 
     public static Logger getLog() {

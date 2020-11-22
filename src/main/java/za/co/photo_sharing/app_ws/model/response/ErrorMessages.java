@@ -34,7 +34,9 @@ public enum ErrorMessages {
     ARTICLE_NOT_FOUND("No article found with the specified ID"),
     NO_ARTICLES_FOUND_IN_RANGE("No articles found in the rage you provided"),
     COMMENT_NOT_FOUND("Comment not found"),
-    ADDRESS_NOT_FOUND("No address found with the specified addressId");
+    ADDRESS_NOT_FOUND("No address found with the specified addressId"),
+    ABOUT_PAGE_NOT_FOUND("About page not found"),
+    SKILL_SET_NOT_FOUND("Skill set not found");
 
 
     private String errorMessage;
