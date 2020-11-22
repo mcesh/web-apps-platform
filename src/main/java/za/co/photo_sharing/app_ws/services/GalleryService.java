@@ -4,5 +4,5 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface GalleryService {
 
-    String uploadFile(String email, MultipartFile file);
+    String uploadGallery(String email, MultipartFile file, String caption, String categoryName);
 }

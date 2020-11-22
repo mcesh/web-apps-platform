@@ -10,15 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import za.co.photo_sharing.app_ws.entity.Category;
 import za.co.photo_sharing.app_ws.model.response.*;
-import za.co.photo_sharing.app_ws.services.CategoryService;
 import za.co.photo_sharing.app_ws.services.GalleryService;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserClientDTO;
 
-import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -96,16 +93,18 @@ public class UserGalleryImagesResource {
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
     })
-    @PostMapping(path = "upload/cloud/{email}",
+    @PostMapping(path = "upload/cloudinary/{email}/{caption}/{categoryName}",
             produces = {MediaType.MULTIPART_FORM_DATA_VALUE,
                     MediaType.APPLICATION_JSON_VALUE})
     public OperationStatusModel uploadImageToCloudinary(@PathVariable String email,
-                                            @RequestParam("file") MultipartFile file){
+                                                        @PathVariable String caption,
+                                                        @RequestParam("file") MultipartFile file,
+                                                        @PathVariable String categoryName){
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.IMAGE_UPLOAD.name());
         statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
         getLog().info("Uploading Image for {} " , email);
-        String uploadFile = galleryService.uploadFile(email, file);
+        String uploadFile = galleryService.uploadGallery(email, file, caption, categoryName);
         getLog().info("Uploaded File: {} ", uploadFile);
         statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
         return statusModel;
