@@ -1,7 +1,6 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
 import com.cloudinary.Cloudinary;
-import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,18 +16,22 @@ import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.CategoryService;
 import za.co.photo_sharing.app_ws.services.GalleryService;
 import za.co.photo_sharing.app_ws.services.UserService;
-import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.transaction.Transactional;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class GalleryServiceImpl implements GalleryService {
 
+    public static final String GALLERY_IMAGES = "GALLERY_IMAGES";
+    public static final String GALLERY = "GALLERY";
     @Autowired
     private UserService userService;
     @Autowired
@@ -40,8 +43,6 @@ public class GalleryServiceImpl implements GalleryService {
     private CategoryService categoryService;
     @Autowired
     private UserRepo userRepo;
-    public static final String GALLERY_IMAGES = "GALLERY_IMAGES";
-    public static final String GALLERY = "GALLERY";
 
     @Transactional
     @Override
@@ -83,7 +84,7 @@ public class GalleryServiceImpl implements GalleryService {
 
     private Category getCategory(String email, String categoryName) {
         Category categoryNameResponse = categoryService.findByEmailAndCategoryName(email, categoryName);
-        if (Objects.isNull(categoryNameResponse)){
+        if (Objects.isNull(categoryNameResponse)) {
             throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }
         return categoryNameResponse;
