@@ -37,4 +37,6 @@ public interface UserService extends UserDetailsService {
     String downloadUserProfileImage(String email);
     String downloadProfile(String email);
     Set<ImageGallery> fetchGalleryImages(String email);
+    String uploadProfileImageToCloudinary(String email, MultipartFile file) throws IOException;
+    String fetchUserProfile(String email);
 }

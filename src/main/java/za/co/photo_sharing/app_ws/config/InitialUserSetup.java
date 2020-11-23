@@ -29,7 +29,7 @@ public class InitialUserSetup {
     @EventListener
     @Transactional
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        log.info("Application running: {} ", event.getTimestamp());
+        log.info("Application running: {} ", event.getApplicationContext().isActive());
 
         Authority readAuthority = createAuthority(UserAuthorityTypeKeys.READ_AUTHORITY);
         Authority writeAuthority = createAuthority(UserAuthorityTypeKeys.WRITE_AUTHORITY);

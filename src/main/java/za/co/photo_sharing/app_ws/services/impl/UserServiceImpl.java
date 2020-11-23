@@ -500,6 +500,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public String uploadProfileImageToCloudinary(String email, MultipartFile file) throws IOException {
+        UserProfile userProfile = userRepo.findByEmail(email);
+        utils.getUser(userProfile);
+        utils.isImage(file);
+        String imageLink = utils.uploadToCloudinary(file);
+        userProfile.setUserProfileImageLink(imageLink);
+        log.info("Uploading profileImage for {}, at {} ", userProfile.getEmail(), LocalDateTime.now());
+        userRepo.save(userProfile);
+        log.info("Profile Picture Successfully Uploaded");
+        return null;
+    }
+
+    @Override
+    public String fetchUserProfile(String email) {
+        UserProfile userProfile = userRepo.findByEmail(email);
+        utils.getUser(userProfile);
+        if (!StringUtils.isEmpty(userProfile.getUserProfileImageLink())){
+            return userProfile.getUserProfileImageLink();
+        }else {
+            // default-profile-picture
+            String defaultPicturePath = String.format("%s/%s", BUCKET_NAME,
+                    DEFAULT_PROFILE_FOLDER);
+            byte[] defaultProfilePic = fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
+            return Base64.getEncoder().encodeToString(defaultProfilePic);
+        }
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
         UserProfile userProfile = userRepo.findByEmail(email);

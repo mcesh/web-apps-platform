@@ -358,7 +358,7 @@ public class UserResource {
         return statusModel;
     }
 
-    @ApiOperation(value = "The Download User Profile Image Endpoint",
+    @ApiOperation(value = "Download User Profile Image Endpoint",
             notes = "${userResource.DownImage.ApiOperation.Notes}")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
@@ -368,6 +368,39 @@ public class UserResource {
     public String downloadProfileImage(@PathVariable String email) {
         log.info("Getting Profile Picture for {} ", email);
         String profileImage = userService.downloadProfile(email);
+        log.info("Profile Picture: {} ", profileImage);
+        return profileImage;
+    }
+    @ApiOperation(value = "Upload User Profile Image Endpoint",
+            notes = "${userResource.UploadImageToCloud.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @PostMapping(path = "upload/profile/{email}",
+            produces = {MediaType.MULTIPART_FORM_DATA_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE})
+    public OperationStatusModel uploadImageToCloud(@PathVariable String email,
+                                            @RequestParam("file") MultipartFile file) throws IOException {
+        log.info("Uploading Profile Pic for {} ", email);
+        OperationStatusModel statusModel = new OperationStatusModel();
+        statusModel.setOperationName(RequestOperationName.IMAGE_UPLOAD.name());
+        statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
+        userService.uploadProfileImageToCloudinary(email, file);
+        statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
+
+        return statusModel;
+    }
+
+    @ApiOperation(value = "Fetch User Profile Image Endpoint",
+            notes = "${userResource.FetchImage.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @GetMapping(path = "fetch/image/{email}",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public String fetchProfileImage(@PathVariable String email) {
+        log.info("Fetching Profile Picture for {} ", email);
+        String profileImage = userService.fetchUserProfile(email);
         log.info("Profile Picture: {} ", profileImage);
         return profileImage;
     }
