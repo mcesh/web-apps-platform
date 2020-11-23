@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import za.co.photo_sharing.app_ws.services.ArticleStatusService;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class ArticleStatusServiceImpl implements ArticleStatusService {
 
     @Autowired
@@ -20,8 +22,8 @@ public class ArticleStatusServiceImpl implements ArticleStatusService {
     @Override
     public ArticleStatus findByStatus(String status) {
         ArticleStatus articleStatus = statusRepository.findByStatus(status);
-        if (Objects.isNull(articleStatus)){
-            throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.ARTICLE_STATUS_NOT_FOUND.getErrorMessage());
+        if (Objects.isNull(articleStatus)) {
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ARTICLE_STATUS_NOT_FOUND.getErrorMessage());
         }
         return articleStatus;
     }

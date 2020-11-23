@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
+@Slf4j
 public class SkillSetServiceImpl implements SkillSetService {
 
     @Autowired
@@ -62,12 +64,12 @@ public class SkillSetServiceImpl implements SkillSetService {
 
     @Override
     public List<SkillSetDto> findAllSkillSets(int page, int size) {
-        Utils.validatePageNumberAndSize(page,size);
+        Utils.validatePageNumberAndSize(page, size);
         Pageable pageable = PageRequest.of(page, size);
         List<SkillSetDto> skillSetDtos = new ArrayList<>();
         Page<SkillSet> skillSetPage = skillSetRepository.findAll(pageable);
         List<SkillSet> skillSets = skillSetPage.getContent();
-        if (CollectionUtils.isEmpty(skillSets)){
+        if (CollectionUtils.isEmpty(skillSets)) {
             return skillSetDtos;
         }
         skillSets.stream()
@@ -83,15 +85,15 @@ public class SkillSetServiceImpl implements SkillSetService {
     public void deleteSkillSetById(Long id) {
         Optional<SkillSet> skillSet = getSkillSet(id);
         skillSet.map(skillSet1 -> {
-           skillSetRepository.delete(skillSet1);
-           return true;
+            skillSetRepository.delete(skillSet1);
+            return true;
         });
 
     }
 
     private Optional<SkillSet> getSkillSet(Long id) {
         Optional<SkillSet> skillSet = skillSetRepository.findById(id);
-        if (!skillSet.isPresent()){
+        if (!skillSet.isPresent()) {
             throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.SKILL_SET_NOT_FOUND.getErrorMessage());
         }
         return skillSet;

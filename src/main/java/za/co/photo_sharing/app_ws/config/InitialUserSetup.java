@@ -1,7 +1,6 @@
 package za.co.photo_sharing.app_ws.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -11,18 +10,17 @@ import za.co.photo_sharing.app_ws.constants.UserAuthorityTypeKeys;
 import za.co.photo_sharing.app_ws.constants.UserRoleTypeKeys;
 import za.co.photo_sharing.app_ws.entity.Authority;
 import za.co.photo_sharing.app_ws.entity.Role;
-import za.co.photo_sharing.app_ws.entity.UserRole;
 import za.co.photo_sharing.app_ws.repo.AuthorityRepository;
 import za.co.photo_sharing.app_ws.repo.RoleRepository;
-import za.co.photo_sharing.app_ws.utility.EmailUtility;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Component
-
+@Slf4j
 public class InitialUserSetup {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(InitialUserSetup.class);
     @Autowired
     AuthorityRepository authorityRepository;
     @Autowired
@@ -31,7 +29,7 @@ public class InitialUserSetup {
     @EventListener
     @Transactional
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        getLog().info("Application running: {} ", event.getTimestamp());
+        log.info("Application running: {} ", event.getApplicationContext().isActive());
 
         Authority readAuthority = createAuthority(UserAuthorityTypeKeys.READ_AUTHORITY);
         Authority writeAuthority = createAuthority(UserAuthorityTypeKeys.WRITE_AUTHORITY);
@@ -49,9 +47,9 @@ public class InitialUserSetup {
     }
 
     @Transactional
-    private Authority createAuthority(String name){
+    private Authority createAuthority(String name) {
         Authority authority = authorityRepository.findByAuthorityName(name);
-        if (Objects.isNull(authority)){
+        if (Objects.isNull(authority)) {
             Authority auth = new Authority();
             auth.setAuthorityName(name);
             authority = auth;
@@ -61,9 +59,9 @@ public class InitialUserSetup {
     }
 
     @Transactional
-    private Role createRole(String name, Set<Authority> authorities){
+    private Role createRole(String name, Set<Authority> authorities) {
         Role role = roleRepository.findByRoleName(name);
-        if (Objects.isNull(role)){
+        if (Objects.isNull(role)) {
             Role role_ = new Role();
             role_.setRoleName(name);
             role_.setAuthorities(authorities);
@@ -71,9 +69,5 @@ public class InitialUserSetup {
             roleRepository.save(role_);
         }
         return role;
-    }
-
-    public static Logger getLog() {
-        return LOGGER;
     }
 }

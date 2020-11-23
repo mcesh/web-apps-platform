@@ -57,7 +57,6 @@ public class UserServiceImpl implements UserService {
     public static final String IMAGE_SLIDER = "GALLERY_IMAGES";
     public static final String BUCKET_NAME = BucketName.WEB_APP_PLATFORM_FILE_STORAGE_SPACE.getBucketName();
     private static String savePath = "C:/Token";
-    private static Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     Utils utils;
@@ -95,9 +94,6 @@ public class UserServiceImpl implements UserService {
     private ModelMapper modelMapper = new ModelMapper();
     private Predicate<String> isNumeric = str -> str.matches("-?\\d+(\\.\\d+)?");
 
-    public static Logger getLog() {
-        return LOGGER;
-    }
 
     @Override
     public UserDto createUser(UserDto user, String userAgent, String webUrl) throws IOException, MessagingException {
@@ -137,7 +133,7 @@ public class UserServiceImpl implements UserService {
             userRoles.add(new UserRole(userProfile, userService.findUserRoleByName(UserRoleTypeKeys.ROLE_ADMIN)));
             userProfile.setUserRoles(userRoles);
         }
-        getLog().info("User Type Key {} ", user.getRoleTypeKey());
+        log.info("User Type Key {} ", user.getRoleTypeKey());
 
         UserProfile storedUserDetails = userRepo.save(userProfile);
         UserDto userDto = modelMapper.map(storedUserDetails, UserDto.class);
@@ -393,9 +389,9 @@ public class UserServiceImpl implements UserService {
         utils.isImage(file);
         ImageUpload galleryImage = utils.uploadImage(file, userProfile, PROFILE_IMAGES);
         userProfile.setUserProfileImageLink(galleryImage.getFileName());
-        getLog().info("Uploading profileImage for {}, at {} ", userProfile.getEmail(), LocalDateTime.now());
+        log.info("Uploading profileImage for {}, at {} ", userProfile.getEmail(), LocalDateTime.now());
         userRepo.save(userProfile);
-        getLog().info("Profile Picture Successfully Uploaded");
+        log.info("Profile Picture Successfully Uploaded");
     }
 
     @Transactional
@@ -501,6 +497,34 @@ public class UserServiceImpl implements UserService {
             });
         }
         return imageGalleries;
+    }
+
+    @Override
+    public String uploadProfileImageToCloudinary(String email, MultipartFile file) throws IOException {
+        UserProfile userProfile = userRepo.findByEmail(email);
+        utils.getUser(userProfile);
+        utils.isImage(file);
+        String imageLink = utils.uploadToCloudinary(file);
+        userProfile.setUserProfileImageLink(imageLink);
+        log.info("Uploading profileImage for {}, at {} ", userProfile.getEmail(), LocalDateTime.now());
+        userRepo.save(userProfile);
+        log.info("Profile Picture Successfully Uploaded");
+        return null;
+    }
+
+    @Override
+    public String fetchUserProfile(String email) {
+        UserProfile userProfile = userRepo.findByEmail(email);
+        utils.getUser(userProfile);
+        if (!StringUtils.isEmpty(userProfile.getUserProfileImageLink())){
+            return userProfile.getUserProfileImageLink();
+        }else {
+            // default-profile-picture
+            String defaultPicturePath = String.format("%s/%s", BUCKET_NAME,
+                    DEFAULT_PROFILE_FOLDER);
+            byte[] defaultProfilePic = fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
+            return Base64.getEncoder().encodeToString(defaultProfilePic);
+        }
     }
 
     @Override

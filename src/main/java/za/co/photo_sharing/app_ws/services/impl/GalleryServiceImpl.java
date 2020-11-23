@@ -20,8 +20,6 @@ import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.transaction.Transactional;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -54,7 +52,7 @@ public class GalleryServiceImpl implements GalleryService {
 
         try {
             Map imageMap = ObjectUtils.emptyMap();
-            File uploadedFile = convertMultiPartToFile(file);
+            File uploadedFile = utils.convertMultiPartToFile(file);
             Map uploadResult = cloudinaryConfig.uploader().upload(uploadedFile, imageMap);
             String url = uploadResult.get("url").toString();
             Set<ImageGallery> imageGalleries = new HashSet<>();
@@ -74,13 +72,6 @@ public class GalleryServiceImpl implements GalleryService {
         }
     }
 
-    private File convertMultiPartToFile(MultipartFile file) throws IOException {
-        File convFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
-        FileOutputStream fos = new FileOutputStream(convFile);
-        fos.write(file.getBytes());
-        fos.close();
-        return convFile;
-    }
 
     private Category getCategory(String email, String categoryName) {
         Category categoryNameResponse = categoryService.findByEmailAndCategoryName(email, categoryName);

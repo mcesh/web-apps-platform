@@ -1,8 +1,7 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,8 +28,11 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class UserAppReqServiceImpl implements UserAppReqService {
 
+    private static String firstName;
+    private static String tokenKey;
     @Autowired
     private UserAppReqRepository appReqRepository;
     @Autowired
@@ -43,28 +45,23 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     private UserAppReqService appReqService;
     @Autowired
     private UserClientRepository clientRepository;
-
-    private static String firstName;
-    private static String tokenKey;
-    private static Logger LOGGER = LoggerFactory.getLogger(UserAppReqServiceImpl.class);
-
     private ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public UserAppRequestDTO requestAppDevelopment(UserAppRequestDTO user, String userAgent, String webUrl) throws IOException, MessagingException {
 
         if (appReqRepository.findByEmail(user.getEmail()) != null) {
-            throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
+            throw new UserServiceException(HttpStatus.BAD_REQUEST, ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
         }
-        getLog().info("Request application Development... {}", LocalDateTime.now());
+        log.info("Request application Development... {}", LocalDateTime.now());
 
-        if (user.getWebType().equalsIgnoreCase("ORGANIZATION")){
-            if (appReqRepository.findByOrganizationUsername(user.getOrganizationUsername()) !=null){
-                throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
+        if (user.getWebType().equalsIgnoreCase("ORGANIZATION")) {
+            if (appReqRepository.findByOrganizationUsername(user.getOrganizationUsername()) != null) {
+                throw new UserServiceException(HttpStatus.BAD_REQUEST, ErrorMessages.USERNAME_ALREADY_EXISTS.getErrorMessage());
             }
             tokenKey = utils.generateAppToken(user.getOrganizationUsername()).toUpperCase();
 
-        }else {
+        } else {
             tokenKey = utils.generateAppToken(user.getEmail()).toUpperCase();
         }
 
@@ -76,7 +73,7 @@ public class UserAppReqServiceImpl implements UserAppReqService {
         UserAppRequest userAppEntity = modelMapper.map(user, UserAppRequest.class);
         userAppEntity.setEmailVerificationToken(utils.generateEmailVerificationTokenForAppRequest(user.getEmail()));
         userAppEntity.setRequestDate(LocalDateTime.now());
-        if (user.getWebType().equalsIgnoreCase("ORGANIZATION")){
+        if (user.getWebType().equalsIgnoreCase("ORGANIZATION")) {
             userAppEntity.setSecondaryEmail(user.getSecondaryEmail());
             userAppEntity.setThirdEmail(user.getThirdEmail());
             userAppEntity.setFourthEmail(user.getFourthEmail());
@@ -92,22 +89,22 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     public boolean verifyAppReqEmailToken(String token) throws IOException, MessagingException {
         boolean isVerified = false;
         UserAppRequest userByEmailVerificationToken = appReqRepository.findUserByEmailVerificationToken(token);
-        if (Objects.nonNull(userByEmailVerificationToken)){
+        if (Objects.nonNull(userByEmailVerificationToken)) {
             boolean hasTokenExpired = Utils.hasTokenExpired(token);
-            if (!hasTokenExpired){
+            if (!hasTokenExpired) {
                 userByEmailVerificationToken.setEmailVerificationToken(null);
                 userByEmailVerificationToken.setEmailVerificationStatus(Boolean.TRUE);
                 appReqRepository.save(userByEmailVerificationToken);
-                if (userByEmailVerificationToken.getWebType().equalsIgnoreCase("ORGANIZATION")){
+                if (userByEmailVerificationToken.getWebType().equalsIgnoreCase("ORGANIZATION")) {
                     firstName = userByEmailVerificationToken.getOrganizationUsername();
-                }else {
+                } else {
                     firstName = userByEmailVerificationToken.getFirstName();
                 }
                 String email = userByEmailVerificationToken.getEmail();
                 appReqService.generateUserClient(email);
                 isVerified = true;
-            }else {
-                throw new UserServiceException(HttpStatus.UNAUTHORIZED,ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
+            } else {
+                throw new UserServiceException(HttpStatus.UNAUTHORIZED, ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
             }
         }
         return isVerified;
@@ -117,7 +114,7 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     public void deleteAppRequestByEmail(String email) {
         UserAppRequest userAppRequest = appReqRepository.findByEmail(email);
         if (userAppRequest == null)
-            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         appReqRepository.delete(userAppRequest);
     }
 
@@ -125,29 +122,29 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     public AppTokenDTO findByTokenKey(String tokenKey) {
         AppToken byTokenKey = tokenRepository.findByTokenKey(tokenKey);
 
-        if (Objects.isNull(byTokenKey)){
-            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.APP_TOKEN_NOT_FOUND.getErrorMessage());
+        if (Objects.isNull(byTokenKey)) {
+            throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.APP_TOKEN_NOT_FOUND.getErrorMessage());
         }
-        return modelMapper.map(byTokenKey,AppTokenDTO.class);
+        return modelMapper.map(byTokenKey, AppTokenDTO.class);
     }
 
     @Override
     public UserAppRequestDTO findByEmail(String email) {
         UserAppRequest userAppRequest = appReqRepository.findByEmail(email);
-        if (Objects.isNull(userAppRequest)){
-            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        if (Objects.isNull(userAppRequest)) {
+            throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
-        return modelMapper.map(userAppRequest,UserAppRequestDTO.class);
+        return modelMapper.map(userAppRequest, UserAppRequestDTO.class);
     }
 
     @Override
     public UserClientDTO generateUserClient(String email) {
         UserAppRequestDTO appRequestDTO = appReqService.findByEmail(email);
-        if (!appRequestDTO.getEmailVerificationStatus()){
-            throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.USER_NOT_VERIFIED.getErrorMessage());
+        if (!appRequestDTO.getEmailVerificationStatus()) {
+            throw new UserServiceException(HttpStatus.BAD_REQUEST, ErrorMessages.USER_NOT_VERIFIED.getErrorMessage());
         }
-        if (clientRepository.findByEmail(email) !=null){
-            throw new UserServiceException(HttpStatus.ALREADY_REPORTED,ErrorMessages.CLIENT_ID_ALREADY_DEFINED.getErrorMessage());
+        if (clientRepository.findByEmail(email) != null) {
+            throw new UserServiceException(HttpStatus.ALREADY_REPORTED, ErrorMessages.CLIENT_ID_ALREADY_DEFINED.getErrorMessage());
         }
         String clientID = utils.generateClientID(email);
         UserClient userClient = new UserClient();
@@ -156,7 +153,7 @@ public class UserAppReqServiceImpl implements UserAppReqService {
         userClient.setClientID(clientID);
         UserClient savedClientInfo = clientRepository.save(userClient);
         UserClientDTO userClientDTO = modelMapper.map(savedClientInfo, UserClientDTO.class);
-        getLog().info("Client ID: {} ", userClientDTO.getClientID());
+        log.info("Client ID: {} ", userClientDTO.getClientID());
 
         return userClientDTO;
     }
@@ -165,32 +162,29 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     public UserClientDTO findByClientID(String clientID) {
         String email;
         UserClientDTO clientDTO = new UserClientDTO();
-        if (clientID.contains("@")){
+        if (clientID.contains("@")) {
             email = clientID;
             appReqService.findByEmail(email);
             UserClient client = clientRepository.findByEmail(email);
-            if (Objects.isNull(client)){
-                throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.CLIENT_INFORMATION_NOT_FOUND.getErrorMessage());
+            if (Objects.isNull(client)) {
+                throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.CLIENT_INFORMATION_NOT_FOUND.getErrorMessage());
             }
             clientDTO = modelMapper.map(client, UserClientDTO.class);
-            getLog().info("Client Info {} ", clientDTO);
+            log.info("Client Info {} ", clientDTO);
             return clientDTO;
         }
         UserClient userClient = clientRepository.findByClientID(clientID);
         if (Objects.isNull(userClient)) {
-            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.CLIENT_INFORMATION_NOT_FOUND.getErrorMessage());
+            throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.CLIENT_INFORMATION_NOT_FOUND.getErrorMessage());
         }
 
         clientDTO = modelMapper.map(userClient, UserClientDTO.class);
-        getLog().info("Client Info {} ", clientDTO);
+        log.info("Client Info {} ", clientDTO);
         return clientDTO;
     }
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         return null;
-    }
-    public static Logger getLog() {
-        return LOGGER;
     }
 }

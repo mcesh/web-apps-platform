@@ -37,7 +37,6 @@ import java.util.function.Function;
 public class EmailUtility {
 
     private static String savePath = "C:/Token";
-    private static Logger LOGGER = LoggerFactory.getLogger(EmailUtility.class);
     // This address must be verified with Amazon SES.
     final String FROM = "siya.nxuseka@gmail.com";
     // The subject line for the email.
@@ -97,11 +96,11 @@ public class EmailUtility {
             helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
             helper.setSentDate(new Date());
             emailSender.send(message);
-            getLog().info("Email sent successfully with the following details {}, {}, and {}",
+            log.info("Email sent successfully with the following details {}, {}, and {}",
                     message.getSubject(), message.getSentDate(),
                     message.getAllRecipients());
         }catch (Exception e){
-            getLog().info("Email Unsuccessfully sent {}", e.getMessage());
+            log.info("Email Unsuccessfully sent {}", e.getMessage());
             throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
         }
     }
@@ -129,11 +128,11 @@ public class EmailUtility {
             helper.setSentDate(new Date());
             emailSender.send(message);
 
-            getLog().info("Email sent successfully with the following details {}, {}, and {}",
+            log.info("Email sent successfully with the following details {}, {}, and {}",
                     message.getSubject(), message.getSentDate(),
                     message.getAllRecipients());
         }catch (MessagingException e){
-            getLog().info("Email Unsuccessfully sent {}", e.getMessage());
+            log.info("Email Unsuccessfully sent {}", e.getMessage());
             throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
         }
 
@@ -146,7 +145,7 @@ public class EmailUtility {
 
         try {
             Optional.ofNullable(userDto).ifPresent(mimeMessage -> {
-                getLog().info("Sending email to {} ", userDto.getEmail());
+                log.info("Sending email to {} ", userDto.getEmail());
             });
 
 
@@ -161,7 +160,7 @@ public class EmailUtility {
             helper.setSentDate(new Date());
             emailSender.send(message);
 
-            getLog().info("Email sent successfully with the following details {}, {}, and {}",
+            log.info("Email sent successfully with the following details {}, {}, and {}",
                     message.getSubject(), message.getSentDate(),
                     message.getAllRecipients());
 
@@ -194,7 +193,7 @@ public class EmailUtility {
 
         try {
             Optional.of(userProfile).ifPresent(mimeMessage -> {
-                getLog().info("Sending email to {} ", userProfile.getEmail());
+                log.info("Sending email to {} ", userProfile.getEmail());
             });
             MimeMessage message = emailSender.createMimeMessage();
 
@@ -212,7 +211,7 @@ public class EmailUtility {
                 returnValue = true;
             }
 
-            getLog().info("Email sent successfully with the following details {}, {}, and {}",
+            log.info("Email sent successfully with the following details {}, {}, and {}",
                     message.getSubject(), message.getSentDate(),
                     message.getAllRecipients());
 
@@ -245,7 +244,7 @@ public class EmailUtility {
 
         try {
             Optional.of(userEntity).ifPresent(mimeMessage -> {
-                getLog().info("Sending email to {} ", userEntity.getEmail());
+                log.info("Sending email to {} ", userEntity.getEmail());
             });
             MimeMessage message = emailSender.createMimeMessage();
 
@@ -263,7 +262,7 @@ public class EmailUtility {
                 returnValue = true;
             }
 
-            getLog().info("Email sent successfully with the following details {}, {}, and {}",
+            log.info("Email sent successfully with the following details {}, {}, and {}",
                     message.getSubject(), message.getSentDate(),
                     message.getAllRecipients());
 
@@ -276,10 +275,6 @@ public class EmailUtility {
     });
     @Autowired
     private Utils utils;
-
-    public static Logger getLog() {
-        return LOGGER;
-    }
 
     @Async
     public void sendVerificationMail(UserDto userDto, String userAgent, String webUrl) {
@@ -307,12 +302,12 @@ public class EmailUtility {
             helper.setSubject(EMAIL_VERIFICATION_SUBJECT);
             helper.setSentDate(new Date());
             emailSender.send(message);
-            getLog().info("Email sent successfully with the following details {}, {}, and {}",
+            log.info("Email sent successfully with the following details {}, {}, and {}",
                     message.getSubject(), message.getSentDate(),
                     message.getAllRecipients());
 
         }catch (Exception    e){
-            getLog().info("Email Unsuccessfully sent {}", e.getMessage());
+            log.info("Email Unsuccessfully sent {}", e.getMessage());
             throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,e.getMessage());
         }
     }

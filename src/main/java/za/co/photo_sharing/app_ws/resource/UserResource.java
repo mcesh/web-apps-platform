@@ -3,9 +3,8 @@ package za.co.photo_sharing.app_ws.resource;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,7 +23,6 @@ import za.co.photo_sharing.app_ws.model.response.OperationStatusModel;
 import za.co.photo_sharing.app_ws.model.response.RequestOperationName;
 import za.co.photo_sharing.app_ws.model.response.RequestOperationStatus;
 import za.co.photo_sharing.app_ws.model.response.UserRest;
-import za.co.photo_sharing.app_ws.services.AddressService;
 import za.co.photo_sharing.app_ws.services.UserService;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
@@ -32,7 +30,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,17 +37,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("users") // http://localhost:8080/users/web-apps-platform
+@Slf4j
 public class UserResource {
-
-    private static Logger LOGGER = LoggerFactory.getLogger(UserResource.class);
 
     @Autowired
     private UserService userService;
     private ModelMapper modelMapper = new ModelMapper();
-
-    public static Logger getLog() {
-        return LOGGER;
-    }
 
     @ApiOperation(value = "The Get User By UserId Endpoint",
             notes = "${userResource.GetUserByUserId.ApiOperation.Notes}")
@@ -73,10 +65,10 @@ public class UserResource {
     })
     @GetMapping(path = "username/{username}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUserByUsername(@PathVariable String username) {
-        getLog().info("Fetching UserDetails for {} ", username);
+        log.info("Fetching UserDetails for {} ", username);
         UserDto byUsername = userService.findByUsername(username);
         UserRest userRest = modelMapper.map(byUsername, UserRest.class);
-        getLog().info("UserDetails Found {} ", userRest);
+        log.info("UserDetails Found {} ", userRest);
         return userRest;
     }
 
@@ -91,26 +83,26 @@ public class UserResource {
         String userAgent = request.getHeader("User-Agent");
         String webUrl = "";
         if (userAgent != null) {
-            getLog().info("User-Agent {}", userAgent);
+            log.info("User-Agent {}", userAgent);
             StringBuffer requestURL = request.getRequestURL();
             String host = request.getHeader("Host");
             String serverName = request.getServerName();
             String requestScheme = request.getScheme();
 
-            getLog().info("App Url, {}", requestURL);
-            getLog().info("Scheme name: {}", requestScheme);
-            getLog().info("Host Name: {}", host);
-            getLog().info("Server name {}", serverName);
+            log.info("App Url, {}", requestURL);
+            log.info("Scheme name: {}", requestScheme);
+            log.info("Host Name: {}", host);
+            log.info("Server name {}", serverName);
             webUrl = requestScheme + "://" + host + "/";
         }
         UserRest userRest = new UserRest();
 
         ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = modelMapper.map(userDetails, UserDto.class);
-        getLog().info("Registering a new user {} ", userDetails);
+        log.info("Registering a new user {} ", userDetails);
         UserDto user = userService.createUser(userDto, userAgent, webUrl);
         userRest = modelMapper.map(user, UserRest.class);
-        getLog().info("New User {} ", userRest);
+        log.info("New User {} ", userRest);
         return userRest;
     }
 
@@ -124,7 +116,7 @@ public class UserResource {
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest updateUserDetails(@RequestBody UserDetailsRequestModel userDetails, @PathVariable String id) {
         Long userId = Long.parseLong(id);
-        getLog().info("Updating User Details for {} ", userId);
+        log.info("Updating User Details for {} ", userId);
         UserRest userRest = new UserRest();
 
         UserDto userDto = modelMapper.map(userDetails, UserDto.class);
@@ -160,7 +152,7 @@ public class UserResource {
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public OperationStatusModel deleteUser(@PathVariable String id) {
         long userId = Long.parseLong(id);
-        getLog().info("Deleting user with ID {} ", userId);
+        log.info("Deleting user with ID {} ", userId);
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.DELETE.name());
         userService.deleteUser(userId);
@@ -178,13 +170,13 @@ public class UserResource {
     public List<UserRest> getUsers(@RequestParam(value = "page", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_NUMBER) Integer page,
                                    @RequestParam(value = "size", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_SIZE) Integer size) {
         List<UserRest> returnRests = new ArrayList<>();
-        getLog().info("Fetching All Users in the DB");
+        log.info("Fetching All Users in the DB");
         List<UserDto> users = userService.getUsers(page, size);
         users.forEach(userDto -> {
             UserRest userRest = modelMapper.map(userDto, UserRest.class);
             returnRests.add(userRest);
         });
-        getLog().info("Users found: {} ", returnRests.size());
+        log.info("Users found: {} ", returnRests.size());
         return returnRests;
     }
 
@@ -197,9 +189,9 @@ public class UserResource {
 
         String userAgent = request.getHeader("User-Agent");
         Optional.ofNullable(userAgent).ifPresent(agent -> {
-            getLog().info("User-Agent {}", agent);
+            log.info("User-Agent {}", agent);
         });
-        getLog().info("Verifying Email at {} ", LocalDateTime.now());
+        log.info("Verifying Email at {} ", LocalDateTime.now());
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.VERIFY_EMAIL.name());
 
@@ -288,7 +280,7 @@ public class UserResource {
                     MediaType.APPLICATION_XML_VALUE})
     public List<UserRest> confirmedEmails(@RequestParam(value = "page", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_NUMBER) Integer page,
                                           @RequestParam(value = "size", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_SIZE) Integer size) {
-        getLog().info("Fetching Confirmed Emails");
+        log.info("Fetching Confirmed Emails");
         List<UserRest> userRests = new ArrayList<>();
         List<UserDto> confirmedEmailAddress = userService.findAllUsersWithConfirmedEmailAddress(page, size);
         confirmedEmailAddress.forEach(userDto -> {
@@ -296,21 +288,21 @@ public class UserResource {
             modelMapper.map(userDto, userRest);
             userRests.add(userRest);
         });
-        getLog().info("Confirmed emails found: {} ", userRests.size());
+        log.info("Confirmed emails found: {} ", userRests.size());
         return userRests;
     }
 
-    @ApiOperation(value="The Get User By Email Address Endpoint",
-            notes="${userResource.Username.ApiOperation.Notes}")
+    @ApiOperation(value = "The Get User By Email Address Endpoint",
+            notes = "${userResource.Username.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @GetMapping(path = "email/{email}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUserByEmailAddress(@PathVariable String email) {
-        getLog().info("Fetching User By Email {} ", email);
+        log.info("Fetching User By Email {} ", email);
         UserDto byUsername = userService.findByEmail(email);
         UserRest userRest = modelMapper.map(byUsername, UserRest.class);
-        getLog().info("User Returned {} ", userRest);
+        log.info("User Returned {} ", userRest);
         return userRest;
     }
 
@@ -323,7 +315,7 @@ public class UserResource {
     @DeleteMapping(path = "email/{email}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public OperationStatusModel deleteUserByEmail(@PathVariable String email) {
-        getLog().info("Deleting User By Email...");
+        log.info("Deleting User By Email...");
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.DELETE.name());
         userService.deleteUserByEmail(email);
@@ -341,7 +333,7 @@ public class UserResource {
     @PutMapping(path = "updateRoles/{email}", produces = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.APPLICATION_XML_VALUE, "application/hal+json"})
     public UserRest updateUserRoles(@PathVariable String email) {
-        getLog().info("Updating User Roles for  {} ", email);
+        log.info("Updating User Roles for  {} ", email);
         UserDto user = userService.updateUserRoles(email);
         return modelMapper.map(user, UserRest.class);
     }
@@ -356,7 +348,7 @@ public class UserResource {
                     MediaType.APPLICATION_JSON_VALUE})
     public OperationStatusModel uploadImage(@PathVariable String email,
                                             @RequestParam("file") MultipartFile file) {
-        getLog().info("Uploading Profile Pic for {} ", email);
+        log.info("Uploading Profile Pic for {} ", email);
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.IMAGE_UPLOAD.name());
         statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
@@ -366,7 +358,7 @@ public class UserResource {
         return statusModel;
     }
 
-    @ApiOperation(value = "The Download User Profile Image Endpoint",
+    @ApiOperation(value = "Download User Profile Image Endpoint",
             notes = "${userResource.DownImage.ApiOperation.Notes}")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
@@ -374,9 +366,42 @@ public class UserResource {
     @GetMapping(path = "download/profile-image/{email}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public String downloadProfileImage(@PathVariable String email) {
-        getLog().info("Getting Profile Picture for {} ", email);
+        log.info("Getting Profile Picture for {} ", email);
         String profileImage = userService.downloadProfile(email);
-        getLog().info("Profile Picture: {} ", profileImage);
+        log.info("Profile Picture: {} ", profileImage);
+        return profileImage;
+    }
+    @ApiOperation(value = "Upload User Profile Image Endpoint",
+            notes = "${userResource.UploadImageToCloud.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @PostMapping(path = "upload/profile/{email}",
+            produces = {MediaType.MULTIPART_FORM_DATA_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE})
+    public OperationStatusModel uploadImageToCloud(@PathVariable String email,
+                                            @RequestParam("file") MultipartFile file) throws IOException {
+        log.info("Uploading Profile Pic for {} ", email);
+        OperationStatusModel statusModel = new OperationStatusModel();
+        statusModel.setOperationName(RequestOperationName.IMAGE_UPLOAD.name());
+        statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
+        userService.uploadProfileImageToCloudinary(email, file);
+        statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
+
+        return statusModel;
+    }
+
+    @ApiOperation(value = "Fetch User Profile Image Endpoint",
+            notes = "${userResource.FetchImage.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @GetMapping(path = "fetch/image/{email}",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public String fetchProfileImage(@PathVariable String email) {
+        log.info("Fetching Profile Picture for {} ", email);
+        String profileImage = userService.fetchUserProfile(email);
+        log.info("Profile Picture: {} ", profileImage);
         return profileImage;
     }
 }

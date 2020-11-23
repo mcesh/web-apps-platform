@@ -1,9 +1,7 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,55 +25,55 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final UserService userService;
     private final Utils utils;
-    private static Logger LOGGER = LoggerFactory.getLogger(CategoryServiceImpl.class);
 
     @Transactional
     @Override
     public Category save(String categoryName, String email) {
         Category category_ = categoryRepository.findByEmailAndCategoryName(email, categoryName);
-        if (Objects.nonNull(category_)){
-            throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.CATEGORY_ALREADY_EXISTS.getErrorMessage());
+        if (Objects.nonNull(category_)) {
+            throw new UserServiceException(HttpStatus.BAD_REQUEST, ErrorMessages.CATEGORY_ALREADY_EXISTS.getErrorMessage());
         }
         Category category = new Category();
         category.setName(categoryName.trim());
         category.setEmail(userService.findByEmail(email).getEmail());
         category.setArticleCount(0);
         Category savedCategory = categoryRepository.save(category);
-        getLog().info("Category created for {} ", savedCategory.getEmail());
+        log.info("Category created for {} ", savedCategory.getEmail());
         return savedCategory;
     }
 
     @Override
     public List<Category> findAllCategoriesByEmail(String email) {
         UserDto userServiceByEmail = userService.findByEmail(email);
-        if (Objects.isNull(userServiceByEmail)){
-            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.USER_NOT_FOUND.getErrorMessage());
+        if (Objects.isNull(userServiceByEmail)) {
+            throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.USER_NOT_FOUND.getErrorMessage());
         }
         List<Category> categories = categoryRepository.findAllCategoriesByEmail(email);
-        if (!CollectionUtils.isEmpty(categories)){
+        if (!CollectionUtils.isEmpty(categories)) {
             categories.forEach(category -> {
-                getLog().info("Category Found {} ", category.getName());
+                log.info("Category Found {} ", category.getName());
             });
         }
-        getLog().info("Categories found: {} ", categories.size());
+        log.info("Categories found: {} ", categories.size());
         return categories;
     }
 
     @Override
-    public void updateArticleCount(int count,String categoryName, String email) {
-        categoryRepository.updateArticleCount(count,categoryName,email);
+    public void updateArticleCount(int count, String categoryName, String email) {
+        categoryRepository.updateArticleCount(count, categoryName, email);
     }
 
     @Override
     public Category updateCategory(Long id, String categoryName) {
         Optional<Category> category = getCategory(id);
         category.get().setName(categoryName);
-        getLog().info("Category {} ", category);
+        log.info("Category {} ", category);
         categoryRepository.save(category.get());
         return category.get();
     }
@@ -83,13 +81,13 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category findById(Long id) {
         Optional<Category> category = getCategory(id);
-        getLog().info("Category by id{} ", category);
+        log.info("Category by id{} ", category);
         return category.get();
     }
 
     private Optional<Category> getCategory(Long id) {
         Optional<Category> category = categoryRepository.findById(id);
-        if (!category.isPresent()){
+        if (!category.isPresent()) {
             throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }
         return category;
@@ -98,19 +96,19 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void deleteCategoryById(Long id) {
         Optional<Category> category = getCategory(id);
-        getLog().info("Deleting category with name {} ", category.get().getName());
+        log.info("Deleting category with name {} ", category.get().getName());
         categoryRepository.flush();
         categoryRepository.delete(category.get());
     }
 
     @Override
     public List<Category> findAllCategories(int page, int size) {
-        Utils.validatePageNumberAndSize(page,size);
+        Utils.validatePageNumberAndSize(page, size);
         Pageable pageable = PageRequest.of(page, size);
         Page<Category> categoryPage = categoryRepository.findAll(pageable);
         List<Category> categories = categoryPage.getContent();
-        getLog().info("Categories Found in DB: {} ", categories.size());
-        if (CollectionUtils.isEmpty(categories)){
+        log.info("Categories Found in DB: {} ", categories.size());
+        if (CollectionUtils.isEmpty(categories)) {
             return new ArrayList<>();
         }
         return categories;
@@ -120,15 +118,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category findByEmailAndCategoryName(String email, String name) {
         Category category = categoryRepository.findByEmailAndCategoryName(email, name);
-        if (Objects.isNull(category)){
-            throw new UserServiceException(HttpStatus.NOT_FOUND,ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
+        if (Objects.isNull(category)) {
+            throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }
-        getLog().info("Category Found {} ", category);
+        log.info("Category Found {} ", category);
         return category;
-    }
-
-
-    public static Logger getLog() {
-        return LOGGER;
     }
 }

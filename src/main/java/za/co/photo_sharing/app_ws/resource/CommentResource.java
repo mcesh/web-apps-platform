@@ -3,9 +3,8 @@ package za.co.photo_sharing.app_ws.resource;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,12 +18,9 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("comment") // http://localhost:8080/comment/web-apps-platform
+@Slf4j
 public class CommentResource {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(CommentResource.class);
-    public static Logger getLog() {
-        return LOGGER;
-    }
 
     @Autowired
     private CommentService commentService;
@@ -41,39 +37,39 @@ public class CommentResource {
     @ResponseStatus(HttpStatus.CREATED)
     public CommentRest addComment(@PathVariable("username") String username,
                                   @PathVariable(name = "articleId") Long articleId,
-                                  @RequestBody CommentRequestModel comment){
-        getLog().info("Comment added by {} time {} ", username, LocalDateTime.now());
+                                  @RequestBody CommentRequestModel comment) {
+        log.info("Comment added by {} time {} ", username, LocalDateTime.now());
         CommentDTO commentDTO = modelMapper.map(comment, CommentDTO.class);
         CommentDTO addCommentDto = commentService.addComment(commentDTO, articleId, username);
         CommentRest commentRest = modelMapper.map(addCommentDto, CommentRest.class);
-        getLog().info("Comment details {} ", commentRest);
+        log.info("Comment details {} ", commentRest);
         return commentRest;
     }
 
-    @ApiOperation(value="Update Comment Endpoint",
-            notes="${userResource.UpdateComment.ApiOperation.Notes}")
+    @ApiOperation(value = "Update Comment Endpoint",
+            notes = "${userResource.UpdateComment.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @PutMapping(path = "{id}",
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public CommentRest updateComment(@PathVariable("id") Long id,
-                                     @RequestBody CommentRequestModel comment){
-        getLog().info("Updating comment with id: {} ", id);
+                                     @RequestBody CommentRequestModel comment) {
+        log.info("Updating comment with id: {} ", id);
         CommentDTO commentDTO = modelMapper.map(comment, CommentDTO.class);
         CommentDTO updateComment = commentService.updateComment(commentDTO, id);
         return modelMapper.map(updateComment, CommentRest.class);
     }
 
-    @ApiOperation(value="The Delete Comment By Id Endpoint",
-            notes="${userResource.DeleteCommentById.ApiOperation.Notes}")
+    @ApiOperation(value = "The Delete Comment By Id Endpoint",
+            notes = "${userResource.DeleteCommentById.ApiOperation.Notes}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="${userResource.authorizationHeader.description}", paramType="header")
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
     @DeleteMapping(path = "/{id}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public void deleteComment(@PathVariable("id") Long id){
+    public void deleteComment(@PathVariable("id") Long id) {
         commentService.deleteCommentById(id);
     }
 }
