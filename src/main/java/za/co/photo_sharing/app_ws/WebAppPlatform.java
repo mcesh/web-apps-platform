@@ -33,8 +33,6 @@ public class WebAppPlatform extends SpringBootServletInitializer {
 		SpringApplication.run(WebAppPlatform.class, args);
 	}
 
-	private static Logger LOGGER = LoggerFactory.getLogger(WebAppPlatform.class);
-
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder(){
 		return new BCryptPasswordEncoder();
@@ -57,10 +55,6 @@ public class WebAppPlatform extends SpringBootServletInitializer {
 	@Bean
 	public TemplateEngine templateEngine(){
 		return new TemplateEngine();
-	}
-
-	public static Logger getLog() {
-		return LOGGER;
 	}
 
 	@Value("${cloudinary.cloud_name}")

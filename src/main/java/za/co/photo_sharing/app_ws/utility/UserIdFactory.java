@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.utility;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import java.util.Objects;
 
 @Component
 @Transactional
+@Slf4j
 public class UserIdFactory {
 
     @Autowired
@@ -30,8 +32,6 @@ public class UserIdFactory {
             String formattedString2 = zonedDateTime.format(formatter2);
             String modifiedDate = formattedString2.replace("/", "")
                     .replace("-", "").replace(":", "").substring(0, 17).trim();
-            System.out.println("Modified Date: {} " + modifiedDate.replace(" ", "").substring(2));
-
             return modifiedDate.replace(" ", "").substring(2);
 
         } catch (Exception e) {

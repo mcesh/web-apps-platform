@@ -1,6 +1,7 @@
 package za.co.photo_sharing.app_ws.utility;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -279,6 +280,12 @@ public class Utils {
         return ratingPercentage;
     }
 
+    public String uploadToCloudinary(MultipartFile file) throws IOException {
+        File uploadedFile = convertMultiPartToFile(file);
+        Map imageMap = ObjectUtils.emptyMap();
+        Map uploadResult = cloudinaryConfig.uploader().upload(uploadedFile, imageMap);
+        return uploadResult.get("url").toString();
+    }
 
     public File convertMultiPartToFile(MultipartFile file) throws IOException {
         File convFile = new File(Objects.requireNonNull(file.getOriginalFilename()));

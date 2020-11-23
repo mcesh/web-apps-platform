@@ -25,6 +25,7 @@ import za.co.photo_sharing.app_ws.shared.dto.ArticleDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -58,13 +59,14 @@ public class ArticleServiceImpl implements ArticleService {
                                  MultipartFile file, String categoryName,
                                  String status) {
 
-
-        UserProfile userProfile = modelMapper.map(userDto, UserProfile.class);
         String base64Image = "";
         if (file != null) {
             utils.isImage(file);
-            ImageUpload imageUpload = utils.uploadImage(file, userProfile, ARTICLE_IMAGES);
-            base64Image = imageUpload.getBase64Image();
+            try {
+                base64Image = utils.uploadToCloudinary(file);
+            } catch (IOException e) {
+                throw new ArticleServiceException(HttpStatus.INTERNAL_SERVER_ERROR,e.getMessage());
+            }
         }
         Set<Tag> tags = getTags(articleDTO);
 
