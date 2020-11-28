@@ -142,7 +142,6 @@ public class UserResource {
     }
 
     // @PreAuthorize("hasRole(ROLE_ADMIN) or #id == principal.userId")
-    @Secured("ROLE_ADMIN")
     @ApiOperation(value = "The Delete User By UserId Endpoint",
             notes = "${userResource.DeleteUserById.ApiOperation.Notes}")
     @ApiImplicitParams({
@@ -306,7 +305,6 @@ public class UserResource {
         return userRest;
     }
 
-    @Secured("ROLE_ADMIN")
     @ApiOperation(value = "The Delete User By Email Address Endpoint",
             notes = "${userResource.DeleteUserById.ApiOperation.Notes}")
     @ApiImplicitParams({

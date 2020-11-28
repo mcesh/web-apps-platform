@@ -28,7 +28,7 @@ public class AddressResource {
     private UserService userService;
     private ModelMapper modelMapper = new ModelMapper();
 
-    @ApiOperation(value = "The Add new User Address Endpoint",
+    @ApiOperation(value = "Add new User Address Endpoint",
             notes = "${userResource.AddNewUserAddress.ApiOperation.Notes}")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
@@ -75,7 +75,6 @@ public class AddressResource {
         return addressesRest;
     }
 
-    @Secured("ROLE_ADMIN")
     @ApiOperation(value = "Delete Address By Id Endpoint",
             notes = "${userResource.DeleteById.ApiOperation.Notes}")
     @ApiImplicitParams({

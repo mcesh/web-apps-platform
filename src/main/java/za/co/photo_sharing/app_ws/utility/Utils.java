@@ -41,6 +41,10 @@ public class Utils {
     private final Random RANDOM = new SecureRandom();
     private final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private final String NUMBERS = "0123456789";
+    @Autowired
+    private Cloudinary cloudinaryConfig;
+    @Autowired
+    private FileStoreService fileStoreService;
     public Consumer<String> generateFilePath = filePath -> {
         File directory = new File(filePath);
         if (!directory.exists()) {
@@ -80,10 +84,6 @@ public class Utils {
         }
 
     };
-    @Autowired
-    private Cloudinary cloudinaryConfig;
-    @Autowired
-    private FileStoreService fileStoreService;
 
     public static boolean hasTokenExpired(String token) {
         boolean returnValue = false;
