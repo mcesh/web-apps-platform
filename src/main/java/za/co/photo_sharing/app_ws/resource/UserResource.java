@@ -231,7 +231,7 @@ public class UserResource {
         return statusModel;
     }
 
-    @ApiOperation(value = "The Password Reset Endpoint",
+    @ApiOperation(value = "Password Reset Endpoint",
             notes = "${userResource.PasswordReset.ApiOperation.Notes}")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")

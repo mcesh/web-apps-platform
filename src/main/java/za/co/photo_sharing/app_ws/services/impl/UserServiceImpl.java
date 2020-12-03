@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     public static final String DEFAULT_PROFILE_FOLDER = "default-profile-picture";
+    public static final String DEFAULT_PROFILE = "http://res.cloudinary.com/dp2bapgv7/image/upload/v1606918586/wj4ksdwvzzjzxgpxmqdm.png";
     public static final String DEFAULT_PROFILE_KEY = "default-image.png";
     public static final String PROFILE_IMAGES = "PROFILE_IMAGES";
     public static final String BLOG_IMAGES = "BLOG_IMAGES";
@@ -456,11 +457,7 @@ public class UserServiceImpl implements UserService {
            byte[] profilePic = fileStoreService.download(path, key);
            return Base64.getEncoder().encodeToString(profilePic);
        }
-       // default-profile-picture
-       String defaultPicturePath = String.format("%s/%s", BUCKET_NAME,
-               DEFAULT_PROFILE_FOLDER);
-        byte[] defaultProfilePic = fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
-        return Base64.getEncoder().encodeToString(defaultProfilePic);
+       return DEFAULT_PROFILE;
     }
 
     @Override
@@ -519,11 +516,8 @@ public class UserServiceImpl implements UserService {
         if (!StringUtils.isEmpty(userProfile.getUserProfileImageLink())){
             return userProfile.getUserProfileImageLink();
         }else {
-            // default-profile-picture
-            String defaultPicturePath = String.format("%s/%s", BUCKET_NAME,
-                    DEFAULT_PROFILE_FOLDER);
-            byte[] defaultProfilePic = fileStoreService.download(defaultPicturePath, DEFAULT_PROFILE_KEY);
-            return Base64.getEncoder().encodeToString(defaultProfilePic);
+
+            return DEFAULT_PROFILE;
         }
     }
 
