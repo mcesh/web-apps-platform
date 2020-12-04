@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.constants.ArticleStatusTypeKeys;
@@ -91,6 +92,7 @@ public class ArticleServiceImpl implements ArticleService {
         return returnedArticle;
     }
 
+    @Transactional
     @Override
     public ArticleDTO findById(Long id) {
         Optional<Article> article = getArticle(id);
@@ -104,6 +106,7 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDTO.get();
     }
 
+    @Transactional
     @Override
     public List<ArticleDTO> findByEmail(String email, int page, int size) {
         Utils.validatePageNumberAndSize(page, size);
@@ -128,6 +131,7 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDTOS;
     }
 
+    @Transactional
     @Override
     public void deleteArticleById(Long id) {
         Optional<Article> article = getArticle(id);
@@ -141,6 +145,7 @@ public class ArticleServiceImpl implements ArticleService {
         articleRepository.delete(article.get());
     }
 
+    @Transactional
     @Override
     public List<ArticleDTO> findArticlesByStatus(String status, String email, int page, int size) {
         Utils.validatePageNumberAndSize(page, size);
@@ -162,6 +167,7 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDTOS;
     }
 
+    @Transactional
     @Override
     public ArticleDTO updateById(Long id, String username, ArticleDTO articleDTO, String category, String status) {
         UserDto userDto = userService.findByUsername(username);
@@ -193,6 +199,7 @@ public class ArticleServiceImpl implements ArticleService {
         return dto;
     }
 
+    @Transactional
     @Override
     public List<ArticleDTO> findAllArticlesByEmail(String email, int page, int size) {
         Utils.validatePageNumberAndSize(page, size);
@@ -212,6 +219,7 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDTOS;
     }
 
+    @Transactional
     @Override
     public List<ArticleDTO> findAllArticles(int page, int size) {
         Utils.validatePageNumberAndSize(page, size);
@@ -234,6 +242,7 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDTOS;
     }
 
+    @Transactional
     @Override
     public ArticleDTO likeArticle(Long postId, String username) {
         userService.findByUsername(username);
@@ -250,6 +259,7 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDTO.get();
     }
 
+    @Transactional
     @Override
     public ArticleDTO dislikeArticle(Long postId, String username) {
         userService.findByUsername(username);
@@ -271,6 +281,7 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDTO.get();
     }
 
+    @Transactional
     @Override
     public List<ArticleDTO> findByTitleContaining(String title, String email) {
 
