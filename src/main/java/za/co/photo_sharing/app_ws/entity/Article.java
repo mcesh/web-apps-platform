@@ -72,7 +72,7 @@ public class Article implements Serializable {
     private Set<Tag> tags;
 
     @Audited
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "category_id")
     private Category category;
 

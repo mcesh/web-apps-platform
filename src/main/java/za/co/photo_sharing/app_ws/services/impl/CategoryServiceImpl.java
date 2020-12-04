@@ -48,6 +48,7 @@ public class CategoryServiceImpl implements CategoryService {
         return savedCategory;
     }
 
+    @Transactional
     @Override
     public List<Category> findAllCategoriesByEmail(String email) {
         UserDto userServiceByEmail = userService.findByEmail(email);
@@ -64,11 +65,13 @@ public class CategoryServiceImpl implements CategoryService {
         return categories;
     }
 
+    @Transactional
     @Override
     public void updateArticleCount(int count, String categoryName, String email) {
         categoryRepository.updateArticleCount(count, categoryName, email);
     }
 
+    @Transactional
     @Override
     public Category updateCategory(Long id, String categoryName) {
         Optional<Category> category = getCategory(id);
@@ -78,6 +81,7 @@ public class CategoryServiceImpl implements CategoryService {
         return category.get();
     }
 
+    @Transactional
     @Override
     public Category findById(Long id) {
         Optional<Category> category = getCategory(id);
@@ -93,6 +97,7 @@ public class CategoryServiceImpl implements CategoryService {
         return category;
     }
 
+    @Transactional
     @Override
     public void deleteCategoryById(Long id) {
         Optional<Category> category = getCategory(id);
@@ -101,6 +106,7 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.delete(category.get());
     }
 
+    @Transactional
     @Override
     public List<Category> findAllCategories(int page, int size) {
         Utils.validatePageNumberAndSize(page, size);

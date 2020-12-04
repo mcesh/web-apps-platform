@@ -39,12 +39,12 @@ public class Category implements Serializable {
 
     @Audited
     @JsonIgnore
-    @OneToMany(mappedBy = "category", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private Set<ImageGallery> imageGallery;
 
     @Audited
     @JsonIgnore
-    @OneToMany(mappedBy = "category", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     private Set<Article> articles;
 
     @CreatedBy
