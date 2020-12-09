@@ -49,7 +49,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
             UserLoginRequestModel creds = new ObjectMapper()
                     .readValue(req.getInputStream(), UserLoginRequestModel.class);
-
             return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             creds.getEmail(),
@@ -82,6 +81,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String token = Jwts.builder()
                 .setSubject(userName)
                 .claim(IS_ADMIN, admin)
+                .claim(USERNAME, user.getUsername())
                 .claim(NAME,user.getFirstName() + " " + user.getLastName())
                 .claim(AUTHORITIES_KEY,authorities)
                 .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))

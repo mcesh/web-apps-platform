@@ -74,7 +74,7 @@ public class ArticleResource {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
-    @GetMapping(value = "/email/{email}",
+    @GetMapping(value = "/by-email/{email}",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
     public List<ArticleRest> getArticlesByEmail(

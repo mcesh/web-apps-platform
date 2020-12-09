@@ -252,6 +252,7 @@ public class UserServiceImpl implements UserService {
                 userProfile.setEmailVerificationToken(null);
                 userProfile.setEmailVerificationStatus(Boolean.TRUE);
                 userRepo.save(userProfile);
+                log.info(userProfile.getEmail() + " verified");
                 isVerified = true;
             } else {
                 throw new UserServiceException(HttpStatus.UNAUTHORIZED,ErrorMessages.TOKEN_EXPIRED.getErrorMessage());
