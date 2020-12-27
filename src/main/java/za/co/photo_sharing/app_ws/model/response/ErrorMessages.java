@@ -36,6 +36,8 @@ public enum ErrorMessages {
     COMMENT_NOT_FOUND("Comment not found"),
     ADDRESS_NOT_FOUND("No address found with the specified addressId"),
     ABOUT_PAGE_NOT_FOUND("About page not found"),
+    EXCEEDED_IMAGE_LIMIT("exceeded image limit"),
+    IMAGE_NOT_FOUND("Image not found"),
     SKILL_SET_NOT_FOUND("Skill set not found");
 
 

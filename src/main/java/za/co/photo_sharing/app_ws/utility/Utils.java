@@ -295,4 +295,13 @@ public class Utils {
         return convFile;
     }
 
+    public boolean deleteImage(String publicId) throws IOException {
+        boolean returnValue;
+        Map deleteParams = ObjectUtils.asMap("invalidate", true );
+        Map destroy = cloudinaryConfig.uploader().destroy(publicId, deleteParams);
+        returnValue = destroy.containsValue("ok");
+        log.info("Image Destroyed: {} ", destroy);
+        return returnValue;
+    }
+
 }
