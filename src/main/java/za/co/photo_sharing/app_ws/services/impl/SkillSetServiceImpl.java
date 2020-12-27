@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import za.co.photo_sharing.app_ws.entity.SkillSet;
 import za.co.photo_sharing.app_ws.exceptions.ArticleServiceException;
@@ -33,6 +34,7 @@ public class SkillSetServiceImpl implements SkillSetService {
     private Utils utils;
     private ModelMapper modelMapper = new ModelMapper();
 
+    @Transactional
     @Override
     public SkillSetDto findById(Long id) {
         final SkillSetDto[] skillSetDto = {new SkillSetDto()};
@@ -45,6 +47,7 @@ public class SkillSetServiceImpl implements SkillSetService {
     }
 
 
+    @Transactional
     @Override
     public SkillSetDto updateSkillSet(Long id, SkillSetDto skillSetDto) {
         Optional<SkillSet> skillSet = getSkillSet(id);
@@ -62,6 +65,7 @@ public class SkillSetServiceImpl implements SkillSetService {
         return setDto.get();
     }
 
+    @Transactional
     @Override
     public List<SkillSetDto> findAllSkillSets(int page, int size) {
         Utils.validatePageNumberAndSize(page, size);
@@ -81,6 +85,7 @@ public class SkillSetServiceImpl implements SkillSetService {
         return skillSetDtos;
     }
 
+    @Transactional
     @Override
     public void deleteSkillSetById(Long id) {
         Optional<SkillSet> skillSet = getSkillSet(id);
