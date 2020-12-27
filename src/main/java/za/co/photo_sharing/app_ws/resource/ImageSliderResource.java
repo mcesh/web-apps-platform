@@ -97,7 +97,7 @@ public class ImageSliderResource {
     })
     @PutMapping(path = "/slider-images/{username}/{id}/{caption}",
             produces = {MediaType.APPLICATION_JSON_VALUE,})
-    public ImageSliderRest updateImade(@PathVariable String username,
+    public ImageSliderRest updateImage(@PathVariable String username,
                                        @PathVariable Long id,
                                        @RequestParam("file") MultipartFile file,
                                        @PathVariable String caption) throws IOException {
