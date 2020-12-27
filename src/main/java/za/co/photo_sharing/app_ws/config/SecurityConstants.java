@@ -15,12 +15,15 @@ public class SecurityConstants {
     public static final String PASSWORD_RESET_REQUEST_URL = "/users/password-reset-request";
     public static final String PASSWORD_RESET_URL = "/users/password-reset";
     public static final String ABOUT_PAGE_IMAGE = "/about/download/about-page/**";
+    public static final String SLIDER_IMAGES = "/api/slider/download/slider-images/**";
+    public static final String VIEW_IMAGE_DETAILS = "/api/slider/view/slider-images/**";
     public static final String LOG_OUT_URL = "/users/logout";
     public static final String H2_CONSOLE = "/h2-console/**";
     public static final String AUTHORITIES_KEY = "scopes";
     public static final String IS_ADMIN = "admin";
     public static final String USERNAME = "userName";
     public static final String NAME = "name";
+    public static final int MAX_SLIDER_IMAGES = 9;
     public static final String DEFAULT_PAGE_NUMBER = "0";
     public static final String DEFAULT_PAGE_SIZE = "30";
     public static final int MAX_PAGE_SIZE = 30;
