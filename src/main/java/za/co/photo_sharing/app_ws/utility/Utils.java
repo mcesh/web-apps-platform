@@ -289,6 +289,7 @@ public class Utils {
 
     public File convertMultiPartToFile(MultipartFile file) throws IOException {
         File convFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
+        log.info("Absolute Path: {} ", convFile.getAbsolutePath());
         FileOutputStream fos = new FileOutputStream(convFile);
         fos.write(file.getBytes());
         fos.close();
