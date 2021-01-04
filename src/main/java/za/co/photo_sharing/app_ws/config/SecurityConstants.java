@@ -16,6 +16,7 @@ public class SecurityConstants {
     public static final String PASSWORD_RESET_URL = "/users/password-reset";
     public static final String ABOUT_PAGE_IMAGE = "/about/download/about-page/**";
     public static final String SLIDER_IMAGES = "/api/slider/download/slider-images/**";
+    public static final String IMAGE_GALLERY = "/api/gallery/download/gallery-images/**";
     public static final String VIEW_IMAGE_DETAILS = "/api/slider/view/slider-images/**";
     public static final String LOG_OUT_URL = "/users/logout";
     public static final String H2_CONSOLE = "/h2-console/**";

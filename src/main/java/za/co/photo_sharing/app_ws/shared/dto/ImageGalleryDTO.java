@@ -11,6 +11,7 @@ import java.util.List;
 @Builder
 public class ImageGalleryDTO {
 
+    private Long id;
     private String caption;
     private Long userId;
     private String imageUrl;

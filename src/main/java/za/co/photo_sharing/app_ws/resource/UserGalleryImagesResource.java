@@ -57,10 +57,6 @@ public class UserGalleryImagesResource {
 
     @ApiOperation(value = "The Download User Gallery Images Endpoint",
             notes = "${userResource.DownloadImages.ApiOperation.Notes}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}",
-                    paramType = "header")
-    })
     @GetMapping(path = "download/gallery-images/{clientID}",
             produces = {MediaType.APPLICATION_JSON_VALUE,})
     public Set<ImageGallery> downloadGalleryImages(@PathVariable String clientID) {
@@ -109,6 +105,24 @@ public class UserGalleryImagesResource {
         log.info("Uploaded File: {} ", uploadFile);
         statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
         return statusModel;
+    }
+
+    @ApiOperation(value = "Fetch User Gallery Images Endpoint",
+            notes = "${userResource.PhotoDetails.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}",
+                    paramType = "header")
+    })
+    @GetMapping(path = "photo/{clientID}/{id}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,})
+    public ImageGallery getPhotoDetails(@PathVariable String clientID,
+                                             @PathVariable Long id) {
+        UserClientDTO clientDTO = appReqService.findByClientID(clientID);
+        log.info("Fetching photo details...{} ID...{} ", clientDTO.getEmail(), id);
+        ImageGallery photoDetailsById = galleryService.getPhotoDetailsById(clientDTO.getEmail(), id);
+        log.info("Photo Details: {}, ", photoDetailsById);
+        return photoDetailsById;
+
     }
 
 }

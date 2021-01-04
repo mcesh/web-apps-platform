@@ -24,7 +24,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.SecureRandom;
+import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -275,9 +278,14 @@ public class Utils {
 
     public double calculateRatingPercent(double rating) {
         validateRatingNumber(rating);
+        DecimalFormat df=new DecimalFormat("0.00");
         double ratingPercentage = (rating / 10) * 100;
-        log.info("Calculated percentage: {} ", ratingPercentage);
-        return ratingPercentage;
+        String formate = df.format(ratingPercentage);
+        String replacement = formate.replaceAll(",", ".");
+        double finalValue;
+        finalValue = Double.parseDouble(replacement);
+        log.info("Calculated percentage: {} ", finalValue);
+        return finalValue;
     }
 
     public String uploadToCloudinary(MultipartFile file) throws IOException {

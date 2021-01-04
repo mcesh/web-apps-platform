@@ -6,6 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.entity.Category;
 import za.co.photo_sharing.app_ws.entity.ImageGallery;
@@ -16,14 +17,14 @@ import za.co.photo_sharing.app_ws.repo.UserRepo;
 import za.co.photo_sharing.app_ws.services.CategoryService;
 import za.co.photo_sharing.app_ws.services.GalleryService;
 import za.co.photo_sharing.app_ws.services.UserService;
+import za.co.photo_sharing.app_ws.shared.dto.ImageGalleryDTO;
+import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.transaction.Transactional;
 import java.io.File;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class GalleryServiceImpl implements GalleryService {
@@ -70,6 +71,21 @@ public class GalleryServiceImpl implements GalleryService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Transactional
+    @Override
+    public za.co.photo_sharing.app_ws.model.response.ImageGallery getPhotoDetailsById(String email,Long id) {
+        UserProfile userProfile = userRepo.findByEmail(email);
+        za.co.photo_sharing.app_ws.model.response.ImageGallery gallery = new za.co.photo_sharing.app_ws.model.response.ImageGallery();
+        List<ImageGallery> galleryList = userProfile.getImageGalleries()
+                .stream()
+                .filter(imageGallery -> imageGallery.getId() == id)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(galleryList)){
+            throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.IMAGE_NOT_FOUND.getErrorMessage());
+        }
+        return modelMapper.map(galleryList.get(0), za.co.photo_sharing.app_ws.model.response.ImageGallery.class);
     }
 
 
