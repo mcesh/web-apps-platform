@@ -10,33 +10,32 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.model.response.*;
-import za.co.photo_sharing.app_ws.services.ImageSliderService;
+import za.co.photo_sharing.app_ws.services.ImageBucketService;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
-import za.co.photo_sharing.app_ws.shared.dto.ImageSliderDto;
+import za.co.photo_sharing.app_ws.shared.dto.ImageBucketDto;
 import za.co.photo_sharing.app_ws.shared.dto.UserClientDTO;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @RestController
-@RequestMapping("api/slider") // http://localhost:8080/users/web-apps-platform
+@RequestMapping("api/bucket") // http://localhost:8080/users/web-apps-platform
 @Slf4j
-public class ImageSliderResource {
+public class ImageBucketResource {
 
     @Autowired
-    private ImageSliderService sliderService;
+    private ImageBucketService sliderService;
     @Autowired
     private UserAppReqService appReqService;
     private ModelMapper modelMapper = new ModelMapper();
 
     @ApiOperation(value = "Upload Slider Images Endpoint",
-            notes = "${userResource.SliderImages.ApiOperation.Notes}")
+            notes = "${userResource.BucketImages.ApiOperation.Notes}")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
-    @PostMapping(path = "upload/slider/{username}/{caption}",
+    @PostMapping(path = "upload/bucket/{username}/{caption}",
             produces = {MediaType.MULTIPART_FORM_DATA_VALUE,
                     MediaType.APPLICATION_JSON_VALUE})
     public OperationStatusModel uploadImage(@PathVariable String username,
@@ -45,7 +44,7 @@ public class ImageSliderResource {
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.IMAGE_UPLOAD.name());
         statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
-        log.info("Uploading Slider image for {}, caption is {}", username, caption);
+        log.info("Uploading Bucket image for {}, caption is {}", username, caption);
         sliderService.addImage(username, caption, file);
         statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
         return statusModel;
@@ -55,15 +54,15 @@ public class ImageSliderResource {
             notes = "${userResource.SliderImagesByEmail.ApiOperation.Notes}")
     @GetMapping(path = "download/slider-images/{clientID}",
             produces = {MediaType.APPLICATION_JSON_VALUE,})
-    public List<ImageSliderRest> downloadSliderImages(@PathVariable String clientID) {
+    public List<ImageBucketRest> downloadSliderImages(@PathVariable String clientID) {
         UserClientDTO clientDTO = appReqService.findByClientID(clientID);
-        List<ImageSliderRest> sliderRests =  new ArrayList<>();
+        List<ImageBucketRest> sliderRests =  new ArrayList<>();
         log.info("Retrieving a slider images... {} ", clientDTO.getEmail());
-        List<ImageSliderDto> imageSliderDtos = sliderService.fetchImagesByEmail(clientDTO.getEmail());
-        log.info("Images retrieved {} ", imageSliderDtos.size());
-        imageSliderDtos.forEach(imageSliderDto -> {
-            ImageSliderRest imageSliderRest = modelMapper.map(imageSliderDto, ImageSliderRest.class);
-            sliderRests.add(imageSliderRest);
+        List<ImageBucketDto> imageBucketDtos = sliderService.fetchImagesByEmail(clientDTO.getEmail());
+        log.info("Images retrieved {} ", imageBucketDtos.size());
+        imageBucketDtos.forEach(imageBucketDto -> {
+            ImageBucketRest imageBucketRest = modelMapper.map(imageBucketDto, ImageBucketRest.class);
+            sliderRests.add(imageBucketRest);
         });
         return sliderRests;
 
@@ -73,9 +72,9 @@ public class ImageSliderResource {
             notes = "${userResource.SliderImageDetails.ApiOperation.Notes}")
     @GetMapping(path = "view/slider-images/{id}",
             produces = {MediaType.APPLICATION_JSON_VALUE,})
-    public ImageSliderRest viewSliderImageDetails(@PathVariable Long id) {
-        ImageSliderDto sliderDto = sliderService.findById(id);
-        return modelMapper.map(sliderDto, ImageSliderRest.class);
+    public ImageBucketRest viewSliderImageDetails(@PathVariable Long id) {
+        ImageBucketDto sliderDto = sliderService.findById(id);
+        return modelMapper.map(sliderDto, ImageBucketRest.class);
     }
 
     @ApiOperation(value = "Delete Slider Images Endpoint",
@@ -97,11 +96,11 @@ public class ImageSliderResource {
     })
     @PutMapping(path = "/slider-images/{username}/{id}/{caption}",
             produces = {MediaType.APPLICATION_JSON_VALUE,})
-    public ImageSliderRest updateImage(@PathVariable String username,
+    public ImageBucketRest updateImage(@PathVariable String username,
                                        @PathVariable Long id,
                                        @RequestParam("file") MultipartFile file,
                                        @PathVariable String caption) throws IOException {
-        ImageSliderDto imageSliderDto = sliderService.updateImage(username, id, file, caption);
-        return modelMapper.map(imageSliderDto, ImageSliderRest.class);
+        ImageBucketDto imageBucketDto = sliderService.updateImage(username, id, file, caption);
+        return modelMapper.map(imageBucketDto, ImageBucketRest.class);
     }
 }

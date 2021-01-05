@@ -7,10 +7,10 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "user_image_slider")
+@Table(name = "image_bucket")
 @Audited
 @EntityListeners(AuditingEntityListener.class)
-public class ImageSlider implements Serializable {
+public class ImageBucket implements Serializable {
 
     private static final long serialVersionUID = 2355487852252525658L;
 

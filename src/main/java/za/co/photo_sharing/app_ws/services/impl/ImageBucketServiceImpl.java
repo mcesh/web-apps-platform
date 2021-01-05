@@ -8,26 +8,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.config.SecurityConstants;
-import za.co.photo_sharing.app_ws.entity.ImageSlider;
+import za.co.photo_sharing.app_ws.entity.ImageBucket;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.ImageSliderRepository;
-import za.co.photo_sharing.app_ws.services.ImageSliderService;
+import za.co.photo_sharing.app_ws.services.ImageBucketService;
 import za.co.photo_sharing.app_ws.services.UserService;
-import za.co.photo_sharing.app_ws.shared.dto.ImageSliderDto;
+import za.co.photo_sharing.app_ws.shared.dto.ImageBucketDto;
 import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
 @Slf4j
-public class ImageSliderServiceImpl implements ImageSliderService {
+public class ImageBucketServiceImpl implements ImageBucketService {
 
     @Autowired
     private UserService userService;
@@ -38,63 +37,63 @@ public class ImageSliderServiceImpl implements ImageSliderService {
     private ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public ImageSliderDto addImage(String username, String caption, MultipartFile file) throws IOException {
+    public ImageBucketDto addImage(String username, String caption, MultipartFile file) throws IOException {
         UserDto userDto = userService.findByUsername(username);
-        List<ImageSlider> sliders = sliderRepository.findByEmail(userDto.getEmail());
+        List<ImageBucket> sliders = sliderRepository.findByEmail(userDto.getEmail());
         log.info("Current images size: {} ", sliders.size());
         if (sliders.size() > SecurityConstants.MAX_SLIDER_IMAGES){
             throw new UserServiceException(HttpStatus.BAD_REQUEST,ErrorMessages.EXCEEDED_IMAGE_LIMIT.getErrorMessage());
         }
         String url = utils.uploadToCloudinary(file);
-        ImageSlider imageSlider = new ImageSlider();
-        imageSlider.setCaption(caption);
-        imageSlider.setEmail(userDto.getEmail());
-        imageSlider.setImageUrl(url);
-        ImageSlider slider = sliderRepository.save(imageSlider);
-        return modelMapper.map(slider, ImageSliderDto.class);
+        ImageBucket imageBucket = new ImageBucket();
+        imageBucket.setCaption(caption);
+        imageBucket.setEmail(userDto.getEmail());
+        imageBucket.setImageUrl(url);
+        ImageBucket slider = sliderRepository.save(imageBucket);
+        return modelMapper.map(slider, ImageBucketDto.class);
     }
 
     @Override
-    public List<ImageSliderDto> fetchImagesByEmail(String email) {
-        List<ImageSlider> imageSliders = sliderRepository.findByEmail(email);
-        List<ImageSliderDto> imageSliderDtos = new ArrayList<>();
-        if (CollectionUtils.isEmpty(imageSliders)){
-            return imageSliderDtos;
+    public List<ImageBucketDto> fetchImagesByEmail(String email) {
+        List<ImageBucket> imageBuckets = sliderRepository.findByEmail(email);
+        List<ImageBucketDto> imageBucketDtos = new ArrayList<>();
+        if (CollectionUtils.isEmpty(imageBuckets)){
+            return imageBucketDtos;
         }
-        imageSliders.forEach(imageSlider -> {
-            ImageSliderDto imageSliderDto = modelMapper.map(imageSlider, ImageSliderDto.class);
-            imageSliderDtos.add(imageSliderDto);
+        imageBuckets.forEach(imageBucket -> {
+            ImageBucketDto imageBucketDto = modelMapper.map(imageBucket, ImageBucketDto.class);
+            imageBucketDtos.add(imageBucketDto);
         });
-        return imageSliderDtos;
+        return imageBucketDtos;
     }
 
     @Override
-    public ImageSliderDto findById(Long id) {
-        Optional<ImageSlider> imageSlider = sliderRepository.findById(id);
+    public ImageBucketDto findById(Long id) {
+        Optional<ImageBucket> imageSlider = sliderRepository.findById(id);
         if (!imageSlider.isPresent()){
             throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.IMAGE_NOT_FOUND.getErrorMessage());
         }
-        return modelMapper.map(imageSlider.get(), ImageSliderDto.class);
+        return modelMapper.map(imageSlider.get(), ImageBucketDto.class);
     }
 
     @Override
-    public ImageSliderDto updateImage(String username, Long id, MultipartFile file, String caption) throws IOException {
+    public ImageBucketDto updateImage(String username, Long id, MultipartFile file, String caption) throws IOException {
         userService.findByUsername(username);
-        Optional<ImageSlider> imageSlider = sliderRepository.findById(id);
+        Optional<ImageBucket> imageSlider = sliderRepository.findById(id);
         if (!imageSlider.isPresent()){
             throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.IMAGE_NOT_FOUND.getErrorMessage());
         }
         String url = utils.uploadToCloudinary(file);
         imageSlider.get().setImageUrl(url);
         imageSlider.get().setCaption(caption);
-        ImageSlider slider = sliderRepository.save(imageSlider.get());
-        return modelMapper.map(slider, ImageSliderDto.class);
+        ImageBucket slider = sliderRepository.save(imageSlider.get());
+        return modelMapper.map(slider, ImageBucketDto.class);
     }
 
     @Override
     public void deleteImage(String username, Long id) throws IOException {
         userService.findByUsername(username);
-        Optional<ImageSlider> imageSlider = sliderRepository.findById(id);
+        Optional<ImageBucket> imageSlider = sliderRepository.findById(id);
         if (!imageSlider.isPresent()){
             throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.IMAGE_NOT_FOUND.getErrorMessage());
         }
