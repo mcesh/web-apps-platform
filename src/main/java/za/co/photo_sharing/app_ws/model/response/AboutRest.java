@@ -12,6 +12,7 @@ import java.util.Set;
 @ToString
 public class AboutRest {
 
+    private long id;
     private String description;
     private Set<SkillSetRest> skillSets;
     private String base64StringImage;

@@ -1,6 +1,8 @@
 package za.co.photo_sharing.app_ws.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
@@ -29,6 +31,10 @@ public class ImageBucket implements Serializable {
     @Audited
     @Column(nullable = false)
     private String email;
+    @NotAudited
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "image_type_id")
+    private ImageType imageType;
 
     public long getId() {
         return id;
@@ -60,5 +66,13 @@ public class ImageBucket implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public ImageType getImageType() {
+        return imageType;
+    }
+
+    public void setImageType(ImageType imageType) {
+        this.imageType = imageType;
     }
 }

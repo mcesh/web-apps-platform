@@ -5,6 +5,6 @@ import za.co.photo_sharing.app_ws.entity.ImageBucket;
 
 import java.util.List;
 
-public interface ImageSliderRepository extends JpaRepository<ImageBucket, Long> {
+public interface ImageBucketRepository extends JpaRepository<ImageBucket, Long> {
     List<ImageBucket> findByEmail(String email);
 }

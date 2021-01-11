@@ -17,7 +17,8 @@ public class SecurityConstants {
     public static final String ABOUT_PAGE_IMAGE = "/about/download/about-page/**";
     public static final String SLIDER_IMAGES = "/api/slider/download/slider-images/**";
     public static final String IMAGE_GALLERY = "/api/gallery/download/gallery-images/**";
-    public static final String VIEW_IMAGE_DETAILS = "/api/slider/view/slider-images/**";
+    public static final String VIEW_IMAGE_DETAILS = "/api/gallery/photo/**";
+    public static final String GET_ABOUT_DETAILS = "/about/getBy/**";
     public static final String LOG_OUT_URL = "/users/logout";
     public static final String H2_CONSOLE = "/h2-console/**";
     public static final String AUTHORITIES_KEY = "scopes";
@@ -25,6 +26,8 @@ public class SecurityConstants {
     public static final String USERNAME = "userName";
     public static final String NAME = "name";
     public static final int MAX_SLIDER_IMAGES = 9;
+    public static final int MAX_SERVICES_IMAGES = 6;
+    public static final int MAX_PROJECTS_IMAGES = 6;
     public static final String DEFAULT_PAGE_NUMBER = "0";
     public static final String DEFAULT_PAGE_SIZE = "30";
     public static final int MAX_PAGE_SIZE = 30;

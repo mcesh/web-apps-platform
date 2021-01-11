@@ -25,7 +25,7 @@ import java.util.List;
 public class ImageBucketResource {
 
     @Autowired
-    private ImageBucketService sliderService;
+    private ImageBucketService bucketService;
     @Autowired
     private UserAppReqService appReqService;
     private ModelMapper modelMapper = new ModelMapper();
@@ -35,17 +35,18 @@ public class ImageBucketResource {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
-    @PostMapping(path = "upload/bucket/{username}/{caption}",
+    @PostMapping(path = "upload/bucket/{username}/{caption}/{imageCode}",
             produces = {MediaType.MULTIPART_FORM_DATA_VALUE,
                     MediaType.APPLICATION_JSON_VALUE})
     public OperationStatusModel uploadImage(@PathVariable String username,
                                             @PathVariable(required = false) String caption,
-                                            @RequestParam("file") MultipartFile file) throws IOException {
+                                            @RequestParam("file") MultipartFile file,
+                                            @PathVariable String imageCode) throws IOException {
         OperationStatusModel statusModel = new OperationStatusModel();
         statusModel.setOperationName(RequestOperationName.IMAGE_UPLOAD.name());
         statusModel.setOperationResult(RequestOperationStatus.ERROR.name());
         log.info("Uploading Bucket image for {}, caption is {}", username, caption);
-        sliderService.addImage(username, caption, file);
+        bucketService.addImage(username, caption, file, imageCode);
         statusModel.setOperationResult(RequestOperationStatus.SUCCESS.name());
         return statusModel;
     }
@@ -58,7 +59,7 @@ public class ImageBucketResource {
         UserClientDTO clientDTO = appReqService.findByClientID(clientID);
         List<ImageBucketRest> sliderRests =  new ArrayList<>();
         log.info("Retrieving a slider images... {} ", clientDTO.getEmail());
-        List<ImageBucketDto> imageBucketDtos = sliderService.fetchImagesByEmail(clientDTO.getEmail());
+        List<ImageBucketDto> imageBucketDtos = bucketService.fetchImagesByEmail(clientDTO.getEmail());
         log.info("Images retrieved {} ", imageBucketDtos.size());
         imageBucketDtos.forEach(imageBucketDto -> {
             ImageBucketRest imageBucketRest = modelMapper.map(imageBucketDto, ImageBucketRest.class);
@@ -73,7 +74,7 @@ public class ImageBucketResource {
     @GetMapping(path = "view/slider-images/{id}",
             produces = {MediaType.APPLICATION_JSON_VALUE,})
     public ImageBucketRest viewSliderImageDetails(@PathVariable Long id) {
-        ImageBucketDto sliderDto = sliderService.findById(id);
+        ImageBucketDto sliderDto = bucketService.findById(id);
         return modelMapper.map(sliderDto, ImageBucketRest.class);
     }
 
@@ -86,7 +87,7 @@ public class ImageBucketResource {
             produces = {MediaType.APPLICATION_JSON_VALUE,})
     public void deleteImade(@PathVariable String username,@PathVariable Long id) throws IOException {
         //ImageSliderDto sliderDto = sliderService.findById(id);
-        sliderService.deleteImage(username, id);
+        bucketService.deleteImage(username, id);
     }
 
     @ApiOperation(value = "Update Slider Images Endpoint",
@@ -100,7 +101,7 @@ public class ImageBucketResource {
                                        @PathVariable Long id,
                                        @RequestParam("file") MultipartFile file,
                                        @PathVariable String caption) throws IOException {
-        ImageBucketDto imageBucketDto = sliderService.updateImage(username, id, file, caption);
+        ImageBucketDto imageBucketDto = bucketService.updateImage(username, id, file, caption);
         return modelMapper.map(imageBucketDto, ImageBucketRest.class);
     }
 }

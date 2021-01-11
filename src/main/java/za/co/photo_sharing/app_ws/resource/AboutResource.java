@@ -67,7 +67,7 @@ public class AboutResource {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
-    @GetMapping(path = "/{email}",
+    @GetMapping(path = "getBy/{email}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public AboutRest getAboutPageDetails(@PathVariable("email") String email) {
         AboutDTO aboutDTO = aboutService.findByEmail(email);
@@ -161,6 +161,21 @@ public class AboutResource {
         log.info("Deleting About Page with ID: {} ", id);
         aboutService.deleteAboutPageById(id);
         log.info("About Page successfully deleted at {} ", LocalDateTime.now());
+    }
+
+    @ApiOperation(value = "Update About Information Endpoint",
+            notes = "${userResource.UpdateAboutInformation.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @PutMapping(path = "/updateAbout/{email}/{id}",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public AboutRest updateAboutInfo(@PathVariable("email") String email,
+                                   @PathVariable("id") Long id,
+                                     @RequestBody AboutDetailsRequestModel about) {
+        AboutDTO aboutDTO = modelMapper.map(about, AboutDTO.class);
+        AboutDTO updateAboutInfo = aboutService.updateAboutInfo(id, email, aboutDTO);
+        return modelMapper.map(updateAboutInfo, AboutRest.class);
     }
 
 }

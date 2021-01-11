@@ -6,6 +6,7 @@ import za.co.photo_sharing.app_ws.shared.dto.AboutDTO;
 public interface AboutService {
 
     AboutDTO addAboutPage(AboutDTO aboutDTO, String email);
+    AboutDTO updateAboutInfo(Long id,String email, AboutDTO aboutDTO);
     AboutDTO addImage(Long id, String email, MultipartFile file);
     AboutDTO findByEmail(String email);
     AboutDTO findById(Long id);

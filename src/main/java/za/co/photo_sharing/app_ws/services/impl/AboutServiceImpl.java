@@ -12,8 +12,8 @@ import za.co.photo_sharing.app_ws.entity.AboutPage;
 import za.co.photo_sharing.app_ws.entity.SkillSet;
 import za.co.photo_sharing.app_ws.entity.UserProfile;
 import za.co.photo_sharing.app_ws.exceptions.ArticleServiceException;
+import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
-import za.co.photo_sharing.app_ws.model.response.ImageUpload;
 import za.co.photo_sharing.app_ws.repo.AboutRepository;
 import za.co.photo_sharing.app_ws.services.AboutService;
 import za.co.photo_sharing.app_ws.services.UserService;
@@ -22,7 +22,9 @@ import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static za.co.photo_sharing.app_ws.services.impl.UserServiceImpl.*;
@@ -62,6 +64,39 @@ public class AboutServiceImpl implements AboutService {
         return dto;
     }
 
+    @Transactional
+    @Override
+    public AboutDTO updateAboutInfo(Long id, String email, AboutDTO aboutDTO) {
+        userService.findByEmail(email);
+        AtomicReference<AboutDTO> map = new AtomicReference<>(new AboutDTO());
+        Optional<AboutPage> aboutPage = aboutRepository.findById(id);
+        if (!aboutPage.isPresent()){
+            throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ABOUT_PAGE_NOT_FOUND.getErrorMessage());
+        }
+        aboutPage.map(aboutPage1 -> {
+            aboutPage1.setDescription(aboutDTO.getDescription());
+            if (aboutDTO.getSkillSets()!=null && aboutDTO.getSkillSets().size() > 0){
+                aboutPage1.setSkillSets(updateSkillSet(aboutDTO));
+            }
+            aboutRepository.save(aboutPage1);
+             map.set(modelMapper.map(aboutPage1, AboutDTO.class));
+            return true;
+        });
+
+        return map.get();
+    }
+
+    private Set<SkillSet> updateSkillSet(AboutDTO aboutDTO) {
+        Set<SkillSet> skillSets = new HashSet<>();
+        aboutDTO.getSkillSets().forEach(skillSet -> {
+            double ratingPercent = utils.calculateRatingPercent(skillSet.getRating());
+            skillSet.setRatingCalc(ratingPercent);
+            SkillSet skillSet1 = modelMapper.map(skillSet, SkillSet.class);
+            skillSets.add(skillSet1);
+        });
+        return skillSets;
+    }
+
     private void verifyIfPageExists(String email) {
         if (aboutRepository.findByEmail(email) != null) {
             throw new ArticleServiceException(HttpStatus.BAD_REQUEST, ErrorMessages.RECORD_ALREADY_EXISTS.getErrorMessage());
@@ -76,8 +111,13 @@ public class AboutServiceImpl implements AboutService {
         final AboutDTO[] aboutDTO = new AboutDTO[1];
         Optional<AboutPage> about = getById(id);
         about.map(aboutPage1 -> {
-            ImageUpload imageUpload = utils.uploadImage(file, userProfile, ABOUT_PAGE);
-            aboutPage1.setBase64StringImage(imageUpload.getFileName());
+            String url = "";
+            try {
+                url = utils.uploadToCloudinary(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            aboutPage1.setBase64StringImage(url);
             AboutPage returnValue = aboutRepository.save(aboutPage1);
             aboutDTO[0] = modelMapper.map(returnValue, AboutDTO.class);
             return aboutDTO[0];
