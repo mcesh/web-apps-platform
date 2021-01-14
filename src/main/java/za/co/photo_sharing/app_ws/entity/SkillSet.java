@@ -24,7 +24,7 @@ public class SkillSet implements Serializable {
     @Audited
     private double rating;
     @Audited
-    private double ratingCalc;
+    private int ratingCalc;
 
     @Audited
     @ManyToOne
@@ -65,11 +65,11 @@ public class SkillSet implements Serializable {
         this.aboutPage = aboutPage;
     }
 
-    public double getRatingCalc() {
+    public int getRatingCalc() {
         return ratingCalc;
     }
 
-    public void setRatingCalc(double ratingCalc) {
+    public void setRatingCalc(int ratingCalc) {
         this.ratingCalc = ratingCalc;
     }
 }

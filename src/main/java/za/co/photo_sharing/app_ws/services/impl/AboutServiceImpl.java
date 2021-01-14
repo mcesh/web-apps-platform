@@ -52,7 +52,7 @@ public class AboutServiceImpl implements AboutService {
         verifyIfPageExists(email);
         if (aboutDTO.getSkillSets().size() > 0) {
             aboutDTO.getSkillSets().forEach(skillSet -> {
-                double ratingPercent = utils.calculateRatingPercent(skillSet.getRating());
+                int ratingPercent = utils.calculateRatingPercent(skillSet.getRating());
                 skillSet.setRatingCalc(ratingPercent);
             });
         }
@@ -89,7 +89,7 @@ public class AboutServiceImpl implements AboutService {
     private Set<SkillSet> updateSkillSet(AboutDTO aboutDTO) {
         Set<SkillSet> skillSets = new HashSet<>();
         aboutDTO.getSkillSets().forEach(skillSet -> {
-            double ratingPercent = utils.calculateRatingPercent(skillSet.getRating());
+            int ratingPercent = utils.calculateRatingPercent(skillSet.getRating());
             skillSet.setRatingCalc(ratingPercent);
             SkillSet skillSet1 = modelMapper.map(skillSet, SkillSet.class);
             skillSets.add(skillSet1);

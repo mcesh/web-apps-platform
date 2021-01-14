@@ -53,7 +53,7 @@ public class SkillSetServiceImpl implements SkillSetService {
         Optional<SkillSet> skillSet = getSkillSet(id);
         AtomicReference<SkillSetDto> setDto = new AtomicReference<>(new SkillSetDto());
         skillSet.map(skillSet1 -> {
-            double ratingPercent = utils.calculateRatingPercent(skillSetDto.getRating());
+            int ratingPercent = utils.calculateRatingPercent(skillSetDto.getRating());
             skillSet1.setRating(skillSetDto.getRating());
             skillSet1.setSkill(skillSetDto.getSkill());
             skillSet1.setRatingCalc(ratingPercent);
