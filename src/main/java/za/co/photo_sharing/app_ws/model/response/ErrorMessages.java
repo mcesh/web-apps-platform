@@ -38,6 +38,7 @@ public enum ErrorMessages {
     ABOUT_PAGE_NOT_FOUND("About page not found"),
     EXCEEDED_IMAGE_LIMIT("exceeded image limit"),
     IMAGE_NOT_FOUND("Image not found"),
+    IMAGE_TYPE_NOT_FOUND("Image type not found"),
     SKILL_SET_NOT_FOUND("Skill set not found");
 
 

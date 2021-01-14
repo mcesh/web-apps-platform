@@ -276,7 +276,7 @@ public class Utils {
         }
     }
 
-    public double calculateRatingPercent(double rating) {
+    public int calculateRatingPercent(double rating) {
         validateRatingNumber(rating);
         DecimalFormat df=new DecimalFormat("0.00");
         double ratingPercentage = (rating / 10) * 100;
@@ -284,8 +284,9 @@ public class Utils {
         String replacement = formate.replaceAll(",", ".");
         double finalValue;
         finalValue = Double.parseDouble(replacement);
-        log.info("Calculated percentage: {} ", finalValue);
-        return finalValue;
+        int mapDoubleToInt = (int) Math.round(finalValue);
+        log.info("Calculated percentage: {} ", mapDoubleToInt);
+        return mapDoubleToInt;
     }
 
     public String uploadToCloudinary(MultipartFile file) throws IOException {

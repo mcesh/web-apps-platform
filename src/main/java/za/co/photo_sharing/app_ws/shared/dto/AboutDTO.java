@@ -12,6 +12,7 @@ import java.util.Set;
 @ToString
 public class AboutDTO {
 
+    private long id;
     private String description;
     private Set<SkillSetDto> skillSets;
     private String base64StringImage;

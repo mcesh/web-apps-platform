@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-public class ImageSliderDto {
+public class ImageBucketDto {
 
     private long id;
     private String caption;

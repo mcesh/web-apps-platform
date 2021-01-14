@@ -12,5 +12,5 @@ public class SkillSetRest {
     private long id;
     private String skill;
     private double rating;
-    private double ratingCalc;
+    private int ratingCalc;
 }
