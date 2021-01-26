@@ -19,6 +19,7 @@ public class SecurityConstants {
     public static final String IMAGE_GALLERY = "/api/gallery/download/gallery-images/**";
     public static final String VIEW_IMAGE_DETAILS = "/api/gallery/photo/**";
     public static final String GET_ABOUT_DETAILS = "/about/getBy/**";
+    public static final String GET_APP_TYPES = "/users_app_request/app_type/**";
     public static final String LOG_OUT_URL = "/users/logout";
     public static final String H2_CONSOLE = "/h2-console/**";
     public static final String AUTHORITIES_KEY = "scopes";

@@ -27,7 +27,7 @@ import java.util.Map;
 @EnableAutoConfiguration(exclude = HibernateJpaAutoConfiguration.class)
 @Slf4j
 @EnableAsync
-public class WebAppPlatform extends SpringBootServletInitializer {
+public class WebAppPlatform {
 
 	public static void main(String[] args) {
 		SpringApplication.run(WebAppPlatform.class, args);
@@ -45,11 +45,6 @@ public class WebAppPlatform extends SpringBootServletInitializer {
 	@Bean(name="AppProperties")
 	public AppProperties getAppProperties(){
 		return new AppProperties();
-	}
-
-	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(WebAppPlatform.class);
 	}
 
 	@Bean

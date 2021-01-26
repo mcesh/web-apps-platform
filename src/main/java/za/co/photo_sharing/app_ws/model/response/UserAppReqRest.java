@@ -18,4 +18,5 @@ public class UserAppReqRest {
     private String description;
     private LocalDateTime requestDate;
     private boolean emailVerificationStatus;
+    private Long appTypeKey;
 }

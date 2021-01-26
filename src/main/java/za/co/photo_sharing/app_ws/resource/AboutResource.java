@@ -16,8 +16,10 @@ import za.co.photo_sharing.app_ws.model.response.AboutRest;
 import za.co.photo_sharing.app_ws.model.response.SkillSetRest;
 import za.co.photo_sharing.app_ws.services.AboutService;
 import za.co.photo_sharing.app_ws.services.SkillSetService;
+import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.shared.dto.AboutDTO;
 import za.co.photo_sharing.app_ws.shared.dto.SkillSetDto;
+import za.co.photo_sharing.app_ws.shared.dto.UserClientDTO;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,6 +32,8 @@ public class AboutResource {
 
     @Autowired
     private AboutService aboutService;
+    @Autowired
+    private UserAppReqService appReqService;
     @Autowired
     private SkillSetService setService;
     private ModelMapper modelMapper = new ModelMapper();
@@ -67,10 +71,11 @@ public class AboutResource {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
     })
-    @GetMapping(path = "getBy/{email}",
+    @GetMapping(path = "getBy/{clientID}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public AboutRest getAboutPageDetails(@PathVariable("email") String email) {
-        AboutDTO aboutDTO = aboutService.findByEmail(email);
+    public AboutRest getAboutPageDetails(@PathVariable("clientID") String clientID) {
+        UserClientDTO userClientDTO = appReqService.findByClientID(clientID);
+        AboutDTO aboutDTO = aboutService.findByEmail(userClientDTO.getEmail());
         AboutRest aboutRest = modelMapper.map(aboutDTO, AboutRest.class);
         log.info("About Page Details: {} ", aboutRest);
         return aboutRest;

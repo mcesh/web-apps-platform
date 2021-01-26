@@ -18,12 +18,10 @@ public class UserAppRequestDTO {
     private String email;
     private String webType;
     private String description;
-    private String secondaryEmail;
-    private String thirdEmail;
-    private String fourthEmail;
     private String OrganizationUsername;
     private LocalDateTime requestDate;
     private String emailVerificationToken;
     private Boolean emailVerificationStatus = false;
+    private Long appTypeKey;
     private AppTokenDTO appToken;
 }
