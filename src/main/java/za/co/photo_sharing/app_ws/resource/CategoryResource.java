@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import za.co.photo_sharing.app_ws.config.SecurityConstants;
 import za.co.photo_sharing.app_ws.entity.Category;
 import za.co.photo_sharing.app_ws.services.CategoryService;
+import za.co.photo_sharing.app_ws.services.UserAppReqService;
+import za.co.photo_sharing.app_ws.shared.dto.UserClientDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +26,7 @@ public class CategoryResource {
     private ModelMapper modelMapper = new ModelMapper();
     @Autowired
     private CategoryService categoryService;
+    private UserAppReqService appReqService;
 
     @ApiOperation(value = "Create Category Endpoint",
             notes = "${userResource.CreateCategory.ApiOperation.Notes}")
@@ -43,15 +46,12 @@ public class CategoryResource {
 
     @ApiOperation(value = "Get Categories Endpoint",
             notes = "${userResource.GetCategories.ApiOperation.Notes}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}",
-                    paramType = "header")
-    })
-    @GetMapping(path = "list/{email}",
+    @GetMapping(path = "list-by-clientID/{clientID}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public List<Category> getCategoriesByEmail(@PathVariable String email) {
-        log.info("Getting categories for: {} time: {}", email, LocalDateTime.now());
-        return categoryService.findAllCategoriesByEmail(email);
+    public List<Category> getCategoriesByEmail(@PathVariable String clientID) {
+        UserClientDTO clientDTO = appReqService.findByClientID(clientID);
+        log.info("Getting categories for: {} time: {}", clientDTO.getEmail(), LocalDateTime.now());
+        return categoryService.findAllCategoriesByEmail(clientDTO.getEmail());
 
     }
 

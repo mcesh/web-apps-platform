@@ -18,7 +18,6 @@ import za.co.photo_sharing.app_ws.entity.*;
 import za.co.photo_sharing.app_ws.exceptions.ArticleServiceException;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
-import za.co.photo_sharing.app_ws.model.response.ImageUpload;
 import za.co.photo_sharing.app_ws.repo.ArticleRepository;
 import za.co.photo_sharing.app_ws.repo.CategoryRepository;
 import za.co.photo_sharing.app_ws.services.*;
@@ -30,6 +29,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -60,22 +60,14 @@ public class ArticleServiceImpl implements ArticleService {
                                  MultipartFile file, String categoryName,
                                  String status) {
 
-        String base64Image = "";
-        if (file != null) {
-            utils.isImage(file);
-            try {
-                base64Image = utils.uploadToCloudinary(file);
-            } catch (IOException e) {
-                throw new ArticleServiceException(HttpStatus.INTERNAL_SERVER_ERROR,e.getMessage());
-            }
-        }
+        String imageUrl = fileUpload(file);
         Set<Tag> tags = getTags(articleDTO);
 
         articleStatus = statusService.findByStatus(status);
         Category categoryNameResponse = getCategory(userDto, categoryName);
         Article article = modelMapper.map(articleDTO, Article.class);
         article.setEmail(userDto.getEmail());
-        article.setBase64StringImage(base64Image);
+        article.setBase64StringImage(imageUrl);
         article.setStatus(articleStatus.getStatus());
         article.setTags(tags);
         article.setCategory(categoryNameResponse);
@@ -301,6 +293,67 @@ public class ArticleServiceImpl implements ArticleService {
                     articleDTOS.add(articleDTO);
                 });
         return articleDTOS;
+    }
+
+    @Transactional
+    @Override
+    public ArticleDTO updateImage(Long articleID, String username, MultipartFile file) {
+        AtomicReference<ArticleDTO> articleDTO = new AtomicReference<>(new ArticleDTO());
+        userService.findByUsername(username);
+        Optional<Article> article = articleRepository.findById(articleID);
+        if (article.isEmpty()){
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
+        }
+        article.map(article1 -> {
+            String uploadUrl = fileUpload(file);
+            article1.setBase64StringImage(uploadUrl);
+            articleRepository.save(article1);
+            articleDTO.set(modelMapper.map(article1, ArticleDTO.class));
+            return true;
+        });
+
+        return articleDTO.get();
+    }
+
+    @Override
+    public void deleteArticleImage(Long articleID, String username) {
+        userService.findByUsername(username);
+        Optional<Article> article = articleRepository.findById(articleID);
+        if (article.isEmpty()){
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
+        }
+        article.map(article1 -> {
+            String base64StringImage = article1.getBase64StringImage();
+            String[] split = base64StringImage.split("/");
+            String publicId = split[7];
+            String[] publicID = publicId.split(Pattern.quote("."));
+            log.info("deleting image with publicID: {} ", publicID[0]);
+            try {
+                boolean deleteImage = utils.deleteImage(publicID[0]);
+                if (deleteImage){
+                    article1.setBase64StringImage("");
+                    articleRepository.save(article1);
+                }else {
+                    throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,ErrorMessages.COULD_NOT_DELETE_RECORD.getErrorMessage());
+                }
+            }catch (IOException e){
+                throw new RuntimeException("Error: {} " + e.getMessage());
+            }
+            return true;
+        });
+    }
+
+    public String fileUpload(MultipartFile file) {
+        String cloudinaryUrl = "";
+        if (file != null) {
+            utils.isImage(file);
+            try {
+                cloudinaryUrl = utils.uploadToCloudinary(file);
+            } catch (IOException e) {
+                throw new ArticleServiceException(HttpStatus.INTERNAL_SERVER_ERROR,e.getMessage());
+            }
+        }
+        return cloudinaryUrl;
     }
 
     private Optional<Article> getArticle(Long postId) {
