@@ -64,7 +64,7 @@ public class ArticleResource {
     @GetMapping(value = "/{id}",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
-    public ArticleRest getArticleById(Long id) {
+    public ArticleRest getArticleById(@PathVariable(name = "id") Long id) {
         ArticleDTO articleDTO = articleService.findById(id);
         return modelMapper.map(articleDTO, ArticleRest.class);
     }

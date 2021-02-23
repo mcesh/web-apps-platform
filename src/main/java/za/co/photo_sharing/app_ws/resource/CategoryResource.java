@@ -26,6 +26,7 @@ public class CategoryResource {
     private ModelMapper modelMapper = new ModelMapper();
     @Autowired
     private CategoryService categoryService;
+    @Autowired
     private UserAppReqService appReqService;
 
     @ApiOperation(value = "Create Category Endpoint",

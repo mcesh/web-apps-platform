@@ -64,7 +64,7 @@ public class ArticleServiceImpl implements ArticleService {
         Set<Tag> tags = getTags(articleDTO);
 
         articleStatus = statusService.findByStatus(status);
-        Category categoryNameResponse = getCategory(userDto, categoryName);
+        Category categoryNameResponse = getCategory(userDto, categoryName, articleDTO);
         Article article = modelMapper.map(articleDTO, Article.class);
         article.setEmail(userDto.getEmail());
         article.setBase64StringImage(imageUrl);
@@ -163,32 +163,36 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public ArticleDTO updateById(Long id, String username, ArticleDTO articleDTO, String category, String status) {
         UserDto userDto = userService.findByUsername(username);
+        AtomicReference<ArticleDTO> dto = new AtomicReference<>(new ArticleDTO());
         Optional<Article> article = getArticle(id);
-
-        if (!article.get().getCategory().getName().equalsIgnoreCase(category)) {
-            if (article.get().getCategory().getArticleCount() > 0) {
-                article.get().getCategory().setArticleCount(article.get().getCategory().getArticleCount() - 1);
-                categoryRepository.save(article.get().getCategory());
+        if (article.isEmpty()){
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
+        }
+        article.map(article1 -> {
+            if (!article1.getCategory().getName().equalsIgnoreCase(category)){
+                if (article1.getCategory().getArticleCount() > 0){
+                    article1.getCategory().setArticleCount(article1.getCategory().getArticleCount() - 1);
+                    categoryRepository.save(article1.getCategory());
+                }
+                Category categoryName = categoryService.findByEmailAndCategoryName(userDto.getEmail(), category);
+                article1.setCategory(categoryName);
+                int articleCount = categoryName.getArticleCount() + 1;
+                categoryName.setArticleCount(articleCount);
+                categoryRepository.save(categoryName);
             }
-            Category categoryName = categoryService.findByEmailAndCategoryName(userDto.getEmail(), category);
-            article.get().setCategory(categoryName);
-            int articleCount = categoryName.getArticleCount() + 1;
-            categoryName.setArticleCount(articleCount);
-            categoryRepository.save(categoryName);
-        }
-
-        if (!article.get().getStatus().equalsIgnoreCase(status)) {
-            ArticleStatus articleStatus = statusService.findByStatus(status);
-            article.get().setStatus(articleStatus.getStatus());
-        }
-        Set<Tag> tags = getTags(articleDTO);
-        article.get().setTitle(articleDTO.getTitle());
-        article.get().setTags(tags);
-        article.get().setCaption(articleDTO.getCaption());
-        Article updatedArticle = articleRepository.save(article.get());
-        ArticleDTO dto = modelMapper.map(updatedArticle, ArticleDTO.class);
-        mapTagsToString(updatedArticle, dto);
-        return dto;
+            if (!article1.getStatus().equalsIgnoreCase(status)){
+                ArticleStatus articleStatus = statusService.findByStatus(status);
+                article1.setStatus(articleStatus.getStatus());
+            }
+            Set<Tag> tags = getTags(articleDTO);
+            article1.setTitle(articleDTO.getTitle());
+            article1.setTags(tags);
+            article1.setCaption(articleDTO.getCaption());
+            Article updatedArticle = articleRepository.save(article1);
+            dto.set(modelMapper.map(updatedArticle, ArticleDTO.class));
+            return true;
+        });
+        return dto.get();
     }
 
     @Transactional
@@ -202,7 +206,9 @@ public class ArticleServiceImpl implements ArticleService {
         if (CollectionUtils.isEmpty(articleList)) {
             return articleDTOS;
         }
-        articleList.forEach(article -> {
+        articleList.stream()
+                .filter(article -> article.getStatus().equalsIgnoreCase(ArticleStatusTypeKeys.PUBLISHED))
+                .forEach(article -> {
             ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
             mapTagsToString(article, articleDTO);
             articleDTOS.add(articleDTO);
@@ -364,14 +370,16 @@ public class ArticleServiceImpl implements ArticleService {
         return article;
     }
 
-    private Category getCategory(UserDto userDto, String categoryName) {
+    private Category getCategory(UserDto userDto, String categoryName, ArticleDTO articleDTO) {
         Category categoryNameResponse = categoryService.findByEmailAndCategoryName(userDto.getEmail(), categoryName);
         if (Objects.isNull(categoryNameResponse)) {
             throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }
-        int articleCount = categoryNameResponse.getArticleCount() + 1;
-        categoryService.updateArticleCount(articleCount, categoryName, userDto.getEmail());
-        categoryNameResponse.setArticleCount(articleCount);
+        if (articleDTO.getStatus().getText().equalsIgnoreCase(ArticleStatusTypeKeys.PUBLISHED)){
+            int articleCount = categoryNameResponse.getArticleCount() + 1;
+            categoryService.updateArticleCount(articleCount, categoryName, userDto.getEmail());
+            categoryNameResponse.setArticleCount(articleCount);
+        }
         return categoryNameResponse;
     }
 
