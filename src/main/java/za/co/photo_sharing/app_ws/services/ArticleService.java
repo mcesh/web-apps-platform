@@ -22,4 +22,7 @@ public interface ArticleService extends UserDetailsService {
     ArticleDTO likeArticle(Long postId, String username);
     ArticleDTO dislikeArticle(Long postId, String username);
     List<ArticleDTO> findByTitleContaining(String title, String email);
+    ArticleDTO updateImage(Long articleID, String username, MultipartFile file);
+    void deleteArticleImage(Long articleID, String username);
+    List<ArticleDTO> famousArticles(String email);
 }

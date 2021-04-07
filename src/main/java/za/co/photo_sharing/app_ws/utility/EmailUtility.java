@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.utility;
 
+import com.sun.mail.util.MailConnectException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
@@ -23,6 +25,9 @@ import za.co.photo_sharing.app_ws.shared.dto.UserDto;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.net.ConnectException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Objects;
@@ -71,10 +76,9 @@ public class EmailUtility {
 
 
 
-    @Async
-    public void sendAppReqVerificationMail(UserAppRequestDTO appRequestDTO, String userAgent, String webUrl) {
+        public void sendAppReqVerificationMail(UserAppRequestDTO appRequestDTO, String userAgent, String webUrl) throws MessagingException, UnknownHostException, SocketException, ConnectException {
 
-        try {
+            log.info("sending email to {} ", appRequestDTO.getEmail());
             MimeMessage message = emailSender.createMimeMessage();
             String emailVerificationToken = appRequestDTO.getEmailVerificationToken();
 
@@ -99,10 +103,6 @@ public class EmailUtility {
             log.info("Email sent successfully with the following details {}, {}, and {}",
                     message.getSubject(), message.getSentDate(),
                     message.getAllRecipients());
-        }catch (Exception e){
-            log.info("Email Unsuccessfully sent {}", e.getMessage());
-            throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,ErrorMessages.ERROR_SENDING_EMAIL.getErrorMessage());
-        }
     }
 
     public void sendAppToken(String tokenKey, String firstName, String email) {

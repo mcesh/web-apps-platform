@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.resource;
 
+import com.sun.mail.util.MailConnectException;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -9,17 +10,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import za.co.photo_sharing.app_ws.entity.ApplicationType;
 import za.co.photo_sharing.app_ws.model.request.UserAppRequestModel;
 import za.co.photo_sharing.app_ws.model.response.OperationStatusModel;
 import za.co.photo_sharing.app_ws.model.response.RequestOperationName;
 import za.co.photo_sharing.app_ws.model.response.RequestOperationStatus;
 import za.co.photo_sharing.app_ws.model.response.UserAppReqRest;
+import za.co.photo_sharing.app_ws.services.ApplicationTypeService;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.shared.dto.UserAppRequestDTO;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.List;
 
 @RestController
 @RequestMapping("users_app_request") // http://localhost:8080/users_app_request/web-apps-platform
@@ -37,7 +44,7 @@ public class UserAppRequestResource {
     @PostMapping(value = "/request-app-dev",
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public UserAppReqRest requestAppDevelopment(@RequestBody UserAppRequestModel appRequestModel, HttpServletRequest request) throws IOException, MessagingException {
+    public UserAppReqRest requestAppDevelopment(@RequestBody UserAppRequestModel appRequestModel, HttpServletRequest request) throws MessagingException, SocketException, UnknownHostException, ConnectException {
 
         String userAgent = request.getHeader("User-Agent");
         String webUrl = "";
@@ -89,6 +96,17 @@ public class UserAppRequestResource {
         }
         return modelAndView;
 
+    }
+
+    @ApiOperation(value = "Application Type Endpoint",
+            notes = "${userAppRequestResource.ApplicationType.ApiOperation.Notes}")
+    @GetMapping(value = "/app_type",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public List<ApplicationType> getAllApplicationTypes(){
+        List<ApplicationType> applicationTypeList = appReqService.findAllApplicationTypes();
+        log.info("Application Types Found: {} ", applicationTypeList);
+        return applicationTypeList;
     }
 
     @ApiOperation(value = "The Delete User By Email Endpoint",

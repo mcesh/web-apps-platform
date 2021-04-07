@@ -39,6 +39,7 @@ public enum ErrorMessages {
     EXCEEDED_IMAGE_LIMIT("exceeded image limit"),
     IMAGE_NOT_FOUND("Image not found"),
     IMAGE_TYPE_NOT_FOUND("Image type not found"),
+    APP_TYPE_NOT_FOUND("Application type code not found"),
     SKILL_SET_NOT_FOUND("Skill set not found");
 
 

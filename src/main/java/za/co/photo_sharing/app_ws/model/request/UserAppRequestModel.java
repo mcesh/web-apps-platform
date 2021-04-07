@@ -15,7 +15,4 @@ public class UserAppRequestModel {
     private String webType;
     private String description;
     private String OrganizationUsername;
-    private String secondaryEmail;
-    private String thirdEmail;
-    private String fourthEmail;
 }

@@ -64,7 +64,7 @@ public class ArticleResource {
     @GetMapping(value = "/{id}",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
-    public ArticleRest getArticleById(Long id) {
+    public ArticleRest getArticleById(@PathVariable(name = "id") Long id) {
         ArticleDTO articleDTO = articleService.findById(id);
         return modelMapper.map(articleDTO, ArticleRest.class);
     }
@@ -155,19 +155,17 @@ public class ArticleResource {
 
     @ApiOperation(value = "Find All Articles By Email",
             notes = "${userAppRequestResource.AllByArticlesByEmail.ApiOperation.Notes}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
-    })
-    @GetMapping(value = "/all/email/{email}",
+    @GetMapping(value = "/all/email/{clientID}",
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE})
     public List<ArticleRest> getAllArticlesByEmail(
             @RequestParam(value = "page", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_NUMBER) Integer page,
             @RequestParam(value = "size", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_SIZE) Integer size,
-            @PathVariable(name = "email") String email) {
+            @PathVariable(name = "clientID") String clientID) {
         List<ArticleRest> articleRests = new ArrayList<>();
-        log.info("Fetching Articles for {} current time is {} ", email, LocalDateTime.now());
-        List<ArticleDTO> articleDTOList = articleService.findAllArticlesByEmail(email, page, size);
+        UserClientDTO clientDTO = appReqService.findByClientID(clientID);
+        log.info("Fetching Articles for {} current time is {} ", clientDTO.getEmail(), LocalDateTime.now());
+        List<ArticleDTO> articleDTOList = articleService.findAllArticlesByEmail(clientDTO.getEmail(), page, size);
         articleDTOList.forEach(articleDTO -> {
             ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
             articleRests.add(articleRest);
@@ -251,5 +249,37 @@ public class ArticleResource {
         });
         log.info("Found Articles based on keyword : {} ", articleRests.size());
         return articleRests;
+    }
+
+    @Secured("ROLE_ADMIN")
+    @ApiOperation(value = "Update Article Image",
+            notes = "${userAppRequestResource.UpdateArticleImage.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @PutMapping(value = "/updateImage/{id}/{username}/",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public ArticleRest updateArticleImage(
+            @PathVariable(name = "id") Long id,
+            @PathVariable(name = "username") String username,
+            MultipartFile file) {
+        ArticleDTO articleDTO = articleService.updateImage(id, username, file);
+        ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
+        log.info("Updated article with ID: {} ", articleRest.getId());
+        return articleRest;
+    }
+
+    @Secured("ROLE_ADMIN")
+    @ApiOperation(value = "Delete Article Image",
+            notes = "${userAppRequestResource.DeleteArticleImage.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @DeleteMapping(value = "/deleteImage/{id}/{username}/")
+    public void deleteArticleImage(
+            @PathVariable(name = "id") Long id,
+            @PathVariable(name = "username") String username) {
+        articleService.deleteArticleImage(id,username);
     }
 }

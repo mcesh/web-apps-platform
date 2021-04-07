@@ -1,5 +1,6 @@
 package za.co.photo_sharing.app_ws.services.impl;
 
+import com.sun.mail.util.MailConnectException;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,14 +8,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import za.co.photo_sharing.app_ws.entity.AppToken;
+import za.co.photo_sharing.app_ws.entity.ApplicationType;
 import za.co.photo_sharing.app_ws.entity.UserAppRequest;
 import za.co.photo_sharing.app_ws.entity.UserClient;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
 import za.co.photo_sharing.app_ws.repo.AppTokenRepository;
+import za.co.photo_sharing.app_ws.repo.ApplicationTypeRepository;
 import za.co.photo_sharing.app_ws.repo.UserAppReqRepository;
 import za.co.photo_sharing.app_ws.repo.UserClientRepository;
+import za.co.photo_sharing.app_ws.services.ApplicationTypeService;
 import za.co.photo_sharing.app_ws.services.UserAppReqService;
 import za.co.photo_sharing.app_ws.shared.dto.AppTokenDTO;
 import za.co.photo_sharing.app_ws.shared.dto.UserAppRequestDTO;
@@ -23,8 +28,13 @@ import za.co.photo_sharing.app_ws.utility.EmailUtility;
 import za.co.photo_sharing.app_ws.utility.Utils;
 
 import javax.mail.MessagingException;
+import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -45,10 +55,15 @@ public class UserAppReqServiceImpl implements UserAppReqService {
     private UserAppReqService appReqService;
     @Autowired
     private UserClientRepository clientRepository;
+    @Autowired
+    private ApplicationTypeService applicationTypeService;
+    @Autowired
+    private ApplicationTypeRepository applicationTypeRepository;
     private ModelMapper modelMapper = new ModelMapper();
 
+    @Transactional(rollbackFor = {MessagingException.class,SocketException.class, ConnectException.class,UnknownHostException.class})
     @Override
-    public UserAppRequestDTO requestAppDevelopment(UserAppRequestDTO user, String userAgent, String webUrl) throws IOException, MessagingException {
+    public UserAppRequestDTO requestAppDevelopment(UserAppRequestDTO user, String userAgent, String webUrl) throws MessagingException, SocketException,UnknownHostException,ConnectException {
 
         if (appReqRepository.findByEmail(user.getEmail()) != null) {
             throw new UserServiceException(HttpStatus.BAD_REQUEST, ErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS.getErrorMessage());
@@ -62,6 +77,7 @@ public class UserAppReqServiceImpl implements UserAppReqService {
             tokenKey = utils.generateAppToken(user.getOrganizationUsername()).toUpperCase();
 
         } else {
+            user.setOrganizationUsername("None");
             tokenKey = utils.generateAppToken(user.getEmail()).toUpperCase();
         }
 
@@ -73,13 +89,15 @@ public class UserAppReqServiceImpl implements UserAppReqService {
         UserAppRequest userAppEntity = modelMapper.map(user, UserAppRequest.class);
         userAppEntity.setEmailVerificationToken(utils.generateEmailVerificationTokenForAppRequest(user.getEmail()));
         userAppEntity.setRequestDate(LocalDateTime.now());
-        if (user.getWebType().equalsIgnoreCase("ORGANIZATION")) {
-            userAppEntity.setSecondaryEmail(user.getSecondaryEmail());
-            userAppEntity.setThirdEmail(user.getThirdEmail());
-            userAppEntity.setFourthEmail(user.getFourthEmail());
+        ApplicationType applicationTypeByCode = applicationTypeService.findApplicationTypeByCode(user.getWebType());
+        if (applicationTypeByCode.getAppTypeCode().equalsIgnoreCase("ORGANIZATION")) {
+            userAppEntity.setAppTypeKey(applicationTypeByCode.getAppTypeKey());
             userAppEntity.setOrganizationUsername(user.getOrganizationUsername());
+        }else if (applicationTypeByCode.getAppTypeCode().equalsIgnoreCase("PERSONAL")){
+            userAppEntity.setAppTypeKey(applicationTypeByCode.getAppTypeKey());
         }
         UserAppRequest appRequest = appReqRepository.save(userAppEntity);
+        log.info("Persisted successfully!!");
         UserAppRequestDTO userAppRequestDTO = modelMapper.map(appRequest, UserAppRequestDTO.class);
         emailUtility.sendAppReqVerificationMail(userAppRequestDTO, userAgent, webUrl);
         return userAppRequestDTO;
@@ -181,6 +199,14 @@ public class UserAppReqServiceImpl implements UserAppReqService {
         clientDTO = modelMapper.map(userClient, UserClientDTO.class);
         log.info("Client Info {} ", clientDTO);
         return clientDTO;
+    }
+
+    @Transactional
+    @Override
+    public List<ApplicationType> findAllApplicationTypes() {
+        List<ApplicationType> applicationTypeList = applicationTypeRepository.findAll();
+        CollectionUtils.isEmpty(applicationTypeList);
+        return applicationTypeList;
     }
 
     @Override

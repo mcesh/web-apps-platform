@@ -41,14 +41,18 @@ public class UserAppRequest implements Serializable {
     private String emailVerificationToken;
     @Column(nullable = false)
     private Boolean emailVerificationStatus = false;
-    @Column(length = 105)
-    private String secondaryEmail;
-    @Column(length = 105)
-    private String thirdEmail;
-    @Column(length = 105)
-    private String fourthEmail;
     @Column(length = 75)
     private String organizationUsername;
+    @Column
+    private Long appTypeKey;
+
+    public Long getAppTypeKey() {
+        return appTypeKey;
+    }
+
+    public void setAppTypeKey(Long appTypeKey) {
+        this.appTypeKey = appTypeKey;
+    }
 
     @JsonIgnore
     @OneToOne(mappedBy = "userAppRequest", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -124,30 +128,6 @@ public class UserAppRequest implements Serializable {
 
     public void setEmailVerificationStatus(Boolean emailVerificationStatus) {
         this.emailVerificationStatus = emailVerificationStatus;
-    }
-
-    public String getSecondaryEmail() {
-        return secondaryEmail;
-    }
-
-    public void setSecondaryEmail(String secondaryEmail) {
-        this.secondaryEmail = secondaryEmail;
-    }
-
-    public String getThirdEmail() {
-        return thirdEmail;
-    }
-
-    public void setThirdEmail(String thirdEmail) {
-        this.thirdEmail = thirdEmail;
-    }
-
-    public String getFourthEmail() {
-        return fourthEmail;
-    }
-
-    public void setFourthEmail(String fourthEmail) {
-        this.fourthEmail = fourthEmail;
     }
 
     public String getOrganizationUsername() {
