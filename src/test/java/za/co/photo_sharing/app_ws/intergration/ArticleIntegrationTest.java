@@ -48,4 +48,10 @@ public class ArticleIntegrationTest {
         assertEquals(4,articles.size());
 
     }
+
+    @Test
+    public void shouldGetFamousArticles(){
+        List<ArticleDTO> articleDTOS = articleService.famousArticles("rardayolte@nedoz.com");
+        System.out.println("Articles: {}" + articleDTOS.size());
+    }
 }

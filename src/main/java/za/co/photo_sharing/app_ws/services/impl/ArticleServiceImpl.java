@@ -64,7 +64,7 @@ public class ArticleServiceImpl implements ArticleService {
         Set<Tag> tags = getTags(articleDTO);
 
         articleStatus = statusService.findByStatus(status);
-        Category categoryNameResponse = getCategory(userDto, categoryName, articleDTO);
+        Category categoryNameResponse = getCategory(userDto, categoryName, status);
         Article article = modelMapper.map(articleDTO, Article.class);
         article.setEmail(userDto.getEmail());
         article.setBase64StringImage(imageUrl);
@@ -127,14 +127,23 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public void deleteArticleById(Long id) {
         Optional<Article> article = getArticle(id);
-        Category category = article.get().getCategory();
-        int articleCount = category.getArticleCount() - 1;
-        category.setArticleCount(articleCount);
-        log.info("Updating article count {} ", category.getArticleCount());
-        article.get().setStatus(statusService.findByStatus(ArticleStatusTypeKeys.DELETED).getStatus());
-        categoryRepository.save(category);
-        articleRepository.saveAndFlush(article.get());
-        articleRepository.delete(article.get());
+        if (article.isEmpty()){
+            throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
+        }
+        article.map(article1 -> {
+            Category category = article1.getCategory();
+            int articleCount = category.getArticleCount() - 1;
+            category.setArticleCount(articleCount);
+            if (!article1.getBase64StringImage().isEmpty()){
+                deleteImage(article1);
+            }
+            log.info("Updating article count {} ", category.getArticleCount());
+            article1.setStatus(statusService.findByStatus(ArticleStatusTypeKeys.DELETED).getStatus());
+            categoryRepository.save(category);
+            articleRepository.saveAndFlush(article1);
+            articleRepository.delete(article1);
+            return true;
+        });
     }
 
     @Transactional
@@ -190,6 +199,7 @@ public class ArticleServiceImpl implements ArticleService {
             article1.setCaption(articleDTO.getCaption());
             Article updatedArticle = articleRepository.save(article1);
             dto.set(modelMapper.map(updatedArticle, ArticleDTO.class));
+            mapTagsToString(updatedArticle, dto.get());
             return true;
         });
         return dto.get();
@@ -329,24 +339,50 @@ public class ArticleServiceImpl implements ArticleService {
             throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
         }
         article.map(article1 -> {
-            String base64StringImage = article1.getBase64StringImage();
-            String[] split = base64StringImage.split("/");
-            String publicId = split[7];
-            String[] publicID = publicId.split(Pattern.quote("."));
-            log.info("deleting image with publicID: {} ", publicID[0]);
-            try {
-                boolean deleteImage = utils.deleteImage(publicID[0]);
-                if (deleteImage){
-                    article1.setBase64StringImage("");
-                    articleRepository.save(article1);
-                }else {
-                    throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,ErrorMessages.COULD_NOT_DELETE_RECORD.getErrorMessage());
-                }
-            }catch (IOException e){
-                throw new RuntimeException("Error: {} " + e.getMessage());
-            }
+            deleteImage(article1);
             return true;
         });
+    }
+
+    @Transactional
+    @Override
+    public List<ArticleDTO> famousArticles(String email) {
+
+        List<ArticleDTO> articleDTOS = new ArrayList<>();
+        List<Article> articles = articleRepository.getFamousArticles(email);
+        if (CollectionUtils.isEmpty(articles)) {
+            return articleDTOS;
+        }
+        articles.stream()
+                .filter(article -> article.getStatus().equalsIgnoreCase(ArticleStatusTypeKeys.PUBLISHED))
+                .sorted(Comparator.comparing(Article::getPostedDate).reversed())
+                .limit(7)
+                .forEach(article -> {
+                    ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
+                    mapTagsToString(article, articleDTO);
+                    articleDTOS.add(articleDTO);
+                });
+
+        return articleDTOS;
+    }
+
+    private void deleteImage(Article article1) {
+        String base64StringImage = article1.getBase64StringImage();
+        String[] split = base64StringImage.split("/");
+        String publicId = split[7];
+        String[] publicID = publicId.split(Pattern.quote("."));
+        log.info("deleting image with publicID: {} ", publicID[0]);
+        try {
+            boolean deleteImage = utils.deleteImage(publicID[0]);
+            if (deleteImage){
+                article1.setBase64StringImage("");
+                articleRepository.save(article1);
+            }else {
+                throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,ErrorMessages.COULD_NOT_DELETE_RECORD.getErrorMessage());
+            }
+        }catch (IOException e){
+            throw new RuntimeException("Error: {} " + e.getMessage());
+        }
     }
 
     public String fileUpload(MultipartFile file) {
@@ -370,12 +406,12 @@ public class ArticleServiceImpl implements ArticleService {
         return article;
     }
 
-    private Category getCategory(UserDto userDto, String categoryName, ArticleDTO articleDTO) {
+    private Category getCategory(UserDto userDto, String categoryName, String status) {
         Category categoryNameResponse = categoryService.findByEmailAndCategoryName(userDto.getEmail(), categoryName);
         if (Objects.isNull(categoryNameResponse)) {
             throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }
-        if (articleDTO.getStatus().getText().equalsIgnoreCase(ArticleStatusTypeKeys.PUBLISHED)){
+        if (status.equalsIgnoreCase(ArticleStatusTypeKeys.PUBLISHED)){
             int articleCount = categoryNameResponse.getArticleCount() + 1;
             categoryService.updateArticleCount(articleCount, categoryName, userDto.getEmail());
             categoryNameResponse.setArticleCount(articleCount);
