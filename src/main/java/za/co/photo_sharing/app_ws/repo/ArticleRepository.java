@@ -23,7 +23,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     List<Article> findByTitleContaining(String title);
     @Query(value = "select artcle.*, count(*) as article_count from article artcle" +
             " " +
-            "INNER JOIN comment cmnts ON cmnts.article_id = artcle.id" +
+            "INNER JOIN article_comments cmnts ON cmnts.article_id = artcle.id" +
             " " +
             "WHERE artcle.email =:email" +
             " " +

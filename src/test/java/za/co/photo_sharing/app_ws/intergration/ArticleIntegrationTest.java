@@ -52,6 +52,7 @@ public class ArticleIntegrationTest {
     @Test
     public void shouldGetFamousArticles(){
         List<ArticleDTO> articleDTOS = articleService.famousArticles("rardayolte@nedoz.com");
+        System.out.println("*************************");
         System.out.println("Articles: {}" + articleDTOS.size());
     }
 }
