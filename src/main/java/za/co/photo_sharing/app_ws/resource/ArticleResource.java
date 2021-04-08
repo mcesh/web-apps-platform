@@ -282,4 +282,23 @@ public class ArticleResource {
             @PathVariable(name = "username") String username) {
         articleService.deleteArticleImage(id,username);
     }
+
+    @ApiOperation(value = "Find Famous Articles By Email",
+            notes = "${userAppRequestResource.FamousArticlesByEmail.ApiOperation.Notes}")
+    @GetMapping(value = "/famous/{clientID}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public List<ArticleRest> getFamousArticlesByEmail(
+                        @PathVariable(name = "clientID") String clientID) {
+        List<ArticleRest> articleRests = new ArrayList<>();
+        UserClientDTO clientDTO = appReqService.findByClientID(clientID);
+        log.info("Fetching Famous Articles for {} current time is {} ", clientDTO.getEmail(), LocalDateTime.now());
+        List<ArticleDTO> articleDTOList = articleService.famousArticles(clientDTO.getEmail());
+        articleDTOList.forEach(articleDTO -> {
+            ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
+            articleRests.add(articleRest);
+        });
+        log.info("Famous Articles found : {} ", articleRests.size());
+        return articleRests;
+    }
 }
