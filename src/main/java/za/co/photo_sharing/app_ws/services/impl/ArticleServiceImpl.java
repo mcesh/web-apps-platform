@@ -67,7 +67,7 @@ public class ArticleServiceImpl implements ArticleService {
         Category categoryNameResponse = getCategory(userDto, categoryName, status);
         Article article = modelMapper.map(articleDTO, Article.class);
         article.setEmail(userDto.getEmail());
-        article.setBase64StringImage(imageUrl);
+        article.setImageUrl(imageUrl);
         article.setStatus(articleStatus.getStatus());
         article.setTags(tags);
         article.setCategory(categoryNameResponse);
@@ -134,7 +134,7 @@ public class ArticleServiceImpl implements ArticleService {
             Category category = article1.getCategory();
             int articleCount = category.getArticleCount() - 1;
             category.setArticleCount(articleCount);
-            if (!article1.getBase64StringImage().isEmpty()){
+            if (!article1.getImageUrl().isEmpty()){
                 deleteImage(article1);
             }
             log.info("Updating article count {} ", category.getArticleCount());
@@ -322,7 +322,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
         article.map(article1 -> {
             String uploadUrl = fileUpload(file);
-            article1.setBase64StringImage(uploadUrl);
+            article1.setImageUrl(uploadUrl);
             articleRepository.save(article1);
             articleDTO.set(modelMapper.map(article1, ArticleDTO.class));
             return true;
@@ -367,7 +367,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private void deleteImage(Article article1) {
-        String base64StringImage = article1.getBase64StringImage();
+        String base64StringImage = article1.getImageUrl();
         String[] split = base64StringImage.split("/");
         String publicId = split[7];
         String[] publicID = publicId.split(Pattern.quote("."));
@@ -375,7 +375,7 @@ public class ArticleServiceImpl implements ArticleService {
         try {
             boolean deleteImage = utils.deleteImage(publicID[0]);
             if (deleteImage){
-                article1.setBase64StringImage("");
+                article1.setImageUrl("");
                 articleRepository.save(article1);
             }else {
                 throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,ErrorMessages.COULD_NOT_DELETE_RECORD.getErrorMessage());

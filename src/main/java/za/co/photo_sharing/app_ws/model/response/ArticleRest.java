@@ -28,5 +28,5 @@ public class ArticleRest {
     private String status = ArticlesStatus.DRAFT.getText();
     private CategoryRest category;
     private String email;
-    private String base64StringImage;
+    private String imageUrl;
 }

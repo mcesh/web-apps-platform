@@ -50,7 +50,7 @@ public class Article implements Serializable {
     @Audited
     @Lob
     @NotNull
-    private String base64StringImage;
+    private String imageUrl;
 
     @NotAudited
     @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
@@ -130,12 +130,12 @@ public class Article implements Serializable {
         this.postedDate = postedDate;
     }
 
-    public String getBase64StringImage() {
-        return base64StringImage;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setBase64StringImage(String base64StringImage) {
-        this.base64StringImage = base64StringImage;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public List<Comment> getCommentList() {
