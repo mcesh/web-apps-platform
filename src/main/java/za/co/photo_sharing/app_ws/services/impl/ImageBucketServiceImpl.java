@@ -9,7 +9,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.photo_sharing.app_ws.config.SecurityConstants;
 import za.co.photo_sharing.app_ws.entity.ImageBucket;
-import za.co.photo_sharing.app_ws.entity.ImageType;
+import za.co.photo_sharing.app_ws.exceptions.ArticleServiceException;
 import za.co.photo_sharing.app_ws.exceptions.UserServiceException;
 import za.co.photo_sharing.app_ws.model.ImageTypeEnum;
 import za.co.photo_sharing.app_ws.model.response.ErrorMessages;
@@ -26,11 +26,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
+// POST    write to the database and external services e.g Linked Post
+// GET     gets content :: How I viewed
+// PUT     updates the content
+// DELETE  Delete Post
+// Postman || Swagger UI
 @Service
 @Slf4j
+@Transactional
 public class ImageBucketServiceImpl implements ImageBucketService {
 
     @Autowired
@@ -43,32 +48,39 @@ public class ImageBucketServiceImpl implements ImageBucketService {
     private ImageTypeService imageTypeService;
     private ModelMapper modelMapper = new ModelMapper();
 
-    @Transactional
     @Override
     public ImageBucketDto addImage(String username,
                                    String caption,
-                                   MultipartFile file,
-                                   String imageCode) throws IOException {
+                                   MultipartFile file) throws IOException {
         UserDto userDto = userService.findByUsername(username);
-        List<ImageBucket> bucketList = imageBucketRepository.findByEmail(userDto.getEmail());
-        log.info("Image Bucket size: {} ", bucketList.size());
-        ImageType imageTypeByCode = imageTypeService.findImageTypeByCode(imageCode);
-        List<ImageBucket> imageBuckets = bucketList.stream()
-                .filter(imageBucket -> imageBucket.getImageType().getCode()
-                        .equalsIgnoreCase(imageTypeByCode.getCode()))
-                .collect(Collectors.toList());
-        validateImageQuantity(imageBuckets);
+        String randomString = utils.generateRandomString(12);
+        String imageName = userDto.getUsername() + randomString;
         String url = utils.uploadToCloudinary(file);
         ImageBucket imageBucket = new ImageBucket();
-        imageBucket.setImageType(imageTypeByCode);
         imageBucket.setCaption(caption);
         imageBucket.setEmail(userDto.getEmail());
         imageBucket.setImageUrl(url);
-        ImageBucket slider = imageBucketRepository.save(imageBucket);
-        return modelMapper.map(slider, ImageBucketDto.class);
+        imageBucket.setName(imageName);
+        ImageBucket bucket = imageBucketRepository.save(imageBucket);
+        return modelMapper.map(bucket, ImageBucketDto.class);
     }
 
-    @Transactional
+    @Override
+    public ImageBucketDto uploadImage(String username,
+                                 String caption,
+                                 String name,
+                                 MultipartFile file) throws IOException {
+        UserDto userDto = userService.findByUsername(username);
+        String url = utils.uploadToCloudinary(file);
+        ImageBucket imageBucket = new ImageBucket();
+        imageBucket.setCaption(caption);
+        imageBucket.setEmail(userDto.getEmail());
+        imageBucket.setImageUrl(url);
+        imageBucket.setName(name);
+        ImageBucket bucket = imageBucketRepository.save(imageBucket);
+        return modelMapper.map(bucket, ImageBucketDto.class);
+    }
+
     @Override
     public List<ImageBucketDto> fetchImagesByEmail(String email) {
         List<ImageBucket> imageBuckets = imageBucketRepository.findByEmail(email);
@@ -83,47 +95,73 @@ public class ImageBucketServiceImpl implements ImageBucketService {
         return imageBucketDtos;
     }
 
-    @Transactional
+
+    @Override
+    public List<ImageBucketDto> fetchImagesByName(String name, String email) {
+        List<ImageBucketDto> imageBucketDtos = new ArrayList<>();
+        List<ImageBucket> imageBucketList = imageBucketRepository.findByNameContaining(name);
+        if (CollectionUtils.isEmpty(imageBucketList)){
+            return imageBucketDtos;
+        }
+        imageBucketList.stream()
+                .filter(imageBucket -> imageBucket.getEmail().equalsIgnoreCase(email))
+                .forEach(imageBucket -> {
+            ImageBucketDto imageBucketDto = modelMapper.map(imageBucket, ImageBucketDto.class);
+            imageBucketDtos.add(imageBucketDto);
+        });
+        return imageBucketDtos;
+    }
+
     @Override
     public ImageBucketDto findById(Long id) {
-        Optional<ImageBucket> imageSlider = imageBucketRepository.findById(id);
-        if (!imageSlider.isPresent()){
+        Optional<ImageBucket> bucket = imageBucketRepository.findById(id);
+        if (bucket.isEmpty()){
             throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.IMAGE_NOT_FOUND.getErrorMessage());
         }
-        return modelMapper.map(imageSlider.get(), ImageBucketDto.class);
+        return modelMapper.map(bucket.get(), ImageBucketDto.class);
     }
 
-    @Transactional
     @Override
-    public ImageBucketDto updateImage(String username, Long id, MultipartFile file, String caption) throws IOException {
+    public ImageBucketDto updateImage(String username, Long id, MultipartFile file, String caption){
+        AtomicReference<ImageBucketDto> imageBucketDto = new AtomicReference<>(new ImageBucketDto());
         userService.findByUsername(username);
-        Optional<ImageBucket> imageSlider = imageBucketRepository.findById(id);
-        if (!imageSlider.isPresent()){
-            throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.IMAGE_NOT_FOUND.getErrorMessage());
+        Optional<ImageBucket> imageBucket = imageBucketRepository.findById(id);
+        if (imageBucket.isEmpty()){
+            throw new UserServiceException(HttpStatus.NOT_FOUND,
+                    ErrorMessages.IMAGE_NOT_FOUND.getErrorMessage());
         }
-        String url = utils.uploadToCloudinary(file);
-        imageSlider.get().setImageUrl(url);
-        imageSlider.get().setCaption(caption);
-        ImageBucket slider = imageBucketRepository.save(imageSlider.get());
-        return modelMapper.map(slider, ImageBucketDto.class);
+        imageBucket.map(imageBucket1 -> {
+            String url;
+            try {
+                url = utils.uploadToCloudinary(file);
+            } catch (IOException e) {
+                throw new ArticleServiceException(HttpStatus.INTERNAL_SERVER_ERROR,
+                        ErrorMessages.COULD_NOT_UPDATE_RECORD.getErrorMessage());
+            }
+            imageBucket1.setImageUrl(url);
+            imageBucket1.setCaption(caption);
+            ImageBucket bucket = imageBucketRepository.save(imageBucket.get());
+            imageBucketDto.set(modelMapper.map(bucket, ImageBucketDto.class));
+            return true;
+        });
+        return imageBucketDto.get();
     }
 
-    @Transactional
     @Override
     public void deleteImage(String username, Long id) throws IOException {
         userService.findByUsername(username);
-        Optional<ImageBucket> imageSlider = imageBucketRepository.findById(id);
-        if (!imageSlider.isPresent()){
+        Optional<ImageBucket> imageBucket = imageBucketRepository.findById(id);
+        if (imageBucket.isEmpty()){
             throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.IMAGE_NOT_FOUND.getErrorMessage());
         }
-        String imageUrl = imageSlider.get().getImageUrl();
+        String imageUrl = imageBucket.get().getImageUrl();
         String[] split = imageUrl.split("/");
         String publicId = split[7];
         String[] publicID = publicId.split(Pattern.quote("."));
         log.info("deleting image with publicID: {} ", publicID[0]);
         boolean deleteImage = utils.deleteImage(publicID[0]);
         if (deleteImage){
-            imageBucketRepository.delete(imageSlider.get());
+            imageBucketRepository.delete(imageBucket.get());
         }else {
             throw new UserServiceException(HttpStatus.INTERNAL_SERVER_ERROR,ErrorMessages.COULD_NOT_DELETE_RECORD.getErrorMessage());
         }

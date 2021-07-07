@@ -316,7 +316,7 @@ public class EmailUtility {
 
         String os = determineOperatingSystem();
 
-        String newLineIndicator = "OS not recognized";
+        String newLineIndicator = "";
         if (os.equalsIgnoreCase("windows")) {
             newLineIndicator = "\r\n";
         }

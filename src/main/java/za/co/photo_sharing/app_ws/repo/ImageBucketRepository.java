@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface ImageBucketRepository extends JpaRepository<ImageBucket, Long> {
     List<ImageBucket> findByEmail(String email);
+    //List<Article> findByTitleContaining(String title);
+    List<ImageBucket> findByNameContaining(String name);
 }

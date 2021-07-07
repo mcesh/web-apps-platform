@@ -14,4 +14,5 @@ public class ImageBucketRest {
     private String caption;
     private String imageUrl;
     private String email;
+    private String name;
 }

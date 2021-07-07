@@ -36,6 +36,10 @@ public class ImageBucket implements Serializable {
     @JoinColumn(name = "image_type_id")
     private ImageType imageType;
 
+    @Audited
+    @Column(length = 85)
+    private String name;
+
     public long getId() {
         return id;
     }
@@ -74,5 +78,13 @@ public class ImageBucket implements Serializable {
 
     public void setImageType(ImageType imageType) {
         this.imageType = imageType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

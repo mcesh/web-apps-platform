@@ -145,7 +145,7 @@ public class Utils {
         return emailToken + randomString;
     }
 
-    private String generateRandomString(int length) {
+    public String generateRandomString(int length) {
         StringBuilder returnValue = new StringBuilder(length);
 
         for (int i = 0; i < length; i++) {

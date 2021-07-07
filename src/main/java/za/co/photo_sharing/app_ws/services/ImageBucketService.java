@@ -8,8 +8,10 @@ import java.util.List;
 
 public interface ImageBucketService {
 
-    ImageBucketDto addImage(String username, String Caption, MultipartFile file, String imageCode) throws IOException;
+    ImageBucketDto addImage(String username, String Caption, MultipartFile file) throws IOException;
+    ImageBucketDto uploadImage(String username, String Caption,String name, MultipartFile file) throws IOException;
     List<ImageBucketDto> fetchImagesByEmail(String email);
+    List<ImageBucketDto> fetchImagesByName(String name, String email);
     ImageBucketDto findById(Long id);
     ImageBucketDto updateImage(String username, Long id, MultipartFile file, String caption) throws IOException;
     void deleteImage(String username,Long id) throws IOException;

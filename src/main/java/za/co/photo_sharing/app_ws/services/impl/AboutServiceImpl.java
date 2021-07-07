@@ -31,6 +31,7 @@ import static za.co.photo_sharing.app_ws.services.impl.UserServiceImpl.*;
 
 @Service
 @Slf4j
+@Transactional
 public class AboutServiceImpl implements AboutService {
 
 
@@ -64,7 +65,6 @@ public class AboutServiceImpl implements AboutService {
         return dto;
     }
 
-    @Transactional
     @Override
     public AboutDTO updateAboutInfo(Long id, String email, AboutDTO aboutDTO) {
         userService.findByEmail(email);
@@ -103,11 +103,9 @@ public class AboutServiceImpl implements AboutService {
         }
     }
 
-    @Transactional
     @Override
     public AboutDTO addImage(Long id, String email, MultipartFile file) {
-        UserDto userDto = userService.findByEmail(email);
-        UserProfile userProfile = modelMapper.map(userDto, UserProfile.class);
+        userService.findByEmail(email);
         final AboutDTO[] aboutDTO = new AboutDTO[1];
         Optional<AboutPage> about = getById(id);
         about.map(aboutPage1 -> {
@@ -120,7 +118,7 @@ public class AboutServiceImpl implements AboutService {
             aboutPage1.setBase64StringImage(url);
             AboutPage returnValue = aboutRepository.save(aboutPage1);
             aboutDTO[0] = modelMapper.map(returnValue, AboutDTO.class);
-            return aboutDTO[0];
+            return true;
         });
 
         return aboutDTO[0];
@@ -135,7 +133,6 @@ public class AboutServiceImpl implements AboutService {
         return about;
     }
 
-    @Transactional
     @Override
     public AboutDTO findByEmail(String email) {
         AboutPage aboutPagePageDetails = aboutRepository.findByEmail(email);

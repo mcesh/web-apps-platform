@@ -14,4 +14,5 @@ public class ImageBucketDto {
     private String caption;
     private String imageUrl;
     private String email;
+    private String name;
 }
