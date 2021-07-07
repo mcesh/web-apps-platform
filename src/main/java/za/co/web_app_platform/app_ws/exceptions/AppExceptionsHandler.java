@@ -1,0 +1,39 @@
+package za.co.web_app_platform.app_ws.exceptions;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import za.co.web_app_platform.app_ws.model.response.ErrorMessage;
+
+import java.util.Date;
+
+@ControllerAdvice
+public class AppExceptionsHandler {
+
+    @ExceptionHandler(value = UserServiceException.class)
+    public ResponseEntity<Object> handleUserServiceException(UserServiceException e, WebRequest request){
+        ErrorMessage errorMessage = new ErrorMessage();
+        errorMessage.setTimestamp(new Date());
+        errorMessage.setMessage(e.getMessage());
+        return new ResponseEntity<>(errorMessage, new HttpHeaders(), e.getStatus());
+    }
+
+    @ExceptionHandler(value = ArticleServiceException.class)
+    public ResponseEntity<Object> handleArticleServiceException(ArticleServiceException e, WebRequest request){
+        ErrorMessage errorMessage = new ErrorMessage();
+        errorMessage.setTimestamp(new Date());
+        errorMessage.setMessage(e.getMessage());
+        return new ResponseEntity<>(errorMessage, new HttpHeaders(), e.getStatus());
+    }
+
+    @ExceptionHandler(value = ValidationException.class)
+    public ResponseEntity<Object> handleValidationException(ValidationException e, WebRequest request){
+        ErrorMessage errorMessage = new ErrorMessage();
+        errorMessage.setTimestamp(new Date());
+        errorMessage.setMessage(e.getMessage());
+        return new ResponseEntity<>(errorMessage, new HttpHeaders(), e.getStatus());
+    }
+
+}

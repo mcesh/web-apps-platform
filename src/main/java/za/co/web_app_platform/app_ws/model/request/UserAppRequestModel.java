@@ -1,0 +1,18 @@
+package za.co.web_app_platform.app_ws.model.request;
+
+import lombok.*;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class UserAppRequestModel {
+
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String webType;
+    private String description;
+    private String OrganizationUsername;
+}

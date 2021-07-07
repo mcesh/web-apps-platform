@@ -1,0 +1,68 @@
+package za.co.web_app_platform.app_ws.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.envers.Audited;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "company")
+@Audited
+public class CompanyEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Audited
+    @Column(nullable = false, length = 105)
+    private String companyName;
+
+    @Audited
+    @Column(nullable = false, length = 95)
+    private String companyType;
+
+    @Audited
+    @Column(nullable = false, length = 50)
+    private String cellNumber;
+
+    @Audited
+    @JsonIgnore
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumns({
+            @JoinColumn(name="users_id")
+    })
+    private UserProfile userDetails;
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getCompanyType() {
+        return companyType;
+    }
+
+    public void setCompanyType(String companyType) {
+        this.companyType = companyType;
+    }
+
+    public String getCellNumber() {
+        return cellNumber;
+    }
+
+    public void setCellNumber(String cellNumber) {
+        this.cellNumber = cellNumber;
+    }
+    public UserProfile getUserDetails() {
+        return userDetails;
+    }
+
+    public void setUserDetails(UserProfile userDetails) {
+        this.userDetails = userDetails;
+    }
+
+}
