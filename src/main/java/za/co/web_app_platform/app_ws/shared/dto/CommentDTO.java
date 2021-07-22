@@ -16,5 +16,4 @@ public class CommentDTO {
     private String comment;
     private LocalDateTime postedDate;
     private String username;
-    private UserDto userProfile;
 }

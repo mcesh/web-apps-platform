@@ -49,7 +49,6 @@ public class Article implements Serializable {
 
     @Audited
     @Lob
-    @NotNull
     private String imageUrl;
 
     @NotAudited

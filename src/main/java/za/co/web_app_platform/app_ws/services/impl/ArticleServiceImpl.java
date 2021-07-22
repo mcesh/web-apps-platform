@@ -59,18 +59,15 @@ public class ArticleServiceImpl implements ArticleService {
     private ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public ArticleDTO createPost(ArticleDTO articleDTO, UserDto userDto,
-                                 MultipartFile file, String categoryName,
-                                 String status) {
+    public ArticleDTO createArticle(ArticleDTO articleDTO, UserDto userDto, String categoryName,
+                                    String status) {
 
-        String imageUrl = fileUpload(file);
         Set<Tag> tags = getTags(articleDTO);
 
         articleStatus = statusService.findByStatus(status);
         Category categoryNameResponse = getCategory(userDto, categoryName, status);
         Article article = modelMapper.map(articleDTO, Article.class);
         article.setEmail(userDto.getEmail());
-        article.setImageUrl(imageUrl);
         article.setStatus(articleStatus.getStatus());
         article.setTags(tags);
         article.setCategory(categoryNameResponse);
@@ -85,6 +82,22 @@ public class ArticleServiceImpl implements ArticleService {
 
         log.info("Article Persisted Successfully at {} ", LocalDateTime.now());
         return returnedArticle;
+    }
+
+    @Override
+    public void uploadArticleImage(MultipartFile file, long articleId) {
+        if (!file.isEmpty()){
+            Optional<Article> article = articleRepository.findById(articleId);
+            if (article.isEmpty()){
+                throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
+            }
+            String imageUrl = fileUpload(file);
+            article.map(article1 -> {
+                article1.setImageUrl(imageUrl);
+                articleRepository.save(article1);
+                return true;
+            });
+        }
     }
 
     @Transactional

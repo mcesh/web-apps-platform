@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface ArticleService extends UserDetailsService {
 
-    ArticleDTO createPost(ArticleDTO articleDTO, UserDto userDto,
-                          MultipartFile file, String categoryName,
-                          String articleStatus);
+    ArticleDTO createArticle(ArticleDTO articleDTO, UserDto userDto, String categoryName,
+                             String articleStatus);
+    void uploadArticleImage(MultipartFile file, long articleId);
     ArticleDTO findById(Long id);
     List<ArticleDTO> findByEmail(String email,int page, int size);
     void deleteArticleById(Long id);

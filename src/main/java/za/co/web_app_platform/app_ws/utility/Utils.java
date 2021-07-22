@@ -202,7 +202,8 @@ public class Utils {
     }
 
     public void isImage(MultipartFile file) {
-        if (!Arrays.asList(IMAGE_JPEG.getMimeType(), IMAGE_GIF.getMimeType(), IMAGE_PNG.getMimeType())
+        if (!Arrays.asList(IMAGE_JPEG.getMimeType(), IMAGE_GIF.getMimeType(),
+                IMAGE_PNG.getMimeType(), APPLICATION_OCTET_STREAM.getMimeType())
                 .contains(file.getContentType())) {
             throw new UserServiceException(HttpStatus.BAD_REQUEST, ErrorMessages.INCORRECT_IMAGE_FORMAT.getErrorMessage());
         }

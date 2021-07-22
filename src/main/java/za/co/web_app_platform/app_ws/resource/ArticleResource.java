@@ -36,6 +36,7 @@ public class ArticleResource {
     @Autowired
     private UserAppReqService appReqService;
     private ModelMapper modelMapper = new ModelMapper();
+    private long articleID = 0L;
 
     @ApiOperation(value = "The Create Article Endpoint",
             notes = "${userResource.CreateArticle.ApiOperation.Notes}")
@@ -46,15 +47,27 @@ public class ArticleResource {
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public ArticleRest createPost(@PathVariable("username") String username,
                                   @PathVariable("category") String category,
-                                  @ModelAttribute ArticleDetailsRequestModel detailsRequestModel,
-                                  @PathVariable("status") String status, MultipartFile file) {
-
+                                  @RequestBody ArticleDetailsRequestModel detailsRequestModel,
+                                  @PathVariable("status") String status) {
         UserDto userDto = userService.findByUsername(username);
         ArticleDTO articleDTO = modelMapper.map(detailsRequestModel, ArticleDTO.class);
         log.info("Creating article for {} current time is {} ", userDto.getEmail(), LocalDateTime.now());
-        ArticleDTO article = articleService.createPost(articleDTO, userDto, file, category, status);
+        ArticleDTO article = articleService.createArticle(articleDTO, userDto, category, status);
+        articleID = article.getId();
         return modelMapper.map(article, ArticleRest.class);
     }
+
+    @ApiOperation(value = "The Upload Article Image Endpoint",
+            notes = "${userResource.UploadArticleImage.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @PostMapping(path = "/photo/upload",
+            produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public void uploadArticleImage(@RequestParam("file") MultipartFile file) {
+        articleService.uploadArticleImage(file, articleID);
+    }
+
 
     @ApiOperation(value = "Find Article By ID",
             notes = "${userAppRequestResource.ArticleByID.ApiOperation.Notes}")
@@ -170,6 +183,7 @@ public class ArticleResource {
             ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
             articleRests.add(articleRest);
         });
+        log.info("Articles {} ", articleRests);
         log.info("Articles found : {} ", articleRests.size());
         return articleRests;
     }

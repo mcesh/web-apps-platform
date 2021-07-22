@@ -21,7 +21,7 @@ import za.co.web_app_platform.app_ws.shared.dto.UserClientDTO;
 import java.util.Set;
 
 @RestController
-@RequestMapping("api/gallery") // http://localhost:8080/users/web-apps-platform
+@RequestMapping("api/gallery") // http://localhost:8080/users/web-apps-platform/api/gallery/
 @Slf4j
 public class UserGalleryImagesResource {
 

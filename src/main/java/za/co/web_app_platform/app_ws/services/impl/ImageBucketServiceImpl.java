@@ -32,7 +32,11 @@ import java.util.regex.Pattern;
 // GET     gets content :: How I viewed
 // PUT     updates the content
 // DELETE  Delete Post
-// Postman || Swagger UI
+// Postman || Swagger UI Front End || Back End
+// Back End developer exposes Endpoints to the API
+// Back End developer integrates with other services ::
+// communication between systems regardless of their source system e.g java to c#
+// * Database connection
 @Service
 @Slf4j
 @Transactional

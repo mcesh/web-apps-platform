@@ -38,12 +38,9 @@ public class CommentResource {
     public CommentRest addComment(@PathVariable("username") String username,
                                   @PathVariable(name = "articleId") Long articleId,
                                   @RequestBody CommentRequestModel comment) {
-        log.info("Comment added by {} time {} ", username, LocalDateTime.now());
         CommentDTO commentDTO = modelMapper.map(comment, CommentDTO.class);
         CommentDTO addCommentDto = commentService.addComment(commentDTO, articleId, username);
-        CommentRest commentRest = modelMapper.map(addCommentDto, CommentRest.class);
-        log.info("Comment details {} ", commentRest);
-        return commentRest;
+        return modelMapper.map(addCommentDto, CommentRest.class);
     }
 
     @ApiOperation(value = "Update Comment Endpoint",
@@ -56,7 +53,6 @@ public class CommentResource {
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public CommentRest updateComment(@PathVariable("id") Long id,
                                      @RequestBody CommentRequestModel comment) {
-        log.info("Updating comment with id: {} ", id);
         CommentDTO commentDTO = modelMapper.map(comment, CommentDTO.class);
         CommentDTO updateComment = commentService.updateComment(commentDTO, id);
         return modelMapper.map(updateComment, CommentRest.class);

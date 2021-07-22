@@ -16,5 +16,4 @@ public class CommentRest {
     private String comment;
     private LocalDateTime postedDate;
     private String username;
-    private UserRest userProfile;
 }
