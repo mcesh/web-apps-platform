@@ -315,4 +315,26 @@ public class ArticleResource {
         log.info("Famous Articles found : {} ", articleRests.size());
         return articleRests;
     }
+
+    @ApiOperation(value = "Find Articles By Category",
+            notes = "${userAppRequestResource.ArticlesByCategory.ApiOperation.Notes}")
+    @GetMapping(value = "/byCategory/{category}/{clientID}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public List<ArticleRest> getArticlesByCategory(
+            @RequestParam(value = "page", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_NUMBER) Integer page,
+            @RequestParam(value = "size", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_SIZE) Integer size,
+            @PathVariable(name = "category") String category,
+            @PathVariable(name = "clientID") String clientID) {
+        List<ArticleRest> articleRests = new ArrayList<>();
+        UserClientDTO clientDTO = appReqService.findByClientID(clientID);
+        log.info("Fetching Articles by category for {} current time is {} ", clientDTO.getEmail(), LocalDateTime.now());
+        List<ArticleDTO> articleDTOList = articleService.getArticlesByCategory(clientDTO.getEmail(),category, page,size);
+        articleDTOList.forEach(articleDTO -> {
+            ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
+            articleRests.add(articleRest);
+        });
+        log.info("Articles by category found : {} ", articleRests.size());
+        return articleRests;
+    }
 }

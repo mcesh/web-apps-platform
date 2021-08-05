@@ -382,6 +382,27 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDTOS;
     }
 
+    @Transactional
+    @Override
+    public List<ArticleDTO> getArticlesByCategory(String email, String category, int page, int size) {
+        Utils.validatePageNumberAndSize(page, size);
+        List<ArticleDTO> articleDTOS = new ArrayList<>();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Article> articlePage = articleRepository.findByEmail(email, pageable);
+        List<Article> articles = articlePage.getContent();
+        if (CollectionUtils.isEmpty(articles)){
+            return articleDTOS;
+        }
+        articles.stream()
+                .filter(article -> article.getCategory().getName().equalsIgnoreCase(category))
+                .forEach(article -> {
+                    ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
+                    mapTagsToString(article, articleDTO);
+                    articleDTOS.add(articleDTO);
+                });
+        return articleDTOS;
+    }
+
     private void deleteImage(Article article1) {
         String base64StringImage = article1.getImageUrl();
         String[] split = base64StringImage.split("/");

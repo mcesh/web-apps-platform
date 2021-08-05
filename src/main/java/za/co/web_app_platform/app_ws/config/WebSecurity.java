@@ -67,6 +67,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter{
                 .permitAll()
                 .antMatchers(HttpMethod.POST, SecurityConstants.PASSWORD_RESET_URL)
                 .permitAll()
+                .antMatchers(HttpMethod.GET, SecurityConstants.GET_ARTICLES_BY_CATEGORY)
+                .permitAll()
                 .antMatchers(HttpMethod.GET,SecurityConstants.GET_CATEGORIES_BY_EMAIL)
                 .permitAll()
                 .antMatchers(HttpMethod.GET, SecurityConstants.GET_LATEST_ARTICLES_BY_EMAIL)

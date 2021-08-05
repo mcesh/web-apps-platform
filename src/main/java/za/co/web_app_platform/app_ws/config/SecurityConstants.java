@@ -24,6 +24,7 @@ public class SecurityConstants {
     public static final String GET_FAMOUS_ARTICLES = "/article/famous/**";
     public static final String GET_LATEST_ARTICLES_BY_EMAIL = "/article/latest/email/**";
     public static final String GET_CATEGORIES_BY_EMAIL = "/category/list-by-clientID/**";
+    public static final String GET_ARTICLES_BY_CATEGORY = "/article/byCategory/**";
     public static final String LOG_OUT_URL = "/users/logout";
     public static final String H2_CONSOLE = "/h2-console/**";
     public static final String AUTHORITIES_KEY = "scopes";
