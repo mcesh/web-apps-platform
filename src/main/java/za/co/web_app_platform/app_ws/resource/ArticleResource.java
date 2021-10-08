@@ -11,6 +11,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import za.co.web_app_platform.app_ws.config.SecurityConstants;
+import za.co.web_app_platform.app_ws.constants.ArticleStatusTypeKeys;
 import za.co.web_app_platform.app_ws.model.request.ArticleDetailsRequestModel;
 import za.co.web_app_platform.app_ws.model.response.ArticleRest;
 import za.co.web_app_platform.app_ws.services.ArticleService;
@@ -183,7 +184,6 @@ public class ArticleResource {
             ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
             articleRests.add(articleRest);
         });
-        log.info("Articles {} ", articleRests);
         log.info("Articles found : {} ", articleRests.size());
         return articleRests;
     }
@@ -313,6 +313,47 @@ public class ArticleResource {
             articleRests.add(articleRest);
         });
         log.info("Famous Articles found : {} ", articleRests.size());
+        return articleRests;
+    }
+
+    @ApiOperation(value = "Find All Articles By Email",
+            notes = "${userAppRequestResource.AllArticlesByEmail2.ApiOperation.Notes}")
+    @GetMapping(value = "/articleBy/{clientID}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public List<ArticleRest> getAllArticlesByEmail(
+            @PathVariable(name = "clientID") String clientID) {
+        List<ArticleRest> articleRests = new ArrayList<>();
+        UserClientDTO clientDTO = appReqService.findByClientID(clientID);
+        log.info("Fetching Articles by email for {} current time is {} ", clientDTO.getEmail(), LocalDateTime.now());
+        List<ArticleDTO> articleDTOList = articleService.findAllArticlesByEmail(clientDTO.getEmail());
+        articleDTOList.forEach(articleDTO -> {
+            ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
+            articleRests.add(articleRest);
+        });
+        log.info("Articles found : {} ", articleRests.size());
+        return articleRests;
+    }
+
+    @ApiOperation(value = "Find Articles By Email And Status",
+            notes = "${userAppRequestResource.ArticlesByEmailAndStatus.ApiOperation.Notes}")
+    @GetMapping(value = "/articlesByStatus/{clientID}",
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE})
+    public List<ArticleRest> getArticlesByEmailAndStatus(
+            @RequestParam(value = "page", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_NUMBER) Integer page,
+            @RequestParam(value = "size", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_SIZE) Integer size,
+            @PathVariable(name = "clientID") String clientID) {
+        List<ArticleRest> articleRests = new ArrayList<>();
+        UserClientDTO clientDTO = appReqService.findByClientID(clientID);
+        log.info("Fetching Articles for {} current time is {} ", clientDTO.getEmail(), LocalDateTime.now());
+        List<ArticleDTO> articleDTOList = articleService.findArticlesByEmailAndStatus(clientDTO.getEmail(),
+                ArticleStatusTypeKeys.PUBLISHED, page, size);
+        articleDTOList.forEach(articleDTO -> {
+            ArticleRest articleRest = modelMapper.map(articleDTO, ArticleRest.class);
+            articleRests.add(articleRest);
+        });
+        log.info("Articles found : {} ", articleRests.size());
         return articleRests;
     }
 

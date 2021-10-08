@@ -56,7 +56,7 @@ public class ArticleServiceImpl implements ArticleService {
     private CategoryRepository categoryRepository;
     @Autowired
     private ArticleStatusService statusService;
-    private ModelMapper modelMapper = new ModelMapper();
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public ArticleDTO createArticle(ArticleDTO articleDTO, UserDto userDto, String categoryName,
@@ -237,6 +237,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .forEach(article -> {
             ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
             mapTagsToString(article, articleDTO);
+            articleDTO.setTotalPages(articles.getTotalElements());
             articleDTOS.add(articleDTO);
         });
 
@@ -376,6 +377,44 @@ public class ArticleServiceImpl implements ArticleService {
                 .forEach(article -> {
                     ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
                     mapTagsToString(article, articleDTO);
+                    articleDTOS.add(articleDTO);
+                });
+
+        return articleDTOS;
+    }
+
+    @Transactional
+    @Override
+    public List<ArticleDTO> findAllArticlesByEmail(String email) {
+        List<ArticleDTO> articleDTOS = new ArrayList<>();
+        List<Article> articles = articleRepository.findAll();
+        articles.stream().
+                filter(article-> article.getEmail().equalsIgnoreCase(email))
+                .filter(article-> article.getStatus().equalsIgnoreCase(ArticleStatusTypeKeys.PUBLISHED))
+                .forEach(article->{
+                    ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
+                    mapTagsToString(article, articleDTO);
+                    articleDTOS.add(articleDTO);
+                });
+        return articleDTOS;
+    }
+
+    @Transactional
+    @Override
+    public List<ArticleDTO> findArticlesByEmailAndStatus(String email, String status, int page, int size) {
+        Utils.validatePageNumberAndSize(page, size);
+        List<ArticleDTO> articleDTOS = new ArrayList<>();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Article> articles = articleRepository.findByEmailAndStatus(email,status, pageable);
+        List<Article> articleList = articles.getContent();
+        if (CollectionUtils.isEmpty(articleList)) {
+            return articleDTOS;
+        }
+        articleList
+                .forEach(article -> {
+                    ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
+                    mapTagsToString(article, articleDTO);
+                    articleDTO.setTotalPages(articles.getTotalElements());
                     articleDTOS.add(articleDTO);
                 });
 
