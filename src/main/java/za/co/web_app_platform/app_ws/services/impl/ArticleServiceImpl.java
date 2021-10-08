@@ -88,7 +88,7 @@ public class ArticleServiceImpl implements ArticleService {
     public void uploadArticleImage(MultipartFile file, long articleId) {
         if (!file.isEmpty()){
             Optional<Article> article = articleRepository.findById(articleId);
-            if (article.isEmpty()){
+            if (!article.isPresent()){
                 throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
             }
             String imageUrl = fileUpload(file);
@@ -143,7 +143,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public void deleteArticleById(Long id) {
         Optional<Article> article = getArticle(id);
-        if (article.isEmpty()){
+        if (!article.isPresent()){
             throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
         }
         article.map(article1 -> {
@@ -190,7 +190,7 @@ public class ArticleServiceImpl implements ArticleService {
         UserDto userDto = userService.findByUsername(username);
         AtomicReference<ArticleDTO> dto = new AtomicReference<>(new ArticleDTO());
         Optional<Article> article = getArticle(id);
-        if (article.isEmpty()){
+        if (!article.isPresent()){
             throw new ArticleServiceException(HttpStatus.NOT_FOUND, ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
         }
         article.map(article1 -> {
@@ -334,7 +334,7 @@ public class ArticleServiceImpl implements ArticleService {
         AtomicReference<ArticleDTO> articleDTO = new AtomicReference<>(new ArticleDTO());
         userService.findByUsername(username);
         Optional<Article> article = articleRepository.findById(articleID);
-        if (article.isEmpty()){
+        if (!article.isPresent()){
             throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
         }
         article.map(article1 -> {
@@ -352,7 +352,7 @@ public class ArticleServiceImpl implements ArticleService {
     public void deleteArticleImage(Long articleID, String username) {
         userService.findByUsername(username);
         Optional<Article> article = articleRepository.findById(articleID);
-        if (article.isEmpty()){
+        if (!article.isPresent()){
             throw new ArticleServiceException(HttpStatus.NOT_FOUND,ErrorMessages.ARTICLE_NOT_FOUND.getErrorMessage());
         }
         article.map(article1 -> {

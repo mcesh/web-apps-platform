@@ -119,7 +119,7 @@ public class ImageBucketServiceImpl implements ImageBucketService {
     @Override
     public ImageBucketDto findById(Long id) {
         Optional<ImageBucket> bucket = imageBucketRepository.findById(id);
-        if (bucket.isEmpty()){
+        if (!bucket.isPresent()){
             throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.IMAGE_NOT_FOUND.getErrorMessage());
         }
         return modelMapper.map(bucket.get(), ImageBucketDto.class);
@@ -130,7 +130,7 @@ public class ImageBucketServiceImpl implements ImageBucketService {
         AtomicReference<ImageBucketDto> imageBucketDto = new AtomicReference<>(new ImageBucketDto());
         userService.findByUsername(username);
         Optional<ImageBucket> imageBucket = imageBucketRepository.findById(id);
-        if (imageBucket.isEmpty()){
+        if (!imageBucket.isPresent()){
             throw new UserServiceException(HttpStatus.NOT_FOUND,
                     ErrorMessages.IMAGE_NOT_FOUND.getErrorMessage());
         }
@@ -155,7 +155,7 @@ public class ImageBucketServiceImpl implements ImageBucketService {
     public void deleteImage(String username, Long id) throws IOException {
         userService.findByUsername(username);
         Optional<ImageBucket> imageBucket = imageBucketRepository.findById(id);
-        if (imageBucket.isEmpty()){
+        if (!imageBucket.isPresent()){
             throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.IMAGE_NOT_FOUND.getErrorMessage());
         }
         String imageUrl = imageBucket.get().getImageUrl();
