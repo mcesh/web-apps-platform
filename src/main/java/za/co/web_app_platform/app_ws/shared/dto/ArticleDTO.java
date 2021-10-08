@@ -25,4 +25,5 @@ public class ArticleDTO {
     private Set<String> tags;
     private CategoryDTO category;
     private String imageUrl;
+    private long totalPages;
 }

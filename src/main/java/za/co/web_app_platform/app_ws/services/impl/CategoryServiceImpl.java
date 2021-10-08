@@ -127,7 +127,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (Objects.isNull(category)) {
             throw new UserServiceException(HttpStatus.NOT_FOUND, ErrorMessages.CATEGORY_NOT_FOUND.getErrorMessage());
         }
-        log.info("Category Found {} ", category);
+        log.info("Category Found {} ", category.getName());
         return category;
     }
 }

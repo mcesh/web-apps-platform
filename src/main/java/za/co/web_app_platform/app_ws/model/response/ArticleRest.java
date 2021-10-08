@@ -26,4 +26,5 @@ public class ArticleRest {
     private CategoryRest category;
     private String email;
     private String imageUrl;
+    private long totalPages;
 }
