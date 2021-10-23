@@ -2,6 +2,7 @@ package za.co.web_app_platform.app_ws.services.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,9 +29,12 @@ import java.util.Optional;
 @Slf4j
 public class CategoryServiceImpl implements CategoryService {
 
-    private final CategoryRepository categoryRepository;
-    private final UserService userService;
-    private final Utils utils;
+    @Autowired
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private Utils utils;
 
     @Transactional
     @Override
