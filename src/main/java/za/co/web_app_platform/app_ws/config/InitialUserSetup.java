@@ -6,10 +6,13 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import za.co.web_app_platform.app_ws.constants.ArticleStatusTypeKeys;
 import za.co.web_app_platform.app_ws.constants.UserAuthorityTypeKeys;
 import za.co.web_app_platform.app_ws.constants.UserRoleTypeKeys;
+import za.co.web_app_platform.app_ws.entity.ArticleStatus;
 import za.co.web_app_platform.app_ws.entity.Authority;
 import za.co.web_app_platform.app_ws.entity.Role;
+import za.co.web_app_platform.app_ws.repo.ArticleStatusRepository;
 import za.co.web_app_platform.app_ws.repo.AuthorityRepository;
 import za.co.web_app_platform.app_ws.repo.RoleRepository;
 
@@ -25,6 +28,8 @@ public class InitialUserSetup {
     AuthorityRepository authorityRepository;
     @Autowired
     RoleRepository roleRepository;
+    @Autowired
+    ArticleStatusRepository articleStatusRepository;
 
     @EventListener
     @Transactional
@@ -44,6 +49,23 @@ public class InitialUserSetup {
         admin_authorities.add(deleteAuthority);
         createRole(UserRoleTypeKeys.ROLE_USER, user_authorities);
         createRole(UserRoleTypeKeys.ROLE_ADMIN, admin_authorities);
+
+        createArticleStatus(ArticleStatusTypeKeys.PUBLISHED);
+        createArticleStatus(ArticleStatusTypeKeys.UNPUBLISHED);
+        createArticleStatus(ArticleStatusTypeKeys.DRAFT);
+        createArticleStatus(ArticleStatusTypeKeys.DELETED);
+    }
+
+    @Transactional
+    private ArticleStatus createArticleStatus(String status){
+        ArticleStatus articleStatus = articleStatusRepository.findByStatus(status);
+        if (Objects.isNull(articleStatus)){
+            ArticleStatus articleStatus1 = new ArticleStatus();
+            articleStatus1.setStatus(status);
+            articleStatus = articleStatus1;
+            articleStatusRepository.save(articleStatus1);
+        }
+        return articleStatus;
     }
 
     @Transactional
