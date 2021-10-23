@@ -6,12 +6,15 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import za.co.web_app_platform.app_ws.constants.ApplicationTypeEnum;
 import za.co.web_app_platform.app_ws.constants.ArticleStatusTypeKeys;
 import za.co.web_app_platform.app_ws.constants.UserAuthorityTypeKeys;
 import za.co.web_app_platform.app_ws.constants.UserRoleTypeKeys;
+import za.co.web_app_platform.app_ws.entity.ApplicationType;
 import za.co.web_app_platform.app_ws.entity.ArticleStatus;
 import za.co.web_app_platform.app_ws.entity.Authority;
 import za.co.web_app_platform.app_ws.entity.Role;
+import za.co.web_app_platform.app_ws.repo.ApplicationTypeRepository;
 import za.co.web_app_platform.app_ws.repo.ArticleStatusRepository;
 import za.co.web_app_platform.app_ws.repo.AuthorityRepository;
 import za.co.web_app_platform.app_ws.repo.RoleRepository;
@@ -30,6 +33,8 @@ public class InitialUserSetup {
     RoleRepository roleRepository;
     @Autowired
     ArticleStatusRepository articleStatusRepository;
+    @Autowired
+    ApplicationTypeRepository applicationTypeRepository;
 
     @EventListener
     @Transactional
@@ -54,6 +59,22 @@ public class InitialUserSetup {
         createArticleStatus(ArticleStatusTypeKeys.UNPUBLISHED);
         createArticleStatus(ArticleStatusTypeKeys.DRAFT);
         createArticleStatus(ArticleStatusTypeKeys.DELETED);
+
+        createApplicationType(ApplicationTypeEnum.PERSONAL.getCode(), ApplicationTypeEnum.PERSONAL.getIndex());
+        createApplicationType(ApplicationTypeEnum.ORGANIZATION.getCode(), ApplicationTypeEnum.ORGANIZATION.getIndex());
+    }
+
+    @Transactional
+    private ApplicationType createApplicationType(String code,long key){
+        ApplicationType applicationType = applicationTypeRepository.findByAppTypeCode(code);
+        if (Objects.isNull(applicationType)){
+            ApplicationType type = new ApplicationType();
+            type.setAppTypeCode(code);
+            type.setAppTypeKey(key);
+            applicationType = type;
+            applicationTypeRepository.save(type);
+        }
+        return applicationType;
     }
 
     @Transactional
