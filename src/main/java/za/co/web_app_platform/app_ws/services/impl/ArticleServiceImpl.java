@@ -86,6 +86,15 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public void uploadArticleImage(MultipartFile file, long articleId) {
+        uploadImage(file, articleId);
+    }
+
+    @Override
+    public void updateArticleImage(MultipartFile file, long articleId) {
+        uploadImage(file, articleId);
+    }
+
+    private void uploadImage(MultipartFile file, long articleId) {
         if (!file.isEmpty()){
             Optional<Article> article = articleRepository.findById(articleId);
             if (!article.isPresent()){

@@ -12,6 +12,7 @@ public interface ArticleService extends UserDetailsService {
     ArticleDTO createArticle(ArticleDTO articleDTO, UserDto userDto, String categoryName,
                              String articleStatus);
     void uploadArticleImage(MultipartFile file, long articleId);
+    void updateArticleImage(MultipartFile file, long articleId);
     ArticleDTO findById(Long id);
     List<ArticleDTO> findByEmail(String email,int page, int size);
     void deleteArticleById(Long id);

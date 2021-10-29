@@ -69,6 +69,16 @@ public class ArticleResource {
         articleService.uploadArticleImage(file, articleID);
     }
 
+    @ApiOperation(value = "The Update Article Image Endpoint",
+            notes = "${userResource.UpdateArticleImage.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @PostMapping(path = "/photo/update/{id}",
+            produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public void updateArticleImage(@RequestParam("file") MultipartFile file,@PathVariable("id") long id) {
+        articleService.updateArticleImage(file, id);
+    }
 
     @ApiOperation(value = "Find Article By ID",
             notes = "${userAppRequestResource.ArticleByID.ApiOperation.Notes}")
