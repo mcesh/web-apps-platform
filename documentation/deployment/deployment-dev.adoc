@@ -1,0 +1,3 @@
+* Currently, the application has been shifted on a container and diployed on Digital Ocean.
+
+  --

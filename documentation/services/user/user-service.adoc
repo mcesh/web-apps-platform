@@ -1,0 +1,16 @@
+--- USER SERVICE WORK FLOW
+
+    - user service is a simple service developed to create, update, get user details in the Database.
+
+ --- Keypoints ---
+
+ - a user can be either an *ROLE_ADMIN* or a *ROLE_USER* depending on the role assigned
+ - assignment of roles depend on whether the user requested App development in the
+ user-app-request endpoint.
+ - this service is used but users when registering in the system and also called by front-end,
+ or REST clients to update, get or delete user information.
+
+ ---
+  - Notable difact as of 2022/01/17, logging od host details in the user creation.
+
+  -

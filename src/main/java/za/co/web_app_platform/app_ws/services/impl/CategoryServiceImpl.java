@@ -25,7 +25,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 public class CategoryServiceImpl implements CategoryService {
 

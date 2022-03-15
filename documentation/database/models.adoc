@@ -1,0 +1,10 @@
+ - Database name is web_app_platform
+
+  -- database has normal tables which store reference data and transactional data.
+
+  - Below are reference tables.
+
+  -- requested_app_type :: checks application type being requested
+  -- article_status :: reference data for status of the article.
+  -- AuthorityRoleType :: Role Type Keys for given Authority
+  -- image_type :: (Not in use currently, this is for sorting images uploaded to cloudinary ).
