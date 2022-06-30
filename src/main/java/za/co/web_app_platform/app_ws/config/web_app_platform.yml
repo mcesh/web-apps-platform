@@ -1,0 +1,109 @@
+pipeline{
+    
+    agent any
+    tools{
+        maven "LocalMaven"
+    }
+    environment{
+        dockerImage=''
+        registry='siya7/webapp:$BUILD_NUMBER'
+        registryCredential='dockerHub_id'
+    }
+    stages{
+        stage('Chekout Master Code'){
+            steps{
+                git credentialsId: 'github_id', url: 'https://github.com/mcesh/web-apps-platform.git'
+            }
+        }
+        stage('Build JAR FILE'){
+            steps{
+                sh "mvn clean install"
+            }
+        }
+        stage('Build Docker Image'){
+            steps{
+                script{
+                    dockerImage = docker.build registry
+                }
+            }
+        }
+        stage('Push Docker Image'){
+            steps{
+                script{
+                docker.withRegistry( '', registryCredential ) {
+                  dockerImage.push()
+                }
+            }
+        }
+    }
+         // Stopping Docker containers for cleaner Docker run
+    stage('Docker stop container') {
+         steps {
+            sh 'docker ps -f name=webapp -q | xargs --no-run-if-empty docker container stop'
+            sh 'docker container ls -a -fname=webapp -q | xargs -r docker container rm'
+         }
+       }
+      // Running spring boot container
+    stage('Docker Run Container') {
+     steps{
+         script {
+            dockerImage.run("-p 8081:8081 --rm --name webapp --link web-app-db:mysql siya7/webapp:$BUILD_NUMBER")
+         }
+      }
+     }
+}
+}pipeline{
+    
+    agent any
+    tools{
+        maven "LocalMaven"
+    }
+    environment{
+        dockerImage=''
+        registry='siya7/webapp:$BUILD_NUMBER'
+        registryCredential='dockerHub_id'
+    }
+    stages{
+        stage('Chekout Master Code'){
+            steps{
+                git credentialsId: 'github_id', url: 'https://github.com/mcesh/web-apps-platform.git'
+            }
+        }
+        stage('Build JAR FILE'){
+            steps{
+                sh "mvn clean install"
+            }
+        }
+        stage('Build Docker Image'){
+            steps{
+                script{
+                    dockerImage = docker.build registry
+                }
+            }
+        }
+        stage('Push Docker Image'){
+            steps{
+                script{
+                docker.withRegistry( '', registryCredential ) {
+                  dockerImage.push()
+                }
+            }
+        }
+    }
+         // Stopping Docker containers for cleaner Docker run
+    stage('Docker stop container') {
+         steps {
+            sh 'docker ps -f name=webapp -q | xargs --no-run-if-empty docker container stop'
+            sh 'docker container ls -a -fname=webapp -q | xargs -r docker container rm'
+         }
+       }
+      // Running spring boot container
+    stage('Docker Run Container') {
+     steps{
+         script {
+            dockerImage.run("-p 8081:8081 --rm --name webapp --link web-app-db:mysql siya7/webapp:$BUILD_NUMBER")
+         }
+      }
+     }
+}
+}

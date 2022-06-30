@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import za.co.web_app_platform.app_ws.config.SecurityConstants;
 import za.co.web_app_platform.app_ws.model.response.ImageBucketRest;
 import za.co.web_app_platform.app_ws.model.response.OperationStatusModel;
 import za.co.web_app_platform.app_ws.model.response.RequestOperationName;
@@ -20,6 +21,7 @@ import za.co.web_app_platform.app_ws.shared.dto.UserClientDTO;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -139,6 +141,27 @@ public class ImageBucketResource {
         List<ImageBucketRest> imageBucketRests =  new ArrayList<>();
         log.info("Retrieving a images by name... {} ", email);
         List<ImageBucketDto> imageBucketDtos = bucketService.fetchImagesByName(name,email);
+        log.info("Images retrieved {} ", imageBucketDtos.size());
+        imageBucketDtos.forEach(imageBucketDto -> {
+            ImageBucketRest imageBucketRest = modelMapper.map(imageBucketDto, ImageBucketRest.class);
+            imageBucketRests.add(imageBucketRest);
+        });
+        return imageBucketRests;
+
+    }
+
+    @ApiOperation(value = "Get All Images",
+            notes = "${userResource.AllImageBuckets.ApiOperation.Notes}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "${userResource.authorizationHeader.description}", paramType = "header")
+    })
+    @GetMapping(path = "fetch-images/all",
+            produces = {MediaType.APPLICATION_JSON_VALUE,})
+    public List<ImageBucketRest> getAllImages(@RequestParam(value = "page", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_NUMBER) Integer page,
+                                              @RequestParam(value = "size", required = false, defaultValue = SecurityConstants.DEFAULT_PAGE_SIZE) Integer size) {
+        List<ImageBucketRest> imageBucketRests =  new ArrayList<>();
+        log.info("Retrieving all images ... {} ", new Date());
+        List<ImageBucketDto> imageBucketDtos = bucketService.getImageBuckets(page,size);
         log.info("Images retrieved {} ", imageBucketDtos.size());
         imageBucketDtos.forEach(imageBucketDto -> {
             ImageBucketRest imageBucketRest = modelMapper.map(imageBucketDto, ImageBucketRest.class);

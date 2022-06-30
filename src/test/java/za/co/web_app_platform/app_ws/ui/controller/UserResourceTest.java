@@ -16,6 +16,7 @@ import za.co.web_app_platform.app_ws.shared.dto.UserDto;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -48,6 +49,17 @@ public class UserResourceTest {
         assertEquals(userDto.getFirstName(), userRest.getFirstName());
         //assertEquals(userDto.getAddresses(), userRest.getAddress());
 
+    }
+
+    @Test
+    public void shouldGetUserByUsername(){
+        UserDto dto = new UserDto(); // Object instantiation
+        UserDto userDto = buildUserDto();
+        when(userService.findByUsername(anyString())).thenReturn(userDto);
+        UserRest userByUsername = userResource.getUserByUsername(userDto.getUsername());
+        assertNotNull(userByUsername);
+        assertEquals(userId, userByUsername.getUserId().longValue());
+        assertEquals(userDto.getFirstName(), userByUsername.getFirstName());
     }
 
     private UserDto buildUserDto() {

@@ -14,5 +14,6 @@ public interface ImageBucketService {
     List<ImageBucketDto> fetchImagesByName(String name, String email);
     ImageBucketDto findById(Long id);
     ImageBucketDto updateImage(String username, Long id, MultipartFile file, String caption) throws IOException;
+    List<ImageBucketDto> getImageBuckets(int page, int limit);
     void deleteImage(String username,Long id) throws IOException;
 }

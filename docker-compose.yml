@@ -1,0 +1,25 @@
+version: '3.7'
+volumes:
+  db_data: {}
+services:
+  db:
+    container_name: web_app_db
+    image: 'mysql:8.0'
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: web_app_platform
+      MYSQL_USER: Fixer@17-92-73
+      MYSQL_PASSWORD: F67Yionghre@erb
+      MYSQL_ROOT_PASSWORD: GHTmn@RT18
+    ports:
+      - '3306:3306'
+    restart: always
+  web-app:
+    image: 'siya7/webapp:30'
+    ports:
+      - '8081:8081'
+    volumes:
+      - /data/web-apps-platform
+    depends_on:
+      - "db"

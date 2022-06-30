@@ -3,6 +3,9 @@ package za.co.web_app_platform.app_ws.services.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -24,6 +27,7 @@ import za.co.web_app_platform.app_ws.utility.Utils;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -149,6 +153,27 @@ public class ImageBucketServiceImpl implements ImageBucketService {
             return true;
         });
         return imageBucketDto.get();
+    }
+
+    @Override
+    public List<ImageBucketDto> getImageBuckets(int page, int limit) {
+        List<ImageBucketDto> imageBucketDtos = new ArrayList<>();
+
+        Utils.validatePageNumberAndSize(page,limit);
+        Pageable pageable = PageRequest.of(page, limit);
+
+        Page<ImageBucket> imageBucketPage = imageBucketRepository.findAll(pageable);
+        List<ImageBucket> imageBuckets = imageBucketPage.getContent();
+        if (CollectionUtils.isEmpty(imageBuckets)){
+            return imageBucketDtos;
+        }
+        imageBuckets.stream()
+                .sorted(Comparator.comparing(ImageBucket::getName))
+                .forEach(imageBucketDto -> {
+                    ImageBucketDto bucketDto = modelMapper.map(imageBucketDto, ImageBucketDto.class);
+                    imageBucketDtos.add(bucketDto);
+                });
+        return imageBucketDtos;
     }
 
     @Override

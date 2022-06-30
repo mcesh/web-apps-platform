@@ -3,6 +3,9 @@ package za.co.web_app_platform.app_ws.services.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -34,6 +37,8 @@ import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -199,6 +204,22 @@ public class UserAppReqServiceImpl implements UserAppReqService {
         clientDTO = modelMapper.map(userClient, UserClientDTO.class);
         log.info("Client Info {} ", clientDTO);
         return clientDTO;
+    }
+
+    @Override
+    public List<UserClientDTO> getAllClientIDs(int page, int limit) {
+        List<UserClientDTO> clientDTOList = new ArrayList<>();
+        Utils.validatePageNumberAndSize(page,limit);
+        Pageable pageable = PageRequest.of(page, limit);
+        Page<UserClient> userClientPage = clientRepository.findAll(pageable);
+        List<UserClient> userClients = userClientPage.getContent();
+        userClients.stream()
+                .sorted(Comparator.comparing(UserClient::getCreationTime).reversed())
+                .forEach(userClient -> {
+                    UserClientDTO userClientDTO = modelMapper.map(userClient, UserClientDTO.class);
+                    clientDTOList.add(userClientDTO);
+                });
+        return clientDTOList;
     }
 
     @Transactional

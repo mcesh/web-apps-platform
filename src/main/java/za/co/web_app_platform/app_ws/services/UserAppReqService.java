@@ -24,5 +24,6 @@ public interface UserAppReqService extends UserDetailsService {
     UserAppRequestDTO findByEmail(String email);
     UserClientDTO generateUserClient(String email);
     UserClientDTO findByClientID(String clientID);
+    List<UserClientDTO> getAllClientIDs(int page, int limit);
     List<ApplicationType> findAllApplicationTypes();
 }
