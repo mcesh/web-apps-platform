@@ -16,8 +16,8 @@ public class BucketConfig {
 
     public static final String SERVICE_ENDPOINT = "ams3.digitaloceanspaces.com";
     public static final String SIGNING_REGION = "ams3";
-    private static String ACCESS_KEY = "JAARA5BSYXVRA6GJ433L";
-    private static String SECRET_KEY = "ZBc9fTpu3iTsC4qK71AelUATqF2rrtvwkv219jhvY8E";
+    private static String ACCESS_KEY = "";
+    private static String SECRET_KEY = "";
 
     @Bean
     public AmazonS3 s3Client() {
