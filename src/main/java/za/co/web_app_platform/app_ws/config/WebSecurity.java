@@ -81,7 +81,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter{
                 .permitAll()
                 .antMatchers(HttpMethod.GET, SecurityConstants.GET_IMAGES_BY_CLIENT_ID)
                 .permitAll()
-                .antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**")
+                .antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**", "/add-numbers/**")
                 .permitAll()
                // .antMatchers(HttpMethod.DELETE,"/users/**").hasRole("ADMIN")
                 .anyRequest().authenticated().and()
